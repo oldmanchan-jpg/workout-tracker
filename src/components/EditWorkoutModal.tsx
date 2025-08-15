@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import type { Workout, ExerciseEntry } from '@/types'
+import { validateWorkoutForm } from '@/lib/validation'
 
 type Props = {
   workout: Workout | null
@@ -14,6 +15,10 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSave }: P
   const [exercises, setExercises] = useState<ExerciseEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
+  // Refs for keyboard navigation
+  const inputRefs = useRef<(HTMLInputElement | null)[][]>([])
+  const saveButtonRef = useRef<HTMLButtonElement>(null)
+
   // Initialize form when workout changes
   useEffect(() => {
     if (workout) {
@@ -23,11 +28,76 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSave }: P
     }
   }, [workout])
 
-  const updateSet = (ei: number, si: number, field: 'reps' | 'weight', val: number) => {
+  const updateSet = (ei: number, si: number, field: 'reps' | 'weight', val: string) => {
     setExercises(prev => prev.map((ex, i) => i !== ei ? ex : {
       ...ex,
       sets: ex.sets.map((s, j) => j !== si ? s : { ...s, [field]: val })
     }))
+  }
+
+  const onChangeSet = (ei: number, si: number, field: 'reps' | 'weight', val: string) => {
+    setExercises(prev => {
+      const copy = prev.map(e => ({ ...e, sets: e.sets.map(s => ({ ...s })) }))
+      let num = Number(val)
+      
+      if (Number.isNaN(num)) {
+        num = field === 'reps' ? 0 : 0
+      } else {
+        // Clamp values
+        if (field === 'reps') {
+          num = Math.max(0, Math.min(1000, num)) // Clamp reps between 0-1000
+        } else {
+          num = Math.max(0, Math.min(1000, num)) // Clamp weight between 0-1000
+        }
+      }
+      
+      ;(copy[ei].sets[si] as any)[field] = num
+      return copy
+    })
+  }
+
+  const handleKeyDown = (ei: number, si: number, field: 'reps' | 'weight', e: React.KeyboardEvent) => {
+    const currentValue = exercises[ei]?.sets[si]?.[field] || 0
+    
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const newValue = field === 'reps' ? currentValue + 1 : currentValue + 2.5
+      onChangeSet(ei, si, field, newValue.toString())
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const newValue = field === 'reps' ? Math.max(0, currentValue - 1) : Math.max(0, currentValue - 2.5)
+      onChangeSet(ei, si, field, newValue.toString())
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      // Find next input or save
+      const nextInput = findNextInput(ei, si, field)
+      if (nextInput) {
+        nextInput.focus()
+      } else {
+        saveButtonRef.current?.focus()
+      }
+    }
+  }
+
+  const findNextInput = (ei: number, si: number, field: 'reps' | 'weight'): HTMLInputElement | null => {
+    const currentFieldIndex = field === 'reps' ? 0 : 1
+    
+    // Try next field in same set
+    if (currentFieldIndex === 0 && inputRefs.current[ei]?.[si * 2 + 1]) {
+      return inputRefs.current[ei][si * 2 + 1]
+    }
+    
+    // Try next set
+    if (si + 1 < exercises[ei]?.sets.length) {
+      return inputRefs.current[ei]?.[(si + 1) * 2] || null
+    }
+    
+    // Try next exercise
+    if (ei + 1 < exercises.length) {
+      return inputRefs.current[ei + 1]?.[0] || null
+    }
+    
+    return null
   }
 
   const updateExerciseName = (ei: number, name: string) => {
@@ -63,6 +133,24 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSave }: P
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!workout) return
+
+    // Validate workout data
+    const workoutData = {
+      date: new Date(date).toISOString(),
+      notes: notes.trim() || undefined,
+      exercises: exercises.map(ex => ({
+        id: ex.id,
+        name: ex.name,
+        sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight }))
+      }))
+    }
+    
+    const validation = validateWorkoutForm(workoutData)
+    if (!validation.isValid) {
+      // For now, just log validation errors since we don't have toast in this component
+      console.error('Validation errors:', validation.errors)
+      return
+    }
 
     setIsLoading(true)
     try {
@@ -180,18 +268,31 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSave }: P
                       <div key={si} className="grid grid-cols-4 gap-2 items-center">
                         <div className="text-sm text-gray-600">Set {si + 1}</div>
                         <input
+                          ref={el => {
+                            if (!inputRefs.current[ei]) inputRefs.current[ei] = []
+                            inputRefs.current[ei][si * 2] = el
+                          }}
                           type="number"
-                          min="1"
+                          min="0"
+                          max="1000"
+                          step="1"
                           value={set.reps}
-                          onChange={(e) => updateSet(ei, si, 'reps', Number(e.target.value))}
+                          onChange={(e) => onChangeSet(ei, si, 'reps', e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(ei, si, 'reps', e)}
                           className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-brand-green focus:border-transparent"
                         />
                         <input
+                          ref={el => {
+                            if (!inputRefs.current[ei]) inputRefs.current[ei] = []
+                            inputRefs.current[ei][si * 2 + 1] = el
+                          }}
                           type="number"
                           step="0.5"
                           min="0"
+                          max="1000"
                           value={set.weight}
-                          onChange={(e) => updateSet(ei, si, 'weight', Number(e.target.value))}
+                          onChange={(e) => onChangeSet(ei, si, 'weight', e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(ei, si, 'weight', e)}
                           className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-brand-green focus:border-transparent"
                         />
                         {exercise.sets.length > 1 && (
@@ -227,6 +328,7 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSave }: P
                 Cancel
               </button>
               <button
+                ref={saveButtonRef}
                 type="submit"
                 disabled={isLoading || exercises.length === 0}
                 className="bg-brand-green text-white rounded-xl px-6 py-2 hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

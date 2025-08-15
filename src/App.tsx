@@ -14,7 +14,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/templates" element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>} />
-      <Route path="/import-template" element={<ProtectedRoute><ImportTemplate /></ProtectedRoute>} />
+              <Route path="/import" element={<ProtectedRoute><ImportTemplate /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/app" replace />} />
     </Routes>

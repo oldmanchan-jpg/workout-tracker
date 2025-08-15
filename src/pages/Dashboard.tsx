@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/state/AuthContext'
 import type { Template, Workout } from '@/types'
@@ -14,6 +14,7 @@ import ProgressChart from '@/components/ProgressChart'
 import WorkoutList from '@/components/WorkoutList'
 import EditWorkoutModal from '@/components/EditWorkoutModal'
 import { useToast, toast } from '@/components/Toaster'
+import { validateWorkoutForm } from '@/lib/validation'
 
 type DraftSet = { reps: number; weight?: number }
 type DraftExercise = { name: string; sets: DraftSet[] }
@@ -35,6 +36,10 @@ export default function Dashboard() {
   // Edit modal state
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  // Refs for keyboard navigation
+  const inputRefs = useRef<(HTMLInputElement | null)[][]>([])
+  const saveButtonRef = useRef<HTMLButtonElement>(null)
 
   // NEW: chart controls
   const [exerciseFilter, setExerciseFilter] = useState('Squat')
@@ -84,14 +89,88 @@ export default function Dashboard() {
   const onChangeSet = (exIdx: number, setIdx: number, field: 'reps' | 'weight', val: string) => {
     setDraftExercises(prev => {
       const copy = prev.map(e => ({ ...e, sets: e.sets.map(s => ({ ...s })) }))
-      const num = field === 'reps' ? Math.max(0, Number(val)) : Number(val)
-      ;(copy[exIdx].sets[setIdx] as any)[field] = Number.isNaN(num) ? undefined : num
+      let num = Number(val)
+      
+      if (Number.isNaN(num)) {
+        num = field === 'reps' ? 0 : undefined
+      } else {
+        // Clamp values
+        if (field === 'reps') {
+          num = Math.max(0, Math.min(1000, num)) // Clamp reps between 0-1000
+        } else {
+          num = Math.max(0, Math.min(1000, num)) // Clamp weight between 0-1000
+        }
+      }
+      
+      ;(copy[exIdx].sets[setIdx] as any)[field] = num
       return copy
     })
   }
 
+  const handleKeyDown = (exIdx: number, setIdx: number, field: 'reps' | 'weight', e: React.KeyboardEvent) => {
+    const currentValue = draftExercises[exIdx]?.sets[setIdx]?.[field] || 0
+    
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const newValue = field === 'reps' ? currentValue + 1 : currentValue + 2.5
+      onChangeSet(exIdx, setIdx, field, newValue.toString())
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const newValue = field === 'reps' ? Math.max(0, currentValue - 1) : Math.max(0, currentValue - 2.5)
+      onChangeSet(exIdx, setIdx, field, newValue.toString())
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      // Find next input or save
+      const nextInput = findNextInput(exIdx, setIdx, field)
+      if (nextInput) {
+        nextInput.focus()
+      } else {
+        saveButtonRef.current?.focus()
+      }
+    }
+  }
+
+  const findNextInput = (exIdx: number, setIdx: number, field: 'reps' | 'weight'): HTMLInputElement | null => {
+    const currentFieldIndex = field === 'reps' ? 0 : 1
+    
+    // Try next field in same set
+    if (currentFieldIndex === 0 && inputRefs.current[exIdx]?.[setIdx * 2 + 1]) {
+      return inputRefs.current[exIdx][setIdx * 2 + 1]
+    }
+    
+    // Try next set
+    if (setIdx + 1 < draftExercises[exIdx]?.sets.length) {
+      return inputRefs.current[exIdx]?.[(setIdx + 1) * 2] || null
+    }
+    
+    // Try next exercise
+    if (exIdx + 1 < draftExercises.length) {
+      return inputRefs.current[exIdx + 1]?.[0] || null
+    }
+    
+    return null
+  }
+
   const onSaveWorkout = async () => {
     if (!selectedTemplate) return
+    
+    // Validate workout data
+    const workoutData = {
+      date: new Date().toISOString(),
+      notes,
+      exercises: draftExercises.map(ex => ({
+        id: crypto.randomUUID(),
+        name: ex.name,
+        sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight ?? 0 })),
+      }))
+    }
+    
+    const validation = validateWorkoutForm(workoutData)
+    if (!validation.isValid) {
+      addToast(toast.error('Validation Error', validation.errors.join(', ')))
+      return
+    }
+    
     setSaving(true)
     try {
       const workout: Omit<Workout, 'id' | 'userId'> = {
@@ -157,7 +236,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto p-4 space-y-4">
+      <main className="max-w-5xl mx-auto p-4 space-y-4 pb-24 md:pb-4">
         {/* Log Workout */}
         <div className="bg-white rounded-2xl shadow-soft p-4">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
@@ -185,11 +264,36 @@ export default function Dashboard() {
                       <div key={setIdx} className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 border rounded-lg p-2">
                         <div className="text-xs text-gray-500 mb-1">Set {setIdx + 1}</div>
                         <div className="flex items-center gap-2">
-                          <input type="number" min={0} className="w-20 border rounded-lg px-2 py-1"
-                                 value={s.reps} onChange={e => onChangeSet(exIdx, setIdx, 'reps', e.target.value)} />
+                          <input 
+                            ref={el => {
+                              if (!inputRefs.current[exIdx]) inputRefs.current[exIdx] = []
+                              inputRefs.current[exIdx][setIdx * 2] = el
+                            }}
+                            type="number" 
+                            min={0} 
+                            max={1000}
+                            step={1}
+                            className="w-20 border rounded-lg px-2 py-1"
+                            value={s.reps} 
+                            onChange={e => onChangeSet(exIdx, setIdx, 'reps', e.target.value)}
+                            onKeyDown={e => handleKeyDown(exIdx, setIdx, 'reps', e)}
+                          />
                           <span className="text-sm text-gray-600">reps</span>
-                          <input type="number" className="w-24 border rounded-lg px-2 py-1" placeholder="kg"
-                                 value={s.weight ?? ''} onChange={e => onChangeSet(exIdx, setIdx, 'weight', e.target.value)} />
+                          <input 
+                            ref={el => {
+                              if (!inputRefs.current[exIdx]) inputRefs.current[exIdx] = []
+                              inputRefs.current[exIdx][setIdx * 2 + 1] = el
+                            }}
+                            type="number" 
+                            min={0} 
+                            max={1000}
+                            step={0.5}
+                            className="w-24 border rounded-lg px-2 py-1" 
+                            placeholder="kg"
+                            value={s.weight ?? ''} 
+                            onChange={e => onChangeSet(exIdx, setIdx, 'weight', e.target.value)}
+                            onKeyDown={e => handleKeyDown(exIdx, setIdx, 'weight', e)}
+                          />
                           <span className="text-sm text-gray-600">kg</span>
                         </div>
                       </div>
@@ -206,6 +310,7 @@ export default function Dashboard() {
 
               <div className="flex justify-end">
                 <button
+                  ref={saveButtonRef}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2 disabled:opacity-60"
                   onClick={onSaveWorkout}
                   disabled={saving}
@@ -244,6 +349,17 @@ export default function Dashboard() {
         {/* Progress Chart */}
         <ProgressChart workouts={workouts} exerciseName={exerciseFilter} metric={metric} />
       </main>
+
+      {/* Sticky Mobile Save Button */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t p-4 md:hidden">
+        <button
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-3 disabled:opacity-60 font-medium"
+          onClick={onSaveWorkout}
+          disabled={saving || !selectedTemplate}
+        >
+          {saving ? 'Saving…' : 'Save Workout'}
+        </button>
+      </div>
 
       {/* Edit Workout Modal */}
       <EditWorkoutModal

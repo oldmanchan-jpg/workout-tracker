@@ -170,6 +170,7 @@ export default function Dashboard() {
                 {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
               <Link to="/templates" className="text-sm border rounded-xl px-3 py-2">Manage Templates</Link>
+              <Link to="/history" className="text-sm border rounded-xl px-3 py-2">Exercise History</Link>
             </div>
           </div>
 

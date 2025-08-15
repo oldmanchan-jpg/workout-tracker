@@ -106,12 +106,40 @@ export default function TemplatesPage() {
     }
   }
 
+  const exportTemplates = () => {
+    if (templates.length === 0) {
+      addToast(toast.error('No Templates', 'No templates to export.'))
+      return
+    }
+
+    // Prepare templates for export (remove internal IDs)
+    const exportData = templates.map(t => ({
+      name: t.name,
+      exercises: t.exercises
+    }))
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `workout-templates-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    addToast(toast.success('Export Complete', `${templates.length} template(s) exported successfully.`))
+  }
+
   return (
     <div className="min-h-screen">
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
           <div className="font-semibold">Templates</div>
-          <Link to="/app" className="text-sm px-3 py-1 rounded-lg border">Back to App</Link>
+          <div className="flex gap-2">
+            <Link to="/import-template" className="text-sm px-3 py-1 rounded-lg border">Import</Link>
+            <Link to="/app" className="text-sm px-3 py-1 rounded-lg border">Back to App</Link>
+          </div>
         </div>
       </div>
 
@@ -122,7 +150,17 @@ export default function TemplatesPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-2">Your templates</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-semibold">Your templates</h2>
+            {!loading && templates.length > 0 && (
+              <button
+                onClick={exportTemplates}
+                className="text-sm border rounded-xl px-3 py-2 hover:bg-gray-50"
+              >
+                Export All Templates
+              </button>
+            )}
+          </div>
           {loading && <div>Loading…</div>}
           {!loading && templates.length===0 && <div className="text-gray-600">No templates yet.</div>}
           <div className="space-y-4">

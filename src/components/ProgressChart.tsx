@@ -44,7 +44,7 @@ export default function ProgressChart({
 
   return (
     <div className="bg-white rounded-2xl shadow-soft p-4">
-      <h3 className="font-semibold mb-3">
+      <h3 className="font-display text-dark mb-3">
         {metric === 'volume' ? 'Weekly Volume' : 'Weekly Top Set'} — {exerciseName || 'All'}
       </h3>
       <div className="w-full h-64">
@@ -59,7 +59,7 @@ export default function ProgressChart({
         </ResponsiveContainer>
       </div>
       {data.length === 0 && (
-        <div className="text-gray-500 text-sm mt-2">
+        <div className="text-gray-500 text-sm mt-2 font-body">
           {metric === 'volume' 
             ? `Log workouts with ${exerciseName || 'exercises'} (including reps and weight) to see volume progress.`
             : `Log workouts with ${exerciseName || 'exercises'} to see your top set progress.`

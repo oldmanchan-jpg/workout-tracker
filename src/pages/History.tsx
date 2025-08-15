@@ -367,13 +367,13 @@ export default function History() {
   // Sortable header component
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th 
-      className="text-left py-3 px-4 font-medium cursor-pointer hover:bg-gray-50 select-none"
+      className="text-left py-3 px-4 font-medium cursor-pointer hover:bg-green-50 select-none transition-colors"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center gap-1">
         {children}
         {sortField === field && (
-          <span className="text-gray-400">
+          <span className="text-primary">
             {sortDirection === 'asc' ? '↑' : '↓'}
           </span>
         )}
@@ -382,37 +382,42 @@ export default function History() {
   )
 
   return (
-    <div className="min-h-screen">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="font-semibold text-lg">Exercise History</div>
+    <div className="min-h-screen bg-primary-dark">
+      {/* Modern Header */}
+      <div className="sticky top-0 z-20 bg-dark shadow-soft border-b border-purple">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">📊</span>
+            </div>
+            <div className="font-bold text-xl text-dark">Exercise History</div>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={exportAllToCSV}
-              className="text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-3 py-2"
+              className="btn btn-secondary btn-sm"
             >
               Export All
             </button>
-            <Link to="/app" className="text-sm px-3 py-2 rounded-xl border hover:bg-gray-50">
+            <Link to="/app" className="btn btn-outline btn-sm">
               Back to App
             </Link>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-4 space-y-4">
+      <main className="max-w-7xl mx-auto p-4 space-y-6 pb-24 md:pb-6">
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-soft p-4">
-          <h2 className="text-xl font-semibold mb-4">Filters</h2>
+        <div className="card p-6">
+          <h2 className="text-2xl font-bold text-white mb-6">Filter & Search</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Exercise</label>
+              <label className="block text-sm font-medium text-secondary mb-2">Exercise</label>
               <select
                 value={selectedExercise}
                 onChange={(e) => setSelectedExercise(e.target.value)}
-                className="w-full border rounded-xl px-3 py-2"
+                className="input"
               >
                 <option value="">Select Exercise</option>
                 {availableExercises.map(exercise => (
@@ -422,22 +427,22 @@ export default function History() {
             </div>
             
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Start Date</label>
+              <label className="block text-sm font-medium text-secondary mb-2">Start Date</label>
               <input
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="w-full border rounded-xl px-3 py-2"
+                className="input"
               />
             </div>
             
             <div>
-              <label className="block text-sm text-gray-600 mb-2">End Date</label>
+              <label className="block text-sm font-medium text-secondary mb-2">End Date</label>
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="w-full border rounded-xl px-3 py-2"
+                className="input"
               />
             </div>
           </div>
@@ -445,64 +450,80 @@ export default function History() {
 
         {/* Summary Stats */}
         {summaryStats && (
-          <div className="bg-white rounded-2xl shadow-soft p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Summary</h3>
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white">Progress Summary</h3>
               <button
                 onClick={exportToCSV}
-                className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 py-2"
+                className="btn btn-primary"
               >
                 Export to CSV
               </button>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{summaryStats.totalWorkouts}</div>
-                <div className="text-sm text-gray-600">Workouts</div>
+              <div className="bg-primary-light rounded-lg p-4 animate-scale-in" style={{ animationDelay: '0ms' }}>
+                <div className="text-3xl font-bold text-white mb-1">{summaryStats.totalWorkouts}</div>
+                <div className="text-white text-sm font-medium">Workouts</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{summaryStats.totalVolume.toFixed(0)}</div>
-                <div className="text-sm text-gray-600">Total Volume (kg)</div>
+              <div className="bg-secondary rounded-lg p-4 animate-scale-in" style={{ animationDelay: '100ms' }}>
+                <div className="text-3xl font-bold text-white mb-1">{summaryStats.totalVolume.toFixed(0)}</div>
+                <div className="text-white text-sm font-medium">Total Volume (kg)</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{summaryStats.totalReps}</div>
-                <div className="text-sm text-gray-600">Total Reps</div>
+              <div className="bg-primary rounded-lg p-4 animate-scale-in" style={{ animationDelay: '200ms' }}>
+                <div className="text-3xl font-bold text-white mb-1">{summaryStats.totalReps}</div>
+                <div className="text-white text-sm font-medium">Total Reps</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{summaryStats.maxWeight}</div>
-                <div className="text-sm text-gray-600">Max Weight (kg)</div>
+              <div className="bg-secondary-light rounded-lg p-4 animate-scale-in" style={{ animationDelay: '300ms' }}>
+                <div className="text-3xl font-bold text-dark mb-1">{summaryStats.maxWeight}</div>
+                <div className="text-dark text-sm font-medium">Max Weight (kg)</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{summaryStats.avgVolume.toFixed(0)}</div>
-                <div className="text-sm text-gray-600">Avg Volume (kg)</div>
+              <div className="bg-primary-light rounded-lg p-4 animate-scale-in" style={{ animationDelay: '400ms' }}>
+                <div className="text-3xl font-bold text-white mb-1">{summaryStats.avgVolume.toFixed(0)}</div>
+                <div className="text-white text-sm font-medium">Avg Volume (kg)</div>
               </div>
             </div>
           </div>
         )}
 
         {/* History Table */}
-        <div className="bg-white rounded-2xl shadow-soft p-4">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="card p-6">
+          <h3 className="text-2xl font-bold text-white mb-6">
             {selectedExercise ? `${selectedExercise} History` : 'Select an exercise to view history'}
           </h3>
           
-          {loading && <div className="text-center py-8 text-gray-600">Loading...</div>}
+          {loading && (
+            <div className="text-center py-12 animate-fade-in">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="text-secondary">Loading workout history...</div>
+            </div>
+          )}
           
           {!loading && exerciseHistory.length === 0 && (
-            <div className="text-center py-8 text-gray-600">
-              {selectedExercise 
-                ? 'No workouts found for this exercise in the selected date range.'
-                : 'Please select an exercise to view its history.'
-              }
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-secondary-light rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">📊</span>
+              </div>
+                             <div className="text-xl font-semibold text-white mb-2">
+                 {selectedExercise 
+                   ? 'No workouts found for this exercise'
+                   : 'Select an exercise to view its history'
+                 }
+               </div>
+              <div className="text-secondary text-lg">
+                {selectedExercise 
+                  ? 'Try adjusting your date range or select a different exercise.'
+                  : 'Choose an exercise from the filter above to see your progress over time.'
+                }
+              </div>
             </div>
           )}
           
           {!loading && exerciseHistory.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr className="border-b">
+              <table className="table w-full">
+                <thead>
+                  <tr>
                     <SortableHeader field="date">Date</SortableHeader>
                     <SortableHeader field="sets">Sets</SortableHeader>
                     <SortableHeader field="totalReps">Total Reps</SortableHeader>
@@ -517,15 +538,29 @@ export default function History() {
                     const isEditing = editingEntry === entry.workoutId + '-' + entry.exerciseId
                     
                     return (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          {new Date(entry.date).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4">{entry.sets.length}</td>
-                        <td className="py-3 px-4">{entry.totalReps}</td>
-                        <td className="py-3 px-4">{entry.maxWeight} kg</td>
-                        <td className="py-3 px-4">{entry.totalVolume} kg</td>
-                        <td className="py-3 px-4">
+                                             <tr key={index} className="hover:bg-secondary-dark transition-colors">
+                                                 <td className="py-4 px-4">
+                           <div className="font-medium text-white">
+                             {new Date(entry.date).toLocaleDateString('en-US', { 
+                               month: 'short', 
+                               day: 'numeric',
+                               weekday: 'short'
+                             })}
+                           </div>
+                         </td>
+                         <td className="py-4 px-4">
+                           <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                             {entry.sets.length}
+                           </div>
+                         </td>
+                         <td className="py-4 px-4 font-semibold text-white">{entry.totalReps}</td>
+                         <td className="py-4 px-4">
+                           <div className="bg-secondary text-white rounded-lg px-3 py-1 text-sm font-bold inline-block">
+                             {entry.maxWeight} kg
+                           </div>
+                         </td>
+                         <td className="py-4 px-4 font-semibold text-white">{entry.totalVolume.toFixed(0)} kg</td>
+                        <td className="py-4 px-4">
                           {isEditing ? (
                             <div className="space-y-2">
                               {editingSets.map((set, setIndex) => (
@@ -534,21 +569,21 @@ export default function History() {
                                     type="number"
                                     value={set.reps}
                                     onChange={(e) => updateEditingSet(setIndex, 'reps', parseInt(e.target.value) || 0)}
-                                    className="w-16 border rounded px-2 py-1 text-sm"
+                                    className="input w-16 text-center"
                                     placeholder="Reps"
                                   />
-                                  <span>×</span>
+                                  <span className="text-secondary">×</span>
                                   <input
                                     type="number"
                                     value={set.weight}
                                     onChange={(e) => updateEditingSet(setIndex, 'weight', parseInt(e.target.value) || 0)}
-                                    className="w-16 border rounded px-2 py-1 text-sm"
+                                    className="input w-16 text-center"
                                     placeholder="Weight"
                                   />
-                                  <span className="text-sm text-gray-500">kg</span>
+                                  <span className="text-secondary text-sm">kg</span>
                                   <button
                                     onClick={() => removeEditingSet(setIndex)}
-                                    className="text-red-500 hover:text-red-700 text-sm"
+                                    className="text-red-500 hover:text-red-700 text-sm bg-red-50 hover:bg-red-100 rounded-full w-6 h-6 flex items-center justify-center"
                                   >
                                     ×
                                   </button>
@@ -556,13 +591,13 @@ export default function History() {
                               ))}
                               <button
                                 onClick={addEditingSet}
-                                className="text-sm text-blue-600 hover:text-blue-800"
+                                className="text-primary hover:text-primary-light text-sm font-medium"
                               >
                                 + Add Set
                               </button>
                             </div>
                           ) : (
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-secondary">
                               {entry.sets.map((set, setIndex) => (
                                 <span key={setIndex}>
                                   {set.reps}×{set.weight}kg
@@ -572,18 +607,18 @@ export default function History() {
                             </div>
                           )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-4 px-4">
                           {isEditing ? (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => saveEdit(entry)}
-                                className="text-sm bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1"
+                                className="btn btn-primary btn-sm"
                               >
                                 Save
                               </button>
                               <button
                                 onClick={cancelEdit}
-                                className="text-sm bg-gray-600 hover:bg-gray-700 text-white rounded px-2 py-1"
+                                className="btn btn-secondary btn-sm"
                               >
                                 Cancel
                               </button>
@@ -592,13 +627,13 @@ export default function History() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => startEdit(entry)}
-                                className="text-sm bg-blue-600 hover:bg-blue-700 text-white rounded px-2 py-1"
+                                className="btn btn-outline btn-sm"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => deleteEntry(entry)}
-                                className="text-sm bg-red-600 hover:bg-red-700 text-white rounded px-2 py-1"
+                                className="btn btn-outline btn-sm text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
                               >
                                 Delete
                               </button>

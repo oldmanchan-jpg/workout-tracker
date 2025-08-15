@@ -3,18 +3,17 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/state/AuthContext'
 import type { Template, Workout } from '@/types'
 import {
-  listTemplates,
   listWorkouts,
   saveWorkout,
-  seedDefaultTemplate,
   deleteWorkout,
   updateWorkout,
 } from '@/lib/firestore'
-import ProgressChart from '@/components/ProgressChart'
 import WorkoutList from '@/components/WorkoutList'
 import EditWorkoutModal from '@/components/EditWorkoutModal'
+import WorkoutTracker from '@/components/WorkoutTracker'
 import { useToast, toast } from '@/components/Toaster'
 import { validateWorkoutForm } from '@/lib/validation'
+import { workoutTemplates } from '@/data/workoutTemplates'
 
 type DraftSet = { reps: number; weight?: number }
 type DraftExercise = { name: string; sets: DraftSet[] }
@@ -24,7 +23,7 @@ export default function Dashboard() {
   const uid = user!.uid
   const { addToast } = useToast()
 
-  const [templates, setTemplates] = useState<Template[]>([])
+  const [templates] = useState<Template[]>(workoutTemplates)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,27 +36,17 @@ export default function Dashboard() {
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
+  // Workout tracker state
+  const [isWorkoutTrackerOpen, setIsWorkoutTrackerOpen] = useState(false)
+
   // Refs for keyboard navigation
   const inputRefs = useRef<(HTMLInputElement | null)[][]>([])
   const saveButtonRef = useRef<HTMLButtonElement>(null)
-
-  // NEW: chart controls
-  const [exerciseFilter, setExerciseFilter] = useState('Squat')
-  const [metric, setMetric] = useState<'volume' | 'topSet'>('volume')
 
   const selectedTemplate = useMemo(
     () => templates.find(t => t.id === selectedTemplateId),
     [templates, selectedTemplateId]
   )
-
-  // options for exercise selector
-  const exerciseOptions = useMemo(() => {
-    const set = new Set<string>()
-    templates.forEach(t => t.exercises.forEach(e => set.add(e.name)))
-    workouts.forEach(w => w.exercises.forEach(e => set.add(e.name)))
-    const arr = Array.from(set).sort()
-    return arr.length ? arr : ['Squat']
-  }, [templates, workouts])
 
   useEffect(() => {
     if (!selectedTemplate) return
@@ -71,20 +60,37 @@ export default function Dashboard() {
   useEffect(() => {
     (async () => {
       setLoading(true)
-      let ts = await listTemplates(uid)
-      if (ts.length === 0) {
-        await seedDefaultTemplate(uid)
-        ts = await listTemplates(uid)
-      }
-      setTemplates(ts)
-      setSelectedTemplateId(prev => (prev || (ts[0]?.id ?? '')))
+      // Set default template
+      setSelectedTemplateId(templates[0]?.id ?? '')
       const ws = await listWorkouts(uid)
       setWorkouts(ws)
       setLoading(false)
     })()
-  }, [uid])
+  }, [uid, templates])
 
-  const refreshWorkouts = async () => setWorkouts(await listWorkouts(uid))
+  const refreshWorkouts = async () => {
+    try {
+      setLoading(true)
+      const workoutList = await listWorkouts(uid)
+      console.log('=== WORKOUTS LOADED ===')
+      console.log('Total workouts:', workoutList.length)
+      workoutList.forEach((workout, index) => {
+        console.log(`Workout ${index + 1}:`, {
+          id: workout.id,
+          idType: typeof workout.id,
+          idLength: workout.id?.length,
+          date: workout.date,
+          exerciseCount: workout.exercises?.length
+        })
+      })
+      setWorkouts(workoutList)
+    } catch (error) {
+      console.error('Failed to load workouts:', error)
+      addToast(toast.error('Load Failed', 'Failed to load workouts. Please try again.'))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const onChangeSet = (exIdx: number, setIdx: number, field: 'reps' | 'weight', val: string) => {
     setDraftExercises(prev => {
@@ -102,89 +108,73 @@ export default function Dashboard() {
         }
       }
       
-      ;(copy[exIdx].sets[setIdx] as any)[field] = num
+      copy[exIdx].sets[setIdx][field] = num
       return copy
     })
   }
 
   const handleKeyDown = (exIdx: number, setIdx: number, field: 'reps' | 'weight', e: React.KeyboardEvent) => {
-    const currentValue = draftExercises[exIdx]?.sets[setIdx]?.[field] || 0
-    
-    if (e.key === 'ArrowUp') {
+    if (e.key === 'Enter') {
       e.preventDefault()
-      const newValue = field === 'reps' ? currentValue + 1 : currentValue + 2.5
-      onChangeSet(exIdx, setIdx, field, newValue.toString())
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      const newValue = field === 'reps' ? Math.max(0, currentValue - 1) : Math.max(0, currentValue - 2.5)
-      onChangeSet(exIdx, setIdx, field, newValue.toString())
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      // Find next input or save
-      const nextInput = findNextInput(exIdx, setIdx, field)
-      if (nextInput) {
-        nextInput.focus()
+      if (field === 'reps') {
+        // Move to weight input
+        const nextInput = inputRefs.current[exIdx]?.[setIdx * 2 + 1]
+        if (nextInput) nextInput.focus()
       } else {
-        saveButtonRef.current?.focus()
+        // Move to next set or next exercise
+        const nextSetIdx = setIdx + 1
+        if (nextSetIdx < draftExercises[exIdx].sets.length) {
+          const nextInput = inputRefs.current[exIdx]?.[nextSetIdx * 2]
+          if (nextInput) nextInput.focus()
+        } else {
+          const nextExIdx = exIdx + 1
+          if (nextExIdx < draftExercises.length) {
+            const nextInput = inputRefs.current[nextExIdx]?.[0]
+            if (nextInput) nextInput.focus()
+          } else {
+            // Last input, focus save button
+            saveButtonRef.current?.focus()
+          }
+        }
       }
     }
-  }
-
-  const findNextInput = (exIdx: number, setIdx: number, field: 'reps' | 'weight'): HTMLInputElement | null => {
-    const currentFieldIndex = field === 'reps' ? 0 : 1
-    
-    // Try next field in same set
-    if (currentFieldIndex === 0 && inputRefs.current[exIdx]?.[setIdx * 2 + 1]) {
-      return inputRefs.current[exIdx][setIdx * 2 + 1]
-    }
-    
-    // Try next set
-    if (setIdx + 1 < draftExercises[exIdx]?.sets.length) {
-      return inputRefs.current[exIdx]?.[(setIdx + 1) * 2] || null
-    }
-    
-    // Try next exercise
-    if (exIdx + 1 < draftExercises.length) {
-      return inputRefs.current[exIdx + 1]?.[0] || null
-    }
-    
-    return null
   }
 
   const onSaveWorkout = async () => {
     if (!selectedTemplate) return
     
-    // Validate workout data
-    const workoutData = {
-      date: new Date().toISOString(),
-      notes,
-      exercises: draftExercises.map(ex => ({
-        id: crypto.randomUUID(),
-        name: ex.name,
-        sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight ?? 0 })),
-      }))
-    }
-    
-    const validation = validateWorkoutForm(workoutData)
-    if (!validation.isValid) {
-      addToast(toast.error('Validation Error', validation.errors.join(', ')))
-      return
-    }
-    
-    setSaving(true)
     try {
-      const workout: Omit<Workout, 'id' | 'userId'> = {
+      setSaving(true)
+      const workoutData = {
         date: new Date().toISOString(),
         notes,
         exercises: draftExercises.map(ex => ({
+          id: crypto.randomUUID(),
           name: ex.name,
-          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight ?? 0 })),
-        })) as any,
+          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight || 0 }))
+        }))
       }
-      await saveWorkout(uid, workout)
-      setNotes('')
+      
+      const validation = validateWorkoutForm(workoutData)
+      if (!validation.isValid) {
+        addToast(toast.error('Validation Error', validation.errors.join(', ')))
+        return
+      }
+      
+      await saveWorkout(uid, workoutData)
       await refreshWorkouts()
-      addToast(toast.success('Workout Saved!', 'Your workout has been successfully saved.'))
+      
+      // Reset form
+      setNotes('')
+      if (selectedTemplate) {
+        const next: DraftExercise[] = selectedTemplate.exercises.map(ex => ({
+          name: ex.name,
+          sets: Array.from({ length: ex.sets }).map(() => ({ reps: ex.reps, weight: undefined })),
+        }))
+        setDraftExercises(next)
+      }
+      
+      addToast(toast.success('Workout Saved!', 'Great job! Your workout has been logged.'))
     } catch (error) {
       addToast(toast.error('Save Failed', 'Failed to save workout. Please try again.'))
     } finally {
@@ -193,13 +183,30 @@ export default function Dashboard() {
   }
 
   const onDeleteWorkout = async (id: string) => {
-    if (!confirm('Delete this workout?')) return
+    console.log('=== DELETE WORKOUT DEBUG ===')
+    console.log('Attempting to delete workout with ID:', id)
+    console.log('ID type:', typeof id)
+    console.log('ID length:', id.length)
+    console.log('ID contains hyphens:', id.includes('-'))
+    console.log('Current uid:', uid)
+    
+    if (!uid) {
+      console.error('No user ID available for deletion')
+      addToast(toast.error('Delete Failed', 'User not authenticated. Please log in again.'))
+      return
+    }
+    
+    if (!confirm('Are you sure you want to delete this workout?')) return
+    
     try {
+      console.log('Calling deleteWorkout with uid:', uid, 'and id:', id)
       await deleteWorkout(uid, id)
+      console.log('Delete successful, refreshing workouts')
       await refreshWorkouts()
       addToast(toast.success('Workout Deleted', 'The workout has been successfully deleted.'))
     } catch (error) {
-      addToast(toast.error('Delete Failed', 'Failed to delete workout. Please try again.'))
+      console.error('Delete failed with error:', error)
+      addToast(toast.error('Delete Failed', `Failed to delete workout: ${error instanceof Error ? error.message : 'Unknown error'}`))
     }
   }
 
@@ -227,139 +234,347 @@ export default function Dashboard() {
     setEditingWorkout(null)
   }
 
+  const onStartWorkout = () => {
+    if (selectedTemplate) {
+      setIsWorkoutTrackerOpen(true)
+    }
+  }
+
+  const onFinishWorkout = async (workout: Workout) => {
+    try {
+      // Remove the random ID since Firestore will generate one
+      const { id, ...workoutData } = workout
+      const firestoreId = await saveWorkout(uid, workoutData)
+      
+      // Create the workout with the correct Firestore ID
+      const workoutWithCorrectId: Workout = {
+        ...workout,
+        id: firestoreId
+      }
+      
+      await refreshWorkouts()
+      setIsWorkoutTrackerOpen(false)
+      addToast(toast.success('Workout Completed!', 'Great job! Your workout has been logged.'))
+    } catch (error) {
+      addToast(toast.error('Save Failed', 'Failed to save workout. Please try again.'))
+    }
+  }
+
+  const onCloseWorkoutTracker = () => {
+    setIsWorkoutTrackerOpen(false)
+  }
+
   return (
-    <div className="min-h-screen">
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="font-semibold">Workout App</div>
-          <div className="text-sm text-gray-600">Signed in</div>
+    <div className="min-h-screen bg-primary-dark">
+      {/* Modern Header */}
+      <div className="sticky top-0 z-20 bg-dark shadow-soft border-b border-purple">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-display text-lg">W</span>
+            </div>
+            <div className="font-display text-xl text-dark">Workout App</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-secondary px-3 py-1 bg-secondary-light rounded-lg">
+              Welcome back!
+            </div>
+            <Link to="/templates" className="btn btn-outline btn-sm">
+              Templates
+            </Link>
+            <Link to="/history" className="btn btn-outline btn-sm">
+              History
+            </Link>
+
+          </div>
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto p-4 space-y-4 pb-24 md:pb-4">
-        {/* Log Workout */}
-        <div className="bg-white rounded-2xl shadow-soft p-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <h2 className="text-xl font-semibold">Log Workout</h2>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Template</label>
-              <select className="border rounded-xl px-3 py-2"
+      <main className="max-w-7xl mx-auto p-4 space-y-6 pb-24 md:pb-6">
+        {/* Welcome Section */}
+        <div className="card p-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-display text-white mb-2">Ready to crush your workout?</h1>
+            <p className="text-secondary text-lg font-body">Choose a template and start logging your progress</p>
+          </div>
+        </div>
+
+        {/* Template Selection & Start Workout */}
+        <div className="card p-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-6">
+            <h2 className="text-2xl font-display text-white">Select Template</h2>
+            <div className="flex items-center gap-3">
+              <select 
+                className="input max-w-xs"
                 value={selectedTemplateId}
-                onChange={e => setSelectedTemplateId(e.target.value)}>
+                onChange={e => setSelectedTemplateId(e.target.value)}
+              >
                 {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
-              <Link to="/templates" className="text-sm border rounded-xl px-3 py-2">Manage Templates</Link>
-              <Link to="/history" className="text-sm border rounded-xl px-3 py-2">Exercise History</Link>
+              <Link to="/templates" className="btn btn-secondary">
+                Manage Templates
+              </Link>
             </div>
           </div>
 
-          {loading && <div className="mt-3 text-gray-600">Loading…</div>}
+          {loading && (
+            <div className="text-center py-12 animate-fade-in">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="text-secondary font-body">Loading your workout template...</div>
+            </div>
+          )}
+
           {!loading && selectedTemplate && (
-            <div className="mt-4 space-y-4">
-              {draftExercises.map((ex, exIdx) => (
-                <div key={exIdx} className="border rounded-xl p-3">
-                  <div className="font-medium mb-2">{ex.name}</div>
-                  <div className="grid grid-cols-12 gap-2">
-                    {ex.sets.map((s, setIdx) => (
-                      <div key={setIdx} className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 border rounded-lg p-2">
-                        <div className="text-xs text-gray-500 mb-1">Set {setIdx + 1}</div>
-                        <div className="flex items-center gap-2">
-                          <input 
-                            ref={el => {
-                              if (!inputRefs.current[exIdx]) inputRefs.current[exIdx] = []
-                              inputRefs.current[exIdx][setIdx * 2] = el
-                            }}
-                            type="number" 
-                            min={0} 
-                            max={1000}
-                            step={1}
-                            className="w-20 border rounded-lg px-2 py-1"
-                            value={s.reps} 
-                            onChange={e => onChangeSet(exIdx, setIdx, 'reps', e.target.value)}
-                            onKeyDown={e => handleKeyDown(exIdx, setIdx, 'reps', e)}
-                          />
-                          <span className="text-sm text-gray-600">reps</span>
-                          <input 
-                            ref={el => {
-                              if (!inputRefs.current[exIdx]) inputRefs.current[exIdx] = []
-                              inputRefs.current[exIdx][setIdx * 2 + 1] = el
-                            }}
-                            type="number" 
-                            min={0} 
-                            max={1000}
-                            step={0.5}
-                            className="w-24 border rounded-lg px-2 py-1" 
-                            placeholder="kg"
-                            value={s.weight ?? ''} 
-                            onChange={e => onChangeSet(exIdx, setIdx, 'weight', e.target.value)}
-                            onKeyDown={e => handleKeyDown(exIdx, setIdx, 'weight', e)}
-                          />
-                          <span className="text-sm text-gray-600">kg</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            <div className="space-y-6">
+              {/* Template Preview */}
+              <div className="bg-secondary-dark rounded-lg p-4 border border-purple">
+                <h3 className="text-lg font-display text-white mb-3">{selectedTemplate.name}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {selectedTemplate.exercises.map((ex, idx) => (
+                    <div key={idx} className="text-sm text-secondary font-body">
+                      {idx + 1}. {ex.name} - {ex.sets} sets × {ex.reps} reps
+                    </div>
+                  ))}
                 </div>
-              ))}
-
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Notes</label>
-                <textarea className="w-full border rounded-xl px-3 py-2" rows={2}
-                          value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  ref={saveButtonRef}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2 disabled:opacity-60"
-                  onClick={onSaveWorkout}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving…' : 'Save Workout'}
-                </button>
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={onStartWorkout}
+                    className="btn btn-primary btn-lg px-8"
+                  >
+                    Start Workout
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Recent Workouts with delete */}
+        {/* Recent Workouts */}
         <WorkoutList workouts={workouts} onDelete={onDeleteWorkout} onEdit={onEditWorkout} />
 
-        {/* Chart controls */}
-        <div className="bg-white rounded-2xl shadow-soft p-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Exercise</label>
-              <select className="border rounded-xl px-3 py-2" value={exerciseFilter}
-                      onChange={e=>setExerciseFilter(e.target.value)}>
-                {exerciseOptions.map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
+        {/* Weekly Workout Completion */}
+        <div className="card p-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-8">
+            <h3 className="text-2xl font-display text-white">Weekly Progress</h3>
+            <div className="text-sm text-secondary bg-secondary px-3 py-1 rounded-lg font-body">
+              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Metric</label>
-              <select className="border rounded-xl px-3 py-2" value={metric}
-                      onChange={e=>setMetric(e.target.value as any)}>
-                <option value="volume">Weekly Volume</option>
-                <option value="topSet">Weekly Top Set (kg)</option>
-              </select>
+          </div>
+          
+          {/* Weekly Progress Rings - Styled like the screenshot */}
+          <div className="flex justify-center mb-10">
+            <div className="grid grid-cols-7 gap-6">
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][index]
+                const today = new Date()
+                const dayOfWeek = today.getDay()
+                const isToday = dayOfWeek === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                
+                // Calculate completion percentage based on workouts for this day
+                const dayWorkouts = workouts.filter(w => {
+                  const workoutDate = new Date(w.date)
+                  return workoutDate.getDay() === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                })
+                
+                const hasWorkout = dayWorkouts.length > 0
+                const completionPercentage = hasWorkout ? 100 : 0
+                
+                return (
+                  <div key={day} className="flex flex-col items-center">
+                    <div className="relative w-16 h-16 mb-3">
+                      {/* Background circle - dark gray */}
+                      <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="#374151"
+                          strokeWidth="4"
+                          fill="transparent"
+                        />
+                        {/* Progress circle - pink when completed */}
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke={hasWorkout ? "#ec4899" : "#6b7280"}
+                          strokeWidth="4"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 28}
+                          strokeDashoffset={hasWorkout ? 0 : 2 * Math.PI * 28}
+                          strokeLinecap="round"
+                          className="transition-all duration-700 ease-out"
+                        />
+                      </svg>
+                      
+                      {/* Day letter - centered */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`text-lg font-bold ${isToday ? 'text-pink-400' : hasWorkout ? 'text-white' : 'text-gray-400'}`}>
+                          {day}
+                        </span>
+                      </div>
+                      
+                      {/* Completion indicator - pink dot when completed */}
+                      {hasWorkout && (
+                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                          <span className="text-xs text-white font-bold">✓</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Day name below */}
+                    <span className={`text-sm font-medium ${isToday ? 'text-pink-400' : hasWorkout ? 'text-white' : 'text-gray-500'}`}>
+                      {dayName.slice(0, 3)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          
+          {/* Main Progress Ring - Large center ring like the screenshot */}
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <div className="w-48 h-48 relative">
+                {/* Large background circle */}
+                <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 192 192">
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="#dc2626"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  {/* Progress circle - pink when workouts completed */}
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="#ec4899"
+                    strokeWidth="8"
+                    fill="transparent"
+                    strokeDasharray={2 * Math.PI * 88}
+                    strokeDashoffset={(() => {
+                      const weekWorkouts = workouts.filter(w => {
+                        const workoutDate = new Date(w.date)
+                        const today = new Date()
+                        const weekStart = new Date(today)
+                        weekStart.setDate(today.getDate() - today.getDay() + 1)
+                        const weekEnd = new Date(weekStart)
+                        weekEnd.setDate(weekStart.getDate() + 6)
+                        return workoutDate >= weekStart && workoutDate <= weekEnd
+                      })
+                      const progress = (weekWorkouts.length / 7) * 100
+                      return 2 * Math.PI * 88 - (2 * Math.PI * 88 * progress / 100)
+                    })()}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-4xl font-bold text-white mb-2">
+                    {workouts.filter(w => {
+                      const workoutDate = new Date(w.date)
+                      const today = new Date()
+                      const weekStart = new Date(today)
+                      weekStart.setDate(today.getDate() - today.getDay() + 1)
+                      const weekEnd = new Date(weekStart)
+                      weekEnd.setDate(weekStart.getDate() + 6)
+                      return workoutDate >= weekStart && workoutDate <= weekEnd
+                    }).length}
+                  </div>
+                  <div className="text-lg text-pink-400 font-semibold">/ 7</div>
+                  <div className="text-sm text-gray-400 mt-1">Workouts</div>
+                </div>
+              </div>
+              
+              {/* Pink arrow pointing right - like the screenshot */}
+              <div className="absolute -right-6 top-1/2 transform -translate-y-1/2">
+                <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-lg">→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Weekly Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-pink-500/20 to-pink-600/20 rounded-xl p-6 text-center border border-pink-500/30">
+              <div className="text-4xl font-bold text-pink-400 mb-2">
+                {workouts.filter(w => {
+                  const workoutDate = new Date(w.date)
+                  const today = new Date()
+                  const weekStart = new Date(today)
+                  weekStart.setDate(today.getDate() - today.getDay() + 1)
+                  const weekEnd = new Date(weekStart)
+                  weekEnd.setDate(weekStart.getDate() + 6)
+                  return workoutDate >= weekStart && workoutDate <= weekEnd
+                }).length}
+              </div>
+              <div className="text-pink-300 text-sm font-medium">Workouts This Week</div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-6 text-center border border-green-500/30">
+              <div className="text-4xl font-bold text-green-400 mb-2">
+                {workouts.filter(w => {
+                  const workoutDate = new Date(w.date)
+                  const today = new Date()
+                  const weekStart = new Date(today)
+                  weekStart.setDate(today.getDate() - today.getDay() + 1)
+                  const weekEnd = new Date(weekStart)
+                  weekEnd.setDate(weekStart.getDate() + 6)
+                  return workoutDate >= weekStart && workoutDate <= weekEnd
+                }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.reduce((setTotal, set) => setTotal + set.reps, 0), 0), 0)}
+              </div>
+              <div className="text-green-300 text-sm font-medium">Total Reps</div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-6 text-center border border-blue-500/30">
+              <div className="text-4xl font-bold text-blue-400 mb-2">
+                {workouts.filter(w => {
+                  const workoutDate = new Date(w.date)
+                  const today = new Date()
+                  const weekStart = new Date(today)
+                  weekStart.setDate(today.getDate() - today.getDay() + 1)
+                  const weekEnd = new Date(weekStart)
+                  weekEnd.setDate(weekStart.getDate() + 6)
+                  return workoutDate >= weekStart && workoutDate <= weekEnd
+                }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.reduce((setTotal, set) => setTotal + (set.reps * (set.weight || 0)), 0), 0), 0).toFixed(0)}
+              </div>
+              <div className="text-blue-300 text-sm font-medium">Volume (kg)</div>
+            </div>
+          </div>
+          
+          {/* Motivational Message */}
+          <div className="text-center">
+            <div className="text-xl text-white font-body mb-3">
+              {(() => {
+                const completedWorkouts = workouts.filter(w => {
+                  const workoutDate = new Date(w.date)
+                  const today = new Date()
+                  const weekStart = new Date(today)
+                  weekStart.setDate(today.getDate() - today.getDay() + 1)
+                  const weekEnd = new Date(weekStart)
+                  weekEnd.setDate(weekStart.getDate() + 6)
+                  return workoutDate >= weekStart && workoutDate <= weekEnd
+                }).length
+                
+                if (completedWorkouts === 0) return "🚀 Start your week strong with your first workout!"
+                if (completedWorkouts < 3) return "💪 Great start! Keep building momentum this week!"
+                if (completedWorkouts < 5) return "🔥 You're on fire! Almost there!"
+                if (completedWorkouts < 7) return "⚡ So close! One more workout to complete the week!"
+                return "🎉 Perfect week! You've completed all your workouts!"
+              })()}
+            </div>
+            <div className="text-pink-300 text-sm font-medium">
+              Complete all 7 days to unlock next week's achievements
             </div>
           </div>
         </div>
-
-        {/* Progress Chart */}
-        <ProgressChart workouts={workouts} exerciseName={exerciseFilter} metric={metric} />
       </main>
-
-      {/* Sticky Mobile Save Button */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t p-4 md:hidden">
-        <button
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-3 disabled:opacity-60 font-medium"
-          onClick={onSaveWorkout}
-          disabled={saving || !selectedTemplate}
-        >
-          {saving ? 'Saving…' : 'Save Workout'}
-        </button>
-      </div>
 
       {/* Edit Workout Modal */}
       <EditWorkoutModal
@@ -368,6 +583,17 @@ export default function Dashboard() {
         onClose={onCloseEditModal}
         onSave={onSaveEditedWorkout}
       />
+
+      {/* Workout Tracker Modal */}
+      {isWorkoutTrackerOpen && selectedTemplate && (
+        <WorkoutTracker
+          template={selectedTemplate}
+          uid={uid}
+          onFinish={onFinishWorkout}
+          onClose={onCloseWorkoutTracker}
+        />
+      )}
     </div>
   )
 }
+

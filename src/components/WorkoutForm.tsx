@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { Template, Workout, ExerciseEntry } from '@/types'
+import { getExerciseMedia, defaultExerciseImage } from '@/data/exerciseMedia'
 
 type Props = {
   template?: Template | null
@@ -52,30 +53,41 @@ export default function WorkoutForm({ template, onSave }: Props) {
       </div>
 
       <div className="space-y-4">
-        {exercises.map((ex, ei) => (
-          <div key={ex.id} className="border rounded-xl p-3">
-            <div className="flex items-center gap-3 mb-2">
-              <input className="flex-1 border rounded-lg px-2 py-1" value={ex.name} onChange={e=>{
-                const name = e.target.value
-                setExercises(prev => prev.map((x,i)=> i===ei ? { ...x, name } : x))
-              }} />
-              <button type="button" className="text-sm px-3 py-1 border rounded-lg" onClick={()=>{
-                setExercises(prev => prev.filter((_,i)=>i!==ei))
-              }}>Remove</button>
+        {exercises.map((ex, ei) => {
+          const exerciseMedia = getExerciseMedia(ex.name) || defaultExerciseImage
+          return (
+            <div key={ex.id} className="border rounded-xl p-3">
+              <div className="flex items-center gap-3 mb-3">
+                {/* Exercise Image - Smaller and Inline */}
+                <div 
+                  className="w-10 h-10 bg-cover bg-center rounded-lg flex-shrink-0"
+                  style={{ backgroundImage: `url(${exerciseMedia.url})` }}
+                  title={exerciseMedia.altText}
+                />
+                
+                {/* Exercise Name Input */}
+                <input className="flex-1 border rounded-lg px-2 py-1" value={ex.name} onChange={e=>{
+                  const name = e.target.value
+                  setExercises(prev => prev.map((x,i)=> i===ei ? { ...x, name } : x))
+                }} />
+                <button type="button" className="text-sm px-3 py-1 border rounded-lg" onClick={()=>{
+                  setExercises(prev => prev.filter((_,i)=>i!==ei))
+                }}>Remove</button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {ex.sets.map((s, si) => (
+                  <div key={si} className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 w-6">S{si+1}</span>
+                    <input className="w-full border rounded-lg px-2 py-1" type="number" min={1} value={s.reps}
+                      onChange={e=>updateSet(ei, si, 'reps', Number(e.target.value))} />
+                    <input className="w-full border rounded-lg px-2 py-1" type="number" step="0.5" value={s.weight}
+                      onChange={e=>updateSet(ei, si, 'weight', Number(e.target.value))} placeholder="kg" />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {ex.sets.map((s, si) => (
-                <div key={si} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 w-6">S{si+1}</span>
-                  <input className="w-full border rounded-lg px-2 py-1" type="number" min={1} value={s.reps}
-                    onChange={e=>updateSet(ei, si, 'reps', Number(e.target.value))} />
-                  <input className="w-full border rounded-lg px-2 py-1" type="number" step="0.5" value={s.weight}
-                    onChange={e=>updateSet(ei, si, 'weight', Number(e.target.value))} placeholder="kg" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          )
+        })}
         <button type="button" className="rounded-xl border px-3 py-2" onClick={addExercise}>+ Add Exercise</button>
       </div>
 

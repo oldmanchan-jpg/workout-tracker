@@ -16,11 +16,7 @@ export default defineConfig({
         manualChunks: {
           // Vendor chunks
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip', '@radix-ui/react-select'],
-          'chart-vendor': ['chart.js', 'react-chartjs-2'],
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'icon-vendor': ['lucide-react'],
-          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore']
+          'icon-vendor': ['lucide-react']
         }
       }
     },
@@ -39,12 +35,6 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      'framer-motion',
-      'chart.js',
-      'react-chartjs-2',
-      'react-hook-form',
-      '@hookform/resolvers',
-      'zod',
       'lucide-react'
     ]
   }

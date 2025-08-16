@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Search, Filter, Dumbbell, Target, Zap, Clock, TrendingUp } from 'lucide-react'
-import { getExerciseMedia, defaultExerciseImage } from '@/data/exerciseMedia'
+import { ArrowLeft, Search, Dumbbell, Target, TrendingUp } from 'lucide-react'
 
 // Sample exercise data - you can expand this
 const exerciseLibrary = [
@@ -216,94 +215,88 @@ export default function Library() {
 
         {/* Exercise Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredExercises.map((exercise) => {
-            const exerciseMedia = getExerciseMedia(exercise.name) || defaultExerciseImage
-            
-            return (
-              <div key={exercise.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-                {/* Exercise Header */}
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-display text-dark mb-2">{exercise.name}</h3>
-                      <p className="text-gray-600 text-sm mb-3">{exercise.description}</p>
-                      
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(exercise.category)}`}>
-                          {exercise.category}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(exercise.difficulty)}`}>
-                          {exercise.difficulty}
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          {exercise.equipment}
-                        </span>
-                      </div>
-                    </div>
+          {filteredExercises.map((exercise) => (
+            <div key={exercise.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200">
+              {/* Exercise Header */}
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{exercise.name}</h3>
+                    <p className="text-gray-600 text-sm mb-3">{exercise.description}</p>
                     
-                    {/* Exercise Image */}
-                    <div className="ml-4">
-                      <div 
-                        className="w-20 h-20 bg-cover bg-center rounded-lg flex-shrink-0"
-                        style={{ backgroundImage: `url(${exerciseMedia.url})` }}
-                        title={exerciseMedia.altText}
-                      />
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(exercise.category)}`}>
+                        {exercise.category}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(exercise.difficulty)}`}>
+                        {exercise.difficulty}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {exercise.equipment}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Muscle Groups */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Target Muscles:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {exercise.muscleGroups.map((muscle, index) => (
-                        <span key={index} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">
-                          {muscle}
-                        </span>
-                      ))}
+                  
+                  {/* Exercise Icon */}
+                  <div className="ml-4">
+                    <div className="w-20 h-20 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Dumbbell className="w-10 h-10 text-blue-600" />
                     </div>
                   </div>
                 </div>
 
-                {/* Exercise Details */}
-                <div className="p-6 space-y-4">
-                  {/* Benefits */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-green-600" />
-                      Key Benefits
-                    </h4>
-                    <ul className="space-y-1">
-                      {exercise.benefits.map((benefit, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></span>
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Instructions */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Target className="w-4 h-4 text-blue-600" />
-                      How to Perform
-                    </h4>
-                    <ol className="space-y-1">
-                      {exercise.instructions.map((instruction, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                          <span className="w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
-                            {index + 1}
-                          </span>
-                          {instruction}
-                        </li>
-                      ))}
-                    </ol>
+                {/* Muscle Groups */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Target Muscles:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {exercise.muscleGroups.map((muscle, index) => (
+                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                        {muscle}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
-            )
-          })}
+
+              {/* Exercise Details */}
+              <div className="p-6 space-y-4">
+                {/* Benefits */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
+                    Key Benefits
+                  </h4>
+                  <ul className="space-y-1">
+                    {exercise.benefits.map((benefit, index) => (
+                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></span>
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Instructions */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-blue-600" />
+                    How to Perform
+                  </h4>
+                  <ol className="space-y-1">
+                    {exercise.instructions.map((instruction, index) => (
+                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                        <span className="w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
+                          {index + 1}
+                        </span>
+                        {instruction}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* No Results */}

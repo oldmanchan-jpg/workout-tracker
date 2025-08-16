@@ -47,14 +47,16 @@ export default function WorkoutList({
   }
 
   return (
-    <div className="card p-6">
+    <div className="card p-6 animate-scale-in shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.01]">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-display text-white">Recent Workouts</h3>
+        <h3 className="text-2xl font-display text-white">
+          Recent Workouts
+        </h3>
       </div>
       
       {workouts.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-20 h-20 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-12 animate-fade-in">
+          <div className="w-20 h-20 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4 shadow-soft-hover transition-all duration-300 hover:scale-110">
             <span className="text-4xl font-display text-white">W</span>
           </div>
           <div className="text-xl font-display text-white mb-2">Ready to start your fitness journey?</div>
@@ -63,11 +65,11 @@ export default function WorkoutList({
       ) : (
         <div className="space-y-4">
           {workouts.map((workout, index) => (
-            <div key={workout.id} className="card-dark p-4 hover:shadow-soft-hover transition-all duration-200 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={workout.id} className="card-dark p-4 hover:shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.02] animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
               {/* Workout Header */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-soft transition-all duration-300 hover:scale-110">
                     <span className="text-white font-display text-sm">W</span>
                   </div>
                   <div>
@@ -84,7 +86,7 @@ export default function WorkoutList({
                 <div className="flex gap-2">
                   {onEdit && (
                     <button 
-                      className="btn btn-outline btn-sm text-white border-white hover:bg-white hover:text-dark"
+                      className="btn btn-outline btn-sm text-white border-white hover:bg-white hover:text-dark transition-all duration-200 hover:scale-105"
                       onClick={() => onEdit(workout)}
                     >
                       Edit
@@ -92,7 +94,7 @@ export default function WorkoutList({
                   )}
                   {onDelete && (
                     <button 
-                      className="btn btn-outline btn-sm text-red-400 border-red-400 hover:bg-red-400 hover:text-white"
+                      className="btn btn-outline btn-sm text-red-400 border-red-400 hover:bg-red-400 hover:text-white transition-all duration-200 hover:scale-105"
                       onClick={() => onDelete(workout.id)}
                     >
                       Delete
@@ -103,13 +105,13 @@ export default function WorkoutList({
 
               {/* Workout Stats */}
               <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="bg-white/10 rounded-lg p-3 text-center transition-all duration-300 hover:bg-white/20 hover:scale-105">
                   <div className="text-white font-bold text-lg">
                     {getTotalReps(workout)}
                   </div>
                   <div className="text-secondary-light text-xs">Total Reps</div>
                 </div>
-                <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="bg-white/10 rounded-lg p-3 text-center transition-all duration-300 hover:bg-white/20 hover:scale-105">
                   <div className="text-white font-bold text-lg">
                     {getTotalVolume(workout).toFixed(0)}
                   </div>
@@ -122,10 +124,10 @@ export default function WorkoutList({
                 {workout.exercises.slice(0, 3).map((exercise, index) => {
                   const exerciseMedia = getExerciseMedia(exercise.name) || defaultExerciseImage
                   return (
-                    <div key={exercise.id} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                    <div key={exercise.id} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-[1.02]">
                       {/* Exercise Image - Smaller Thumbnail */}
                       <div 
-                        className="w-10 h-10 bg-cover bg-center rounded-lg flex-shrink-0"
+                        className="w-10 h-10 bg-cover bg-center rounded-lg flex-shrink-0 shadow-soft transition-all duration-300 hover:scale-110"
                         style={{ backgroundImage: `url(${exerciseMedia.url})` }}
                         title={exerciseMedia.altText}
                       />
@@ -143,7 +145,7 @@ export default function WorkoutList({
                   )
                 })}
                 {workout.exercises.length > 3 && (
-                  <div className="text-secondary-light text-sm text-center pt-2">
+                  <div className="text-secondary-light text-sm text-center pt-2 animate-pulse">
                     +{workout.exercises.length - 3} more exercises
                   </div>
                 )}

@@ -13,7 +13,7 @@ export default function Login() {
   const [err, setErr] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  if (user) return <Navigate to="/app" replace />
+  if (user) return <Navigate to="/" replace />
 
   const onGoogle = async () => {
     setErr(null); setLoading(true)

@@ -1,4 +1,5 @@
 import type { ExerciseSet, ExerciseEntry, Workout, Template } from '@/types'
+import { z } from 'zod'
 
 // Validation result type
 export type ValidationResult = {
@@ -217,125 +218,61 @@ export const validateTemplateForm = (template: Omit<Template, 'id' | 'userId'>):
   }
 }
 
-// Form-specific validations
-export const validateWorkoutForm = (data: {
-  date: string
-  notes?: string
-  exercises: ExerciseEntry[]
-}): ValidationResult => {
-  const errors: string[] = []
-  
-  const dateError = isRequired(data.date, 'Date')
-  if (dateError) errors.push(dateError)
-  
-  if (data.date) {
-    const validDateError = isValidDate(data.date, 'Date')
-    if (validDateError) errors.push(validDateError)
-    
-    const futureDateError = isNotFutureDate(data.date, 'Date')
-    if (futureDateError) errors.push(futureDateError)
-  }
-  
-  if (data.notes !== undefined && data.notes !== '') {
-    const notesLengthError = hasMaxLength(data.notes, 500, 'Notes')
-    if (notesLengthError) errors.push(notesLengthError)
-  }
-  
-  const exercisesError = isNotEmptyArray(data.exercises, 'Exercises')
-  if (exercisesError) errors.push(exercisesError)
-  
-  if (data.exercises.length > 0) {
-    data.exercises.forEach((exercise, index) => {
-      const exerciseErrors = validateExerciseEntry(exercise)
-      exerciseErrors.forEach(error => errors.push(`Exercise ${index + 1}: ${error}`))
-    })
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  }
-}
+// Enhanced workout validation schema with Zod
+export const workoutFormSchema = z.object({
+  notes: z.string().optional(),
+  exercises: z.array(z.object({
+    name: z.string().min(1, 'Exercise name is required'),
+    sets: z.array(z.object({
+      reps: z.number().min(0, 'Reps must be 0 or greater').max(1000, 'Reps cannot exceed 1000').optional(),
+      weight: z.number().min(0, 'Weight must be 0 or greater').max(1000, 'Weight cannot exceed 1000kg').optional()
+    })).min(1, 'At least one set is required')
+  })).min(1, 'At least one exercise is required')
+})
 
-export const validateTemplateFormData = (data: {
-  name: string
-  exercises: { name: string; sets: number; reps: number }[]
-}): ValidationResult => {
-  const errors: string[] = []
-  
-  const nameError = isRequired(data.name, 'Template name')
-  if (nameError) errors.push(nameError)
-  
-  const nameLengthError = hasMaxLength(data.name, 100, 'Template name')
-  if (nameLengthError) errors.push(nameLengthError)
-  
-  const exercisesError = isNotEmptyArray(data.exercises, 'Exercises')
-  if (exercisesError) errors.push(exercisesError)
-  
-  if (data.exercises.length > 0) {
-    data.exercises.forEach((exercise, index) => {
-      const nameError = isRequired(exercise.name, `Exercise ${index + 1} name`)
-      if (nameError) errors.push(nameError)
-      
-      const nameLengthError = hasMaxLength(exercise.name, 100, `Exercise ${index + 1} name`)
-      if (nameLengthError) errors.push(nameLengthError)
-      
-      const setsError = isPositiveNumber(exercise.sets, `Exercise ${index + 1} sets`)
-      if (setsError) errors.push(setsError)
-      
-      const repsError = isPositiveNumber(exercise.reps, `Exercise ${index + 1} reps`)
-      if (repsError) errors.push(repsError)
-    })
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  }
-}
+export type WorkoutFormData = z.infer<typeof workoutFormSchema>
 
-// Utility functions
-export const validateAll = (validations: (string | null)[]): string[] => {
-  return validations.filter((error): error is string => error !== null)
-}
-
-export const createValidator = <T>(validators: ((value: T) => string | null)[]) => {
-  return (value: T): ValidationResult => {
-    const errors = validateAll(validators.map(validator => validator(value)))
-    return {
-      isValid: errors.length === 0,
-      errors
+// Enhanced validation function using Zod
+export const validateWorkoutForm = (data: any) => {
+  try {
+    const validated = workoutFormSchema.parse(data)
+    return { isValid: true, data: validated, errors: [] }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errors = error.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+      return { isValid: false, data: null, errors }
     }
+    return { isValid: false, data: null, errors: ['Unknown validation error'] }
   }
 }
 
-// Common validation patterns
-export const workoutNameValidator = createValidator([
-  (name: string) => isRequired(name, 'Workout name'),
-  (name: string) => hasMinLength(name, 1, 'Workout name'),
-  (name: string) => hasMaxLength(name, 100, 'Workout name')
-])
+// Individual field validation schemas
+export const setSchema = z.object({
+  reps: z.number().min(0).max(1000),
+  weight: z.number().min(0).max(1000)
+})
 
-export const exerciseNameValidator = createValidator([
-  (name: string) => isRequired(name, 'Exercise name'),
-  (name: string) => hasMinLength(name, 1, 'Exercise name'),
-  (name: string) => hasMaxLength(name, 100, 'Exercise name')
-])
+export const exerciseSchema = z.object({
+  name: z.string().min(1),
+  sets: z.array(setSchema).min(1)
+})
 
-export const repsValidator = createValidator([
-  (reps: number) => isPositiveNumber(reps, 'Reps'),
-  (reps: number) => isInRange(reps, 1, 1000, 'Reps')
-])
+// Real-time validation helpers
+export const validateReps = (value: string): { isValid: boolean; error?: string } => {
+  const num = Number(value)
+  if (isNaN(num)) return { isValid: false, error: 'Must be a number' }
+  if (num < 0) return { isValid: false, error: 'Cannot be negative' }
+  if (num > 1000) return { isValid: false, error: 'Cannot exceed 1000' }
+  return { isValid: true }
+}
 
-export const weightValidator = createValidator([
-  (weight: number) => isNonNegativeNumber(weight, 'Weight'),
-  (weight: number) => isInRange(weight, 0, 1000, 'Weight')
-])
-
-export const setsValidator = createValidator([
-  (sets: number) => isPositiveNumber(sets, 'Sets'),
-  (sets: number) => isInRange(sets, 1, 50, 'Sets')
-])
+export const validateWeight = (value: string): { isValid: boolean; error?: string } => {
+  const num = Number(value)
+  if (isNaN(num)) return { isValid: false, error: 'Must be a number' }
+  if (num < 0) return { isValid: false, error: 'Cannot be negative' }
+  if (num > 1000) return { isValid: false, error: 'Cannot exceed 1000kg' }
+  return { isValid: true }
+}
 
 // Template-specific types and constants
 export const LIMITS = {
@@ -441,3 +378,46 @@ export const validateTemplate = (template: TemplateDraft): {
     errors
   }
 }
+
+// Utility functions
+export const validateAll = (validations: (string | null)[]): string[] => {
+  return validations.filter((error): error is string => error !== null)
+}
+
+export const createValidator = <T>(validators: ((value: T) => string | null)[]) => {
+  return (value: T): ValidationResult => {
+    const errors = validateAll(validators.map(validator => validator(value)))
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
+  }
+}
+
+// Common validation patterns
+export const workoutNameValidator = createValidator([
+  (name: string) => isRequired(name, 'Workout name'),
+  (name: string) => hasMinLength(name, 1, 'Workout name'),
+  (name: string) => hasMaxLength(name, 100, 'Workout name')
+])
+
+export const exerciseNameValidator = createValidator([
+  (name: string) => isRequired(name, 'Exercise name'),
+  (name: string) => hasMinLength(name, 1, 'Exercise name'),
+  (name: string) => hasMaxLength(name, 100, 'Exercise name')
+])
+
+export const repsValidator = createValidator([
+  (reps: number) => isPositiveNumber(reps, 'Reps'),
+  (reps: number) => isInRange(reps, 1, 1000, 'Reps')
+])
+
+export const weightValidator = createValidator([
+  (weight: number) => isNonNegativeNumber(weight, 'Weight'),
+  (weight: number) => isInRange(weight, 0, 1000, 'Weight')
+])
+
+export const setsValidator = createValidator([
+  (sets: number) => isPositiveNumber(sets, 'Sets'),
+  (sets: number) => isInRange(sets, 1, 50, 'Sets')
+])

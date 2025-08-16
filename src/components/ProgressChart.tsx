@@ -1,71 +1,137 @@
-import React, { useMemo } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import type { Workout } from '@/types'
+import React from 'react'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ChartOptions
+} from 'chart.js'
+import { Bar, Line } from 'react-chartjs-2'
 
-type Metric = 'volume' | 'topSet'
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
-function weekKey(d: Date) {
-  const dt = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
-  const firstDay = new Date(Date.UTC(dt.getUTCFullYear(),0,1))
-  const dayOfYear = Math.floor((dt.getTime()-firstDay.getTime())/(1000*60*60*24))+1
-  const week = Math.ceil(dayOfYear/7)
-  return `${dt.getUTCFullYear()}-W${String(week).padStart(2,'0')}`
+interface ChartData {
+  labels: string[]
+  datasets: {
+    label: string
+    data: number[]
+    backgroundColor?: string | string[]
+    borderColor?: string | string[]
+    borderWidth?: number
+    fill?: boolean
+    tension?: number
+    pointBackgroundColor?: string
+    pointBorderColor?: string
+    pointRadius?: number
+    pointHoverRadius?: number
+  }[]
 }
 
-export default function ProgressChart({
-  workouts,
-  exerciseName,
-  metric,
-}: {
-  workouts: Workout[]
-  exerciseName: string
-  metric: Metric
-}) {
-  const data = useMemo(() => {
-    const map = new Map<string, number>()
-    workouts.forEach(w => {
-      const wk = weekKey(new Date(w.date))
-      const sets = w.exercises
-        .filter(e => e.name.toLowerCase().includes(exerciseName.toLowerCase()))
-        .flatMap(e => e.sets)
-      let value = 0
-      if (metric === 'volume') {
-        value = sets.reduce((acc, s) => acc + (s.reps * (s.weight || 0)), 0)
-        map.set(wk, (map.get(wk) || 0) + value)
-      } else {
-        value = sets.reduce((acc, s) => Math.max(acc, s.weight || 0), 0)
-        map.set(wk, Math.max(map.get(wk) || 0, value))
+interface ProgressChartProps {
+  type: 'bar' | 'line'
+  data: ChartData
+  title: string
+  height?: number
+  className?: string
+}
+
+export default function ProgressChart({ 
+  type, 
+  data, 
+  title, 
+  height = 300,
+  className = '' 
+}: ProgressChartProps) {
+  const options: ChartOptions<'bar' | 'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: false,
+        callbacks: {
+          title: (tooltipItems) => {
+            return tooltipItems[0].label
+          },
+          label: (context) => {
+            return `${context.dataset.label}: ${context.parsed.y}`
+          }
+        }
       }
-    })
-    return Array.from(map.entries())
-      .sort((a,b)=>a[0].localeCompare(b[0]))
-      .map(([name, value]) => ({ name, value }))
-  }, [workouts, exerciseName, metric])
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#9ca3af',
+          font: {
+            size: 12,
+            weight: 500
+          }
+        }
+      },
+      y: {
+        grid: {
+          color: 'rgba(156, 163, 175, 0.1)',
+        },
+        ticks: {
+          color: '#9ca3af',
+          font: {
+            size: 12,
+            weight: 500
+          },
+          padding: 8
+        }
+      }
+    },
+    elements: {
+      point: {
+        hoverRadius: 6,
+        radius: 4,
+      }
+    }
+  }
 
   return (
-    <div className="bg-white rounded-2xl shadow-soft p-4">
-      <h3 className="font-display text-dark mb-3">
-        {metric === 'volume' ? 'Weekly Volume' : 'Weekly Top Set'} — {exerciseName || 'All'}
-      </h3>
-      <div className="w-full h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" dot />
-          </LineChart>
-        </ResponsiveContainer>
+    <div className={`bg-white rounded-xl p-6 border border-purple shadow-soft ${className}`}>
+      <h3 className="text-xl font-display text-dark mb-6 text-center">{title}</h3>
+      <div style={{ height }}>
+        {type === 'bar' ? (
+          <Bar data={data} options={options} />
+        ) : (
+          <Line data={data} options={options} />
+        )}
       </div>
-      {data.length === 0 && (
-        <div className="text-gray-500 text-sm mt-2 font-body">
-          {metric === 'volume' 
-            ? `Log workouts with ${exerciseName || 'exercises'} (including reps and weight) to see volume progress.`
-            : `Log workouts with ${exerciseName || 'exercises'} to see your top set progress.`
-          }
-        </div>
-      )}
     </div>
   )
 }

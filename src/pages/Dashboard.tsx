@@ -5,12 +5,30 @@ import type { Template, Workout } from '@/types'
 import {
   listWorkouts,
   saveWorkout,
-  deleteWorkout,
-  updateWorkout,
 } from '@/lib/firestore'
-import WorkoutList from '@/components/WorkoutList'
-import EditWorkoutModal from '@/components/EditWorkoutModal'
+import { 
+  Dumbbell, 
+  BarChart3, 
+  Settings, 
+  Play, 
+  CheckCircle2, 
+  Calendar,
+  TrendingUp,
+  Target
+} from 'lucide-react'
+import { 
+  TemplateSelect, 
+  ActionsDropdown, 
+  HelpTooltip,
+  PageTransition,
+  StaggeredContainer,
+  StaggeredItem,
+  FadeIn,
+  ScaleIn
+} from '@/components/ui'
+
 import WorkoutTracker from '@/components/WorkoutTracker'
+import ProgressChart from '@/components/ProgressChart'
 import { useToast, toast } from '@/components/Toaster'
 import { validateWorkoutForm } from '@/lib/validation'
 import { workoutTemplates } from '@/data/workoutTemplates'
@@ -31,10 +49,6 @@ export default function Dashboard() {
 
   const [draftExercises, setDraftExercises] = useState<DraftExercise[]>([])
   const [notes, setNotes] = useState('')
-
-  // Edit modal state
-  const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   // Workout tracker state
   const [isWorkoutTrackerOpen, setIsWorkoutTrackerOpen] = useState(false)
@@ -72,17 +86,6 @@ export default function Dashboard() {
     try {
       setLoading(true)
       const workoutList = await listWorkouts(uid)
-      console.log('=== WORKOUTS LOADED ===')
-      console.log('Total workouts:', workoutList.length)
-      workoutList.forEach((workout, index) => {
-        console.log(`Workout ${index + 1}:`, {
-          id: workout.id,
-          idType: typeof workout.id,
-          idLength: workout.id?.length,
-          date: workout.date,
-          exerciseCount: workout.exercises?.length
-        })
-      })
       setWorkouts(workoutList)
     } catch (error) {
       console.error('Failed to load workouts:', error)
@@ -113,150 +116,23 @@ export default function Dashboard() {
     })
   }
 
-  const handleKeyDown = (exIdx: number, setIdx: number, field: 'reps' | 'weight', e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      if (field === 'reps') {
-        // Move to weight input
-        const nextInput = inputRefs.current[exIdx]?.[setIdx * 2 + 1]
-        if (nextInput) nextInput.focus()
-      } else {
-        // Move to next set or next exercise
-        const nextSetIdx = setIdx + 1
-        if (nextSetIdx < draftExercises[exIdx].sets.length) {
-          const nextInput = inputRefs.current[exIdx]?.[nextSetIdx * 2]
-          if (nextInput) nextInput.focus()
-        } else {
-          const nextExIdx = exIdx + 1
-          if (nextExIdx < draftExercises.length) {
-            const nextInput = inputRefs.current[nextExIdx]?.[0]
-            if (nextInput) nextInput.focus()
-          } else {
-            // Last input, focus save button
-            saveButtonRef.current?.focus()
-          }
-        }
-      }
-    }
-  }
-
-  const onSaveWorkout = async () => {
-    if (!selectedTemplate) return
-    
-    try {
-      setSaving(true)
-      const workoutData = {
-        date: new Date().toISOString(),
-        notes,
-        exercises: draftExercises.map(ex => ({
-          id: crypto.randomUUID(),
-          name: ex.name,
-          sets: ex.sets.map(s => ({ reps: s.reps, weight: s.weight || 0 }))
-        }))
-      }
-      
-      const validation = validateWorkoutForm(workoutData)
-      if (!validation.isValid) {
-        addToast(toast.error('Validation Error', validation.errors.join(', ')))
-        return
-      }
-      
-      await saveWorkout(uid, workoutData)
-      await refreshWorkouts()
-      
-      // Reset form
-      setNotes('')
-      if (selectedTemplate) {
-        const next: DraftExercise[] = selectedTemplate.exercises.map(ex => ({
-          name: ex.name,
-          sets: Array.from({ length: ex.sets }).map(() => ({ reps: ex.reps, weight: undefined })),
-        }))
-        setDraftExercises(next)
-      }
-      
-      addToast(toast.success('Workout Saved!', 'Great job! Your workout has been logged.'))
-    } catch (error) {
-      addToast(toast.error('Save Failed', 'Failed to save workout. Please try again.'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const onDeleteWorkout = async (id: string) => {
-    console.log('=== DELETE WORKOUT DEBUG ===')
-    console.log('Attempting to delete workout with ID:', id)
-    console.log('ID type:', typeof id)
-    console.log('ID length:', id.length)
-    console.log('ID contains hyphens:', id.includes('-'))
-    console.log('Current uid:', uid)
-    
-    if (!uid) {
-      console.error('No user ID available for deletion')
-      addToast(toast.error('Delete Failed', 'User not authenticated. Please log in again.'))
-      return
-    }
-    
-    if (!confirm('Are you sure you want to delete this workout?')) return
-    
-    try {
-      console.log('Calling deleteWorkout with uid:', uid, 'and id:', id)
-      await deleteWorkout(uid, id)
-      console.log('Delete successful, refreshing workouts')
-      await refreshWorkouts()
-      addToast(toast.success('Workout Deleted', 'The workout has been successfully deleted.'))
-    } catch (error) {
-      console.error('Delete failed with error:', error)
-      addToast(toast.error('Delete Failed', `Failed to delete workout: ${error instanceof Error ? error.message : 'Unknown error'}`))
-    }
-  }
-
-  const onEditWorkout = (workout: Workout) => {
-    setEditingWorkout(workout)
-    setIsEditModalOpen(true)
-  }
-
-  const onSaveEditedWorkout = async (updatedWorkout: Workout) => {
-    try {
-      await updateWorkout(uid, updatedWorkout.id, {
-        date: updatedWorkout.date,
-        notes: updatedWorkout.notes,
-        exercises: updatedWorkout.exercises,
-      })
-      await refreshWorkouts()
-      addToast(toast.success('Workout Updated!', 'Your workout has been successfully updated.'))
-    } catch (error) {
-      addToast(toast.error('Update Failed', 'Failed to update workout. Please try again.'))
-    }
-  }
-
-  const onCloseEditModal = () => {
-    setIsEditModalOpen(false)
-    setEditingWorkout(null)
-  }
-
   const onStartWorkout = () => {
-    if (selectedTemplate) {
-      setIsWorkoutTrackerOpen(true)
-    }
+    if (!selectedTemplate) return
+    setIsWorkoutTrackerOpen(true)
   }
 
   const onFinishWorkout = async (workout: Workout) => {
     try {
-      // Remove the random ID since Firestore will generate one
-      const { id, ...workoutData } = workout
-      const firestoreId = await saveWorkout(uid, workoutData)
-      
-      // Create the workout with the correct Firestore ID
-      const workoutWithCorrectId: Workout = {
-        ...workout,
-        id: firestoreId
-      }
-      
+      setSaving(true)
+      await saveWorkout(uid, workout)
       await refreshWorkouts()
       setIsWorkoutTrackerOpen(false)
-      addToast(toast.success('Workout Completed!', 'Great job! Your workout has been logged.'))
+      addToast(toast.success('Workout Saved', 'Great job! Your workout has been saved.'))
     } catch (error) {
+      console.error('Failed to save workout:', error)
       addToast(toast.error('Save Failed', 'Failed to save workout. Please try again.'))
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -265,217 +141,134 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-primary-dark">
+    <div className="min-h-screen app-container">
       {/* Modern Header */}
-      <div className="sticky top-0 z-20 bg-dark shadow-soft border-b border-purple">
+      <div className="sticky top-0 z-20 bg-dark shadow-soft border-b border-purple backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-display text-lg">W</span>
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-soft-hover transition-all duration-300 hover:scale-110">
+              <Dumbbell className="w-5 h-5 text-white" />
             </div>
             <div className="font-display text-xl text-dark">Workout App</div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-secondary px-3 py-1 bg-secondary-light rounded-lg">
+            <div className="text-sm text-secondary px-3 py-1 bg-secondary-light rounded-lg animate-fade-in">
               Welcome back!
             </div>
-            <Link to="/templates" className="btn btn-outline btn-sm">
+            <Link to="/templates" className="text-sm font-medium text-white hover:text-primary transition-all duration-200 hover:scale-105 flex items-center gap-2">
+              <Settings className="w-4 h-4" />
               Templates
             </Link>
-            <Link to="/history" className="btn btn-outline btn-sm">
-              History
+            <Link to="/history" className="text-sm font-medium text-white hover:text-primary transition-all duration-200 hover:scale-105 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Progress
             </Link>
-
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-4 space-y-6 pb-24 md:pb-6">
-        {/* Welcome Section */}
-        <div className="card p-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-display text-white mb-2">Ready to crush your workout?</h1>
-            <p className="text-secondary text-lg font-body">Choose a template and start logging your progress</p>
-          </div>
-        </div>
-
-        {/* Template Selection & Start Workout */}
-        <div className="card p-6">
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-6">
-            <h2 className="text-2xl font-display text-white">Select Template</h2>
-            <div className="flex items-center gap-3">
-              <select 
-                className="input max-w-xs"
-                value={selectedTemplateId}
-                onChange={e => setSelectedTemplateId(e.target.value)}
-              >
-                {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-              <Link to="/templates" className="btn btn-secondary">
-                Manage Templates
-              </Link>
-            </div>
-          </div>
-
-          {loading && (
-            <div className="text-center py-12 animate-fade-in">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <div className="text-secondary font-body">Loading your workout template...</div>
-            </div>
-          )}
-
-          {!loading && selectedTemplate && (
-            <div className="space-y-6">
-              {/* Template Preview */}
-              <div className="bg-secondary-dark rounded-lg p-4 border border-purple">
-                <h3 className="text-lg font-display text-white mb-3">{selectedTemplate.name}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {selectedTemplate.exercises.map((ex, idx) => (
-                    <div key={idx} className="text-sm text-secondary font-body">
-                      {idx + 1}. {ex.name} - {ex.sets} sets × {ex.reps} reps
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <button
-                    onClick={onStartWorkout}
-                    className="btn btn-primary btn-lg px-8"
-                  >
-                    Start Workout
-                  </button>
-                </div>
+      <PageTransition>
+        <main id="main-content" className="max-w-7xl mx-auto p-4 space-y-6 pb-24 md:pb-6">
+          {/* Welcome Section */}
+          <FadeIn delay={0.1}>
+            <div className="card p-6 shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.02]">
+              <div className="text-center">
+                <h1 className="text-3xl font-display text-white mb-2">
+                  Ready to crush your workout?
+                </h1>
+                <p className="text-secondary text-lg font-body">Choose a template and start logging your progress</p>
               </div>
             </div>
-          )}
-        </div>
+          </FadeIn>
 
-        {/* Recent Workouts */}
-        <WorkoutList workouts={workouts} onDelete={onDeleteWorkout} onEdit={onEditWorkout} />
+          {/* Template Selection & Start Workout */}
+          <FadeIn delay={0.2}>
+            <div className="card p-6 shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.01]">
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-6">
+                <h2 className="text-2xl font-display text-white flex items-center gap-3">
+                  <Target className="w-6 h-6 text-primary" />
+                  Select Template
+                </h2>
+                <div className="flex items-center gap-3">
+                  <TemplateSelect
+                    value={selectedTemplateId}
+                    onValueChange={setSelectedTemplateId}
+                    templates={templates}
+                    size="md"
+                  />
+                  <Link to="/templates" className="text-sm font-medium text-white hover:text-primary transition-all duration-200 hover:scale-105 flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Manage Templates
+                  </Link>
+                </div>
+              </div>
 
-        {/* Weekly Workout Completion */}
-        <div className="card p-6">
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-8">
-            <h3 className="text-2xl font-display text-white">Weekly Progress</h3>
-            <div className="text-sm text-secondary bg-secondary px-3 py-1 rounded-lg font-body">
-              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </div>
-          </div>
-          
-          {/* Weekly Progress Rings - Styled like the screenshot */}
-          <div className="flex justify-center mb-10">
-            <div className="grid grid-cols-7 gap-6">
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
-                const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][index]
-                const today = new Date()
-                const dayOfWeek = today.getDay()
-                const isToday = dayOfWeek === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
-                
-                // Calculate completion percentage based on workouts for this day
-                const dayWorkouts = workouts.filter(w => {
-                  const workoutDate = new Date(w.date)
-                  return workoutDate.getDay() === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
-                })
-                
-                const hasWorkout = dayWorkouts.length > 0
-                const completionPercentage = hasWorkout ? 100 : 0
-                
-                return (
-                  <div key={day} className="flex flex-col items-center">
-                    <div className="relative w-16 h-16 mb-3">
-                      {/* Background circle - dark gray */}
-                      <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="#374151"
-                          strokeWidth="4"
-                          fill="transparent"
-                        />
-                        {/* Progress circle - pink when completed */}
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke={hasWorkout ? "#ec4899" : "#6b7280"}
-                          strokeWidth="4"
-                          fill="transparent"
-                          strokeDasharray={2 * Math.PI * 28}
-                          strokeDashoffset={hasWorkout ? 0 : 2 * Math.PI * 28}
-                          strokeLinecap="round"
-                          className="transition-all duration-700 ease-out"
-                        />
-                      </svg>
-                      
-                      {/* Day letter - centered */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`text-lg font-bold ${isToday ? 'text-pink-400' : hasWorkout ? 'text-white' : 'text-gray-400'}`}>
-                          {day}
-                        </span>
-                      </div>
-                      
-                      {/* Completion indicator - pink dot when completed */}
-                      {hasWorkout && (
-                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                          <span className="text-xs text-white font-bold">✓</span>
-                        </div>
-                      )}
+              {loading && (
+                <div className="text-center py-12 animate-fade-in">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="text-secondary font-body">Loading your workout template...</div>
+                </div>
+              )}
+
+              {!loading && selectedTemplate && (
+                <div className="space-y-6">
+                  {/* Template Preview */}
+                  <div className="bg-secondary rounded-lg p-6 border border-accent shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.02]">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-display text-white">
+                        {selectedTemplate.name}
+                      </h3>
+                      <ActionsDropdown
+                        onEdit={() => {/* TODO: Implement edit */}}
+                        onCopy={() => {/* TODO: Implement copy */}}
+                        onDelete={() => {/* TODO: Implement delete */}}
+                        size="sm"
+                      />
                     </div>
-                    
-                    {/* Day name below */}
-                    <span className={`text-sm font-medium ${isToday ? 'text-pink-400' : hasWorkout ? 'text-white' : 'text-gray-500'}`}>
-                      {dayName.slice(0, 3)}
-                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                      {selectedTemplate.exercises.map((ex, idx) => (
+                        <div key={idx} className="text-sm text-white font-body bg-primary/20 rounded-lg p-3 transition-all duration-200 hover:bg-primary/30 border border-accent/30">
+                          <span className="font-semibold text-white">{idx + 1}.</span> {ex.name} - {ex.sets} sets × {ex.reps} reps
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-center">
+                      <button
+                        onClick={onStartWorkout}
+                        className="bg-primary text-white px-8 py-3 rounded-lg font-medium text-lg transition-all duration-300 hover:scale-110 hover:bg-primary-light flex items-center gap-3"
+                      >
+                        <Play className="w-5 h-5" />
+                        Start Workout
+                      </button>
+                    </div>
                   </div>
-                )
-              })}
+                </div>
+              )}
             </div>
-          </div>
-          
-          {/* Main Progress Ring - Large center ring like the screenshot */}
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="w-48 h-48 relative">
-                {/* Large background circle */}
-                <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 192 192">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="#dc2626"
-                    strokeWidth="8"
-                    fill="transparent"
-                  />
-                  {/* Progress circle - pink when workouts completed */}
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="#ec4899"
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray={2 * Math.PI * 88}
-                    strokeDashoffset={(() => {
-                      const weekWorkouts = workouts.filter(w => {
-                        const workoutDate = new Date(w.date)
-                        const today = new Date()
-                        const weekStart = new Date(today)
-                        weekStart.setDate(today.getDate() - today.getDay() + 1)
-                        const weekEnd = new Date(weekStart)
-                        weekEnd.setDate(weekStart.getDate() + 6)
-                        return workoutDate >= weekStart && workoutDate <= weekEnd
-                      })
-                      const progress = (weekWorkouts.length / 7) * 100
-                      return 2 * Math.PI * 88 - (2 * Math.PI * 88 * progress / 100)
-                    })()}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                
-                {/* Center content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-4xl font-bold text-white mb-2">
+          </FadeIn>
+
+          {/* Weekly Workout Completion */}
+          <FadeIn delay={0.3}>
+            <div className="card p-6 shadow-soft-hover transition-all duration-300 hover:transform hover:scale-[1.01]">
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-8">
+                <h3 className="text-2xl font-display text-white flex items-center gap-3">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                  Weekly Progress
+                  <HelpTooltip helpText="Track your weekly workout completion and performance metrics">
+                    <span></span>
+                  </HelpTooltip>
+                </h3>
+                <div className="text-sm text-secondary font-body animate-fade-in flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+              </div>
+              
+              {/* Weekly Progress Bar */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-white">Weekly Goal Progress</span>
+                  <span className="text-sm text-secondary">
                     {workouts.filter(w => {
                       const workoutDate = new Date(w.date)
                       const today = new Date()
@@ -484,105 +277,133 @@ export default function Dashboard() {
                       const weekEnd = new Date(weekStart)
                       weekEnd.setDate(weekStart.getDate() + 6)
                       return workoutDate >= weekStart && workoutDate <= weekEnd
-                    }).length}
-                  </div>
-                  <div className="text-lg text-pink-400 font-semibold">/ 7</div>
-                  <div className="text-sm text-gray-400 mt-1">Workouts</div>
+                    }).length}/7 workouts
+                  </span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-700 ease-out rounded-full"
+                    style={{ 
+                      width: `${(workouts.filter(w => {
+                        const workoutDate = new Date(w.date)
+                        const today = new Date()
+                        const weekStart = new Date(today)
+                        weekStart.setDate(today.getDate() - today.getDay() + 1)
+                        const weekEnd = new Date(weekStart)
+                        weekEnd.setDate(weekStart.getDate() + 6)
+                        return workoutDate >= weekStart && workoutDate <= weekEnd
+                      }).length / 7) * 100}%` 
+                    }}
+                  />
                 </div>
               </div>
               
-              {/* Pink arrow pointing right - like the screenshot */}
-              <div className="absolute -right-6 top-1/2 transform -translate-y-1/2">
-                <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-lg">→</span>
-                </div>
+              {/* Weekly Progress - Visual Day Indicators */}
+              <div className="flex justify-center mb-8">
+                <StaggeredContainer className="grid grid-cols-7 gap-6 w-full max-w-3xl">
+                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                    const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][index]
+                    const today = new Date()
+                    const dayOfWeek = today.getDay()
+                    const isToday = dayOfWeek === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                    
+                    // Calculate completion based on workouts for this day
+                    const dayWorkouts = workouts.filter(w => {
+                      const workoutDate = new Date(w.date)
+                      return workoutDate.getDay() === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                    })
+                    
+                    const hasWorkout = dayWorkouts.length > 0
+                    
+                    return (
+                      <StaggeredItem key={day} delay={index * 0.1}>
+                        <div className="flex flex-col items-center justify-center">
+                          <div className={`relative w-16 h-16 mb-3 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-soft ${
+                            hasWorkout 
+                              ? 'bg-gradient-to-br from-primary to-primary-light' 
+                              : 'bg-gray-700 border-2 border-gray-500'
+                          } ${isToday ? 'ring-4 ring-primary ring-opacity-30' : ''}`}>
+                            <span className={`text-lg font-bold ${
+                              hasWorkout ? 'text-white' : 'text-gray-300'
+                            }`}>
+                              {day}
+                            </span>
+                            {hasWorkout && (
+                              <div className="absolute -top-2 -right-2 w-5 h-5 bg-secondary rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                                <CheckCircle2 className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                          </div>
+                          <span className={`text-sm font-medium text-center ${
+                            hasWorkout ? 'text-white' : 'text-secondary'
+                          }`}>
+                            {dayName.slice(0, 3)}
+                          </span>
+                        </div>
+                      </StaggeredItem>
+                    )
+                  })}
+                </StaggeredContainer>
               </div>
             </div>
-          </div>
-          
-          {/* Weekly Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-pink-500/20 to-pink-600/20 rounded-xl p-6 text-center border border-pink-500/30">
-              <div className="text-4xl font-bold text-pink-400 mb-2">
-                {workouts.filter(w => {
-                  const workoutDate = new Date(w.date)
-                  const today = new Date()
-                  const weekStart = new Date(today)
-                  weekStart.setDate(today.getDate() - today.getDay() + 1)
-                  const weekEnd = new Date(weekStart)
-                  weekEnd.setDate(weekStart.getDate() + 6)
-                  return workoutDate >= weekStart && workoutDate <= weekEnd
-                }).length}
-              </div>
-              <div className="text-pink-300 text-sm font-medium">Workouts This Week</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-6 text-center border border-green-500/30">
-              <div className="text-4xl font-bold text-green-400 mb-2">
-                {workouts.filter(w => {
-                  const workoutDate = new Date(w.date)
-                  const today = new Date()
-                  const weekStart = new Date(today)
-                  weekStart.setDate(today.getDate() - today.getDay() + 1)
-                  const weekEnd = new Date(weekStart)
-                  weekEnd.setDate(weekStart.getDate() + 6)
-                  return workoutDate >= weekStart && workoutDate <= weekEnd
-                }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.reduce((setTotal, set) => setTotal + set.reps, 0), 0), 0)}
-              </div>
-              <div className="text-green-300 text-sm font-medium">Total Reps</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-6 text-center border border-blue-500/30">
-              <div className="text-4xl font-bold text-blue-400 mb-2">
-                {workouts.filter(w => {
-                  const workoutDate = new Date(w.date)
-                  const today = new Date()
-                  const weekStart = new Date(today)
-                  weekStart.setDate(today.getDate() - today.getDay() + 1)
-                  const weekEnd = new Date(weekStart)
-                  weekEnd.setDate(weekStart.getDate() + 6)
-                  return workoutDate >= weekStart && workoutDate <= weekEnd
-                }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.reduce((setTotal, set) => setTotal + (set.reps * (set.weight || 0)), 0), 0), 0).toFixed(0)}
-              </div>
-              <div className="text-blue-300 text-sm font-medium">Volume (kg)</div>
-            </div>
-          </div>
-          
-          {/* Motivational Message */}
-          <div className="text-center">
-            <div className="text-xl text-white font-body mb-3">
-              {(() => {
-                const completedWorkouts = workouts.filter(w => {
-                  const workoutDate = new Date(w.date)
-                  const today = new Date()
-                  const weekStart = new Date(today)
-                  weekStart.setDate(today.getDate() - today.getDay() + 1)
-                  const weekEnd = new Date(weekStart)
-                  weekEnd.setDate(weekStart.getDate() + 6)
-                  return workoutDate >= weekStart && workoutDate <= weekEnd
-                }).length
-                
-                if (completedWorkouts === 0) return "🚀 Start your week strong with your first workout!"
-                if (completedWorkouts < 3) return "💪 Great start! Keep building momentum this week!"
-                if (completedWorkouts < 5) return "🔥 You're on fire! Almost there!"
-                if (completedWorkouts < 7) return "⚡ So close! One more workout to complete the week!"
-                return "🎉 Perfect week! You've completed all your workouts!"
-              })()}
-            </div>
-            <div className="text-pink-300 text-sm font-medium">
-              Complete all 7 days to unlock next week's achievements
-            </div>
-          </div>
-        </div>
-      </main>
+          </FadeIn>
 
-      {/* Edit Workout Modal */}
-      <EditWorkoutModal
-        workout={editingWorkout}
-        isOpen={isEditModalOpen}
-        onClose={onCloseEditModal}
-        onSave={onSaveEditedWorkout}
-      />
+          {/* Professional Weekly Performance Charts */}
+          <FadeIn delay={0.4}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Weekly Weight Progress Chart */}
+              <ProgressChart
+                type="bar"
+                title="Weekly Weight Progress"
+                height={300}
+                data={{
+                  labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                  datasets: [{
+                    label: 'Weight (kg)',
+                    data: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                      return workouts.filter(w => {
+                        const workoutDate = new Date(w.date)
+                        return workoutDate.getDay() === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                      }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.reduce((setTotal, set) => setTotal + (set.reps * (set.weight || 0)), 0), 0), 0)
+                    }),
+                    backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                    borderColor: 'rgba(147, 51, 234, 1)',
+                    borderWidth: 2,
+                  }]
+                }}
+              />
+              
+              {/* Weekly Sets Progress Chart */}
+              <ProgressChart
+                type="line"
+                title="Weekly Sets Progress"
+                height={300}
+                data={{
+                  labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                  datasets: [{
+                    label: 'Sets',
+                    data: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                      return workouts.filter(w => {
+                        const workoutDate = new Date(w.date)
+                        return workoutDate.getDay() === (index === 0 ? 1 : index === 6 ? 0 : index + 1)
+                      }).reduce((total, w) => total + w.exercises.reduce((exTotal, ex) => exTotal + ex.sets.length, 0), 0)
+                    }),
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#ffffff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                  }]
+                }}
+              />
+            </div>
+          </FadeIn>
+        </main>
+      </PageTransition>
 
       {/* Workout Tracker Modal */}
       {isWorkoutTrackerOpen && selectedTemplate && (

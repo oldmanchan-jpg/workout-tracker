@@ -8,6 +8,7 @@ export interface WorkoutData {
     sets: {
       reps: number
       weight: number
+      rpe?: number // Rate of Perceived Exertion (1-10)
     }[]
   }[]
   total_volume: number

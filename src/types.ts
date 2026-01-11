@@ -2,6 +2,7 @@
 export type ExerciseSet = {
   reps: number
   weight: number
+  rpe?: number // Rate of Perceived Exertion (1-10)
 }
 
 export type ExerciseEntry = {

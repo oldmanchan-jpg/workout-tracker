@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Dumbbell } from 'lucide-react'
-import type { WorkoutTemplate } from '../types'
+import type { Template } from '../types'
 import { saveWorkout } from '../services/workoutService'
 
 interface SetLog {
@@ -17,7 +17,7 @@ interface ExerciseLog {
 export default function ActiveWorkout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const template = location.state?.template as WorkoutTemplate | undefined
+  const template = location.state?.template as Template | undefined
 
   // If no template provided, redirect to dashboard
   if (!template) {

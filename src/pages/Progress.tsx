@@ -148,9 +148,14 @@ export default function Progress() {
                     <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                       <Activity className="w-6 h-6 text-primary" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium text-dark">{workout.template_name}</div>
                       <div className="text-sm text-gray-600">{formatDate(workout.workout_date)}</div>
+                      {workout.notes && (
+                        <div className="text-sm text-gray-600 mt-2 italic border-l-2 border-orange-300 pl-2 bg-orange-50 py-1 rounded">
+                          "{workout.notes}"
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">

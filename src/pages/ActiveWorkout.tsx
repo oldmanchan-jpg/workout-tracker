@@ -35,6 +35,7 @@ export default function ActiveWorkout() {
   const [currentReps, setCurrentReps] = useState('')
   const [currentWeight, setCurrentWeight] = useState('')
   const [isFinished, setIsFinished] = useState(false)
+  const [notes, setNotes] = useState('')
 
   const currentExercise = template.exercises[currentExerciseIndex]
   const currentLog = exerciseLogs[currentExerciseIndex]
@@ -93,7 +94,7 @@ export default function ActiveWorkout() {
       exercises: exerciseLogs,
       total_volume: totalVolume,
       total_reps: totalReps,
-      notes: ''
+      notes: notes
     }
 
     try {
@@ -287,6 +288,24 @@ export default function ActiveWorkout() {
             Next
             <ArrowRight className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Workout Notes */}
+        <div className="bg-gray-800 rounded-lg p-6 mb-4">
+          <label htmlFor="workout-notes" className="block text-white font-medium mb-2">
+            Workout Notes (Optional)
+          </label>
+          <textarea
+            id="workout-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="How did you feel? Any pain? Energy level? PRs?"
+            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+            rows={4}
+          />
+          <p className="text-gray-400 text-sm mt-2">
+            Add notes for your trainer about this workout
+          </p>
         </div>
 
         {/* Finish Workout Button */}

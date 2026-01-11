@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Template } from '@/types'
 import { 
   Play, 
@@ -11,13 +11,13 @@ import TopBar from '@/components/TopBar'
 export default function Dashboard() {
   const [templates] = useState<Template[]>(workoutTemplates)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
+  const navigate = useNavigate()
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
 
   const onStartWorkout = () => {
     if (!selectedTemplate) return
-    // TODO: Implement workout tracking
-    console.log('Starting workout with template:', selectedTemplate.name)
+    navigate('/workout', { state: { template: selectedTemplate } })
   }
 
   return (

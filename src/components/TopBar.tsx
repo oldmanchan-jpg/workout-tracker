@@ -1,9 +1,12 @@
 
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { LogOut } from 'lucide-react'
 
 export default function TopBar() {
   const location = useLocation()
+  const { signOut } = useAuth()
   
   const isActive = (path: string) => location.pathname === path
 
@@ -48,6 +51,14 @@ export default function TopBar() {
             </Link>
           </nav>
         </div>
+        
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-secondary hover:text-primary hover:bg-white/10"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
       </div>
     </div>
   )

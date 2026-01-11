@@ -1,10 +1,57 @@
 # ✅ Completed Work Log
 
-**Last Updated:** January 11, 2026, 12:42 PM
+**Last Updated:** January 11, 2026, ~1:15 PM
 
 ---
 
-## 📅 Session: January 11, 2026
+## 📅 Session: January 11, 2026 - Part 2 (UX Refinements)
+
+### 🔧 UX Improvements: Pre-filled Inputs & Manual Rest Timer
+**Status:** ✅ COMPLETED & PUSHED  
+**Commit:** `a243490`
+
+#### Issues Identified
+After initial implementation, user testing revealed:
+1. **Empty input fields** - Required manual entry for every set even when using template values
+2. **Auto-starting rest timer** - Timer started automatically, removing user control
+
+#### Fixes Implemented
+
+1. **Pre-filled Input Fields**
+   - Input fields now pre-populated with template values:
+     - Reps: From template (e.g., "12")
+     - Weight: From template (e.g., "45")
+     - RPE: Default suggestion "7"
+   - **One-click set completion** - If template values are correct, just click "Complete Set"
+   - **Smart auto-fill** - After completing a set, fields keep last values for quick adjustments
+   - **Exercise navigation** - When switching exercises, inputs reset to new exercise's template values
+   - **Extra sets** - Values persist after completing all template sets
+
+2. **Manual Rest Timer**
+   - Changed `restTimerActive: true` to `restTimerActive: false` after set completion
+   - User must manually click Play ▶️ button to start rest timer
+   - Gives user full control over rest period timing
+   - Prevents unwanted timer running in background
+
+#### Code Changes
+**File:** `src/pages/ActiveWorkout.tsx`
+- Line ~53: Changed `useState('')` to `useState(currentExercise.reps.toString())` for reps
+- Line ~54: Changed `useState('')` to `useState(currentExercise.weight?.toString() || '')` for weight
+- Line ~55: Changed `useState('')` to `useState('7')` for default RPE
+- Line ~142: Changed `restTimerActive: true` to `restTimerActive: false`
+- Lines ~152-154: Simplified to always keep last values (no clearing after last set)
+- Lines ~205-207: Pre-fill with next exercise's template values
+- Lines ~221-223: Pre-fill with previous exercise's template values
+
+#### User Experience Impact
+✅ **Faster logging** - One click to complete a set with template values  
+✅ **Less typing** - Only adjust values when needed  
+✅ **User control** - Rest timer starts when user wants it  
+✅ **Consistent behavior** - Pre-filled inputs across all exercises  
+
+---
+
+## 📅 Session: January 11, 2026 - Part 1 (Initial Implementation)
 
 ### 🎉 Major Feature: Compact List View Workout UI
 **Status:** ✅ COMPLETED & PUSHED

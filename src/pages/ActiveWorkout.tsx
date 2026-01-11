@@ -56,10 +56,10 @@ export default function ActiveWorkout() {
   const [notes, setNotes] = useState('')
   const [defaultRestTime] = useState(90)
   
-  // Input states for in-progress set
-  const [currentReps, setCurrentReps] = useState('')
-  const [currentWeight, setCurrentWeight] = useState('')
-  const [currentRPE, setCurrentRPE] = useState('')
+  // Input states for in-progress set - PRE-FILLED with template values
+  const [currentReps, setCurrentReps] = useState(currentExercise.reps.toString())
+  const [currentWeight, setCurrentWeight] = useState(currentExercise.weight?.toString() || '')
+  const [currentRPE, setCurrentRPE] = useState('7') // Default RPE suggestion
   
   const restTimerIntervals = useRef<Map<number, number>>(new Map())
 
@@ -139,7 +139,7 @@ export default function ActiveWorkout() {
       status: 'completed',
       data: newSet,
       restTimerRemaining: defaultRestTime,
-      restTimerActive: true
+      restTimerActive: false // Manual start - user controls when to start rest timer
     }
 
     // Move to next set if available
@@ -148,16 +148,12 @@ export default function ActiveWorkout() {
         ...updatedStates[setIndex + 1],
         status: 'in_progress'
       }
-      // Pre-fill with last set data
-      setCurrentReps(reps.toString())
-      setCurrentWeight(weight.toString())
-      if (rpe) setCurrentRPE(rpe.toString())
-    } else {
-      // Clear inputs after last set
-      setCurrentReps('')
-      setCurrentWeight('')
-      setCurrentRPE('')
     }
+    
+    // Always keep the last set's values for quick re-entry (for next set or extra sets)
+    setCurrentReps(reps.toString())
+    setCurrentWeight(weight.toString())
+    if (rpe) setCurrentRPE(rpe.toString())
 
     setSetStates(updatedStates)
   }
@@ -202,9 +198,10 @@ export default function ActiveWorkout() {
           restTimerActive: false
         }))
       )
-      setCurrentReps('')
-      setCurrentWeight('')
-      setCurrentRPE('')
+      // Pre-fill with next exercise's template values
+      setCurrentReps(nextExercise.reps.toString())
+      setCurrentWeight(nextExercise.weight?.toString() || '')
+      setCurrentRPE('7') // Default RPE suggestion
     }
   }
 
@@ -219,9 +216,10 @@ export default function ActiveWorkout() {
           restTimerActive: false
         }))
       )
-      setCurrentReps('')
-      setCurrentWeight('')
-      setCurrentRPE('')
+      // Pre-fill with previous exercise's template values
+      setCurrentReps(prevExercise.reps.toString())
+      setCurrentWeight(prevExercise.weight?.toString() || '')
+      setCurrentRPE('7') // Default RPE suggestion
     }
   }
 

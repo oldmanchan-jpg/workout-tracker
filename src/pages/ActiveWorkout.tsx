@@ -154,14 +154,6 @@ export default function ActiveWorkout() {
     setSetStates(updatedStates)
   }
 
-  const handleAddExtraSet = () => {
-    const updatedStates = [...setStates]
-    updatedStates.push({
-      status: 'in_progress'
-    })
-    setSetStates(updatedStates)
-  }
-
   const handleNextExercise = () => {
     if (currentExerciseIndex < totalExercises - 1) {
       const nextExercise = template.exercises[currentExerciseIndex + 1]
@@ -336,9 +328,9 @@ export default function ActiveWorkout() {
           {/* Sets Table */}
           <div className="p-4">
             {/* Table Header */}
-            <div className="grid grid-cols-[50px_70px_1fr_1fr_1fr_40px] gap-2 mb-3 text-xs text-gray-400 font-medium">
+            <div className="grid grid-cols-[40px_60px_1fr_1fr_1fr_40px] gap-2 mb-2 text-xs text-gray-400 font-medium">
               <div>Set</div>
-              <div>Previous</div>
+              <div>Prev</div>
               <div className="text-center">kg</div>
               <div className="text-center">Reps</div>
               <div className="text-center">RPE</div>
@@ -346,97 +338,91 @@ export default function ActiveWorkout() {
             </div>
 
             {/* Sets Rows */}
-            {setStates.map((setState, setIndex) => {
-              const isCompleted = setState.status === 'completed'
-              const isInProgress = setState.status === 'in_progress'
-              const previousSet = setIndex > 0 && exerciseLogs[currentExerciseIndex]?.sets[setIndex - 1]
+            <div className="space-y-1">
+              {setStates.map((setState, setIndex) => {
+                const isCompleted = setState.status === 'completed'
+                const isInProgress = setState.status === 'in_progress'
+                const previousSet = setIndex > 0 && exerciseLogs[currentExerciseIndex]?.sets[setIndex - 1]
 
-              return (
-                <div
-                  key={setIndex}
-                  className="grid grid-cols-[50px_70px_1fr_1fr_1fr_40px] gap-2 items-center mb-2"
-                >
-                  {/* Set Number */}
-                  <div className="text-white font-semibold text-sm">{setIndex + 1}</div>
+                return (
+                  <div
+                    key={setIndex}
+                    className="grid grid-cols-[40px_60px_1fr_1fr_1fr_40px] gap-2 items-center"
+                  >
+                    {/* Set Number */}
+                    <div className="text-white font-semibold text-sm">{setIndex + 1}</div>
 
-                  {/* Previous */}
-                  <div className="text-gray-500 text-xs">
-                    {previousSet ? `${previousSet.weight}×${previousSet.reps}` : '—'}
+                    {/* Previous */}
+                    <div className="text-gray-500 text-xs truncate">
+                      {previousSet ? `${previousSet.weight}×${previousSet.reps}` : '—'}
+                    </div>
+
+                    {/* Weight Input */}
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? currentWeight : '')}
+                      onChange={(e) => {
+                        if (isInProgress) {
+                          setCurrentWeight(e.target.value)
+                        }
+                      }}
+                      disabled={!isInProgress}
+                      placeholder={currentExercise.weight?.toString()}
+                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                    />
+
+                    {/* Reps Input */}
+                    <input
+                      type="number"
+                      value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? currentReps : '')}
+                      onChange={(e) => {
+                        if (isInProgress) {
+                          setCurrentReps(e.target.value)
+                        }
+                      }}
+                      disabled={!isInProgress}
+                      placeholder={currentExercise.reps.toString()}
+                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                    />
+
+                    {/* RPE Input */}
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? currentRPE : '')}
+                      onChange={(e) => {
+                        if (isInProgress) {
+                          setCurrentRPE(e.target.value)
+                        }
+                      }}
+                      disabled={!isInProgress}
+                      placeholder="7"
+                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                    />
+
+                    {/* Checkmark */}
+                    {isCompleted ? (
+                      <div className="flex items-center justify-center">
+                        <Check className="w-5 h-5 text-green-500" />
+                      </div>
+                    ) : isInProgress ? (
+                      <button
+                        onClick={() => handleCompleteSet(setIndex)}
+                        className="flex items-center justify-center p-1 hover:bg-gray-700 rounded transition-colors"
+                      >
+                        <div className="w-5 h-5 rounded border-2 border-gray-500 hover:border-gray-400" />
+                      </button>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <div className="w-5 h-5 rounded border-2 border-gray-700" />
+                      </div>
+                    )}
                   </div>
-
-                  {/* Weight Input */}
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? currentWeight : '')}
-                    onChange={(e) => {
-                      if (isInProgress) {
-                        setCurrentWeight(e.target.value)
-                      }
-                    }}
-                    disabled={!isInProgress}
-                    placeholder={currentExercise.weight?.toString()}
-                    className="px-2 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
-                  />
-
-                  {/* Reps Input */}
-                  <input
-                    type="number"
-                    value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? currentReps : '')}
-                    onChange={(e) => {
-                      if (isInProgress) {
-                        setCurrentReps(e.target.value)
-                      }
-                    }}
-                    disabled={!isInProgress}
-                    placeholder={currentExercise.reps.toString()}
-                    className="px-2 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
-                  />
-
-                  {/* RPE Input */}
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? currentRPE : '')}
-                    onChange={(e) => {
-                      if (isInProgress) {
-                        setCurrentRPE(e.target.value)
-                      }
-                    }}
-                    disabled={!isInProgress}
-                    placeholder="7"
-                    className="px-2 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
-                  />
-
-                  {/* Checkmark */}
-                  {isCompleted ? (
-                    <div className="flex items-center justify-center">
-                      <Check className="w-5 h-5 text-green-500" />
-                    </div>
-                  ) : isInProgress ? (
-                    <button
-                      onClick={() => handleCompleteSet(setIndex)}
-                      className="flex items-center justify-center p-1.5 hover:bg-gray-700 rounded transition-colors"
-                    >
-                      <div className="w-5 h-5 rounded border-2 border-gray-500 hover:border-gray-400" />
-                    </button>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 rounded border-2 border-gray-700" />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-
-            {/* Add Set Button */}
-            <button
-              onClick={handleAddExtraSet}
-              className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-gray-700 text-gray-400 hover:text-white text-sm font-medium rounded transition-colors"
-            >
-              + Add Set
-            </button>
+                )
+              })}
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Check, Dumbbell, Play, Pause, RotateCcw, X } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Play, Pause, RotateCcw } from 'lucide-react'
 import type { Template } from '../types'
 import { saveWorkout } from '../services/workoutService'
 
@@ -13,8 +13,6 @@ interface SetLog {
 interface SetState {
   status: 'pending' | 'in_progress' | 'completed'
   data?: SetLog
-  restTimerRemaining?: number
-  restTimerActive?: boolean
 }
 
 interface ExerciseLog {
@@ -40,70 +38,63 @@ export default function ActiveWorkout() {
     }))
   )
   
-  // Initialize sets based on template (pre-fill structure)
+  // Initialize sets based on template
   const currentExercise = template.exercises[currentExerciseIndex]
   const targetSets = currentExercise.sets
   
-  const [setSates, setSetStates] = useState<SetState[]>(
+  const [setStates, setSetStates] = useState<SetState[]>(
     Array(targetSets).fill(null).map((_, idx) => ({
-      status: idx === 0 ? 'in_progress' : 'pending',
-      restTimerRemaining: 90,
-      restTimerActive: false
+      status: idx === 0 ? 'in_progress' : 'pending'
     }))
   )
   
+  // Global rest timer state
+  const [restTimerRemaining, setRestTimerRemaining] = useState(90)
+  const [restTimerActive, setRestTimerActive] = useState(false)
+  const [defaultRestTime] = useState(90)
+  const restTimerInterval = useRef<number | null>(null)
+  
   const [isFinished, setIsFinished] = useState(false)
   const [notes, setNotes] = useState('')
-  const [defaultRestTime] = useState(90)
   
   // Input states for in-progress set - PRE-FILLED with template values
-  const [currentReps, setCurrentReps] = useState(currentExercise.reps.toString())
   const [currentWeight, setCurrentWeight] = useState(currentExercise.weight?.toString() || '')
-  const [currentRPE, setCurrentRPE] = useState('7') // Default RPE suggestion
-  
-  const restTimerIntervals = useRef<Map<number, number>>(new Map())
+  const [currentReps, setCurrentReps] = useState(currentExercise.reps.toString())
+  const [currentRPE, setCurrentRPE] = useState('7')
 
   const currentLog = exerciseLogs[currentExerciseIndex]
   const totalExercises = template.exercises.length
 
-  // Cleanup timers on unmount
+  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      restTimerIntervals.current.forEach(interval => clearInterval(interval))
+      if (restTimerInterval.current) {
+        clearInterval(restTimerInterval.current)
+      }
     }
   }, [])
 
-  // Rest timer effect for each set
+  // Global rest timer effect
   useEffect(() => {
-    setSates.forEach((setState, idx) => {
-      if (setState.restTimerActive && setState.restTimerRemaining! > 0) {
-        if (!restTimerIntervals.current.has(idx)) {
-          const interval = window.setInterval(() => {
-            setSetStates(prev => {
-              const updated = [...prev]
-              if (updated[idx].restTimerRemaining! > 0) {
-                updated[idx] = {
-                  ...updated[idx],
-                  restTimerRemaining: updated[idx].restTimerRemaining! - 1
-                }
-                if (updated[idx].restTimerRemaining === 0) {
-                  updated[idx].restTimerActive = false
-                }
-              }
-              return updated
-            })
-          }, 1000)
-          restTimerIntervals.current.set(idx, interval)
-        }
-      } else {
-        const interval = restTimerIntervals.current.get(idx)
-        if (interval) {
-          clearInterval(interval)
-          restTimerIntervals.current.delete(idx)
-        }
+    if (restTimerActive && restTimerRemaining > 0) {
+      if (!restTimerInterval.current) {
+        restTimerInterval.current = window.setInterval(() => {
+          setRestTimerRemaining(prev => {
+            if (prev <= 1) {
+              setRestTimerActive(false)
+              return 0
+            }
+            return prev - 1
+          })
+        }, 1000)
       }
-    })
-  }, [setSates])
+    } else {
+      if (restTimerInterval.current) {
+        clearInterval(restTimerInterval.current)
+        restTimerInterval.current = null
+      }
+    }
+  }, [restTimerActive, restTimerRemaining])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -112,12 +103,12 @@ export default function ActiveWorkout() {
   }
 
   const handleCompleteSet = (setIndex: number) => {
-    const reps = parseInt(currentReps)
     const weight = parseFloat(currentWeight)
+    const reps = parseInt(currentReps)
     const rpe = currentRPE ? parseInt(currentRPE) : undefined
 
-    if (!reps || reps <= 0 || !weight || weight < 0) {
-      alert('Please enter valid reps and weight')
+    if (!weight || weight < 0 || !reps || reps <= 0) {
+      alert('Please enter valid weight and reps')
       return
     }
 
@@ -126,7 +117,7 @@ export default function ActiveWorkout() {
       return
     }
 
-    const newSet: SetLog = { reps, weight, rpe }
+    const newSet: SetLog = { weight, reps, rpe }
     
     // Update exercise logs
     const updatedLogs = [...exerciseLogs]
@@ -134,12 +125,10 @@ export default function ActiveWorkout() {
     setExerciseLogs(updatedLogs)
 
     // Update set states
-    const updatedStates = [...setSates]
+    const updatedStates = [...setStates]
     updatedStates[setIndex] = {
       status: 'completed',
-      data: newSet,
-      restTimerRemaining: defaultRestTime,
-      restTimerActive: false // Manual start - user controls when to start rest timer
+      data: newSet
     }
 
     // Move to next set if available
@@ -150,41 +139,37 @@ export default function ActiveWorkout() {
       }
     }
     
-    // Always keep the last set's values for quick re-entry (for next set or extra sets)
-    setCurrentReps(reps.toString())
+    // Keep the last set's values for quick re-entry
     setCurrentWeight(weight.toString())
+    setCurrentReps(reps.toString())
     if (rpe) setCurrentRPE(rpe.toString())
 
     setSetStates(updatedStates)
+    
+    // Start rest timer automatically
+    setRestTimerRemaining(defaultRestTime)
+    setRestTimerActive(true)
   }
 
   const handleAddExtraSet = () => {
-    const updatedStates = [...setSates]
+    const updatedStates = [...setStates]
     updatedStates.push({
-      status: 'in_progress',
-      restTimerRemaining: defaultRestTime,
-      restTimerActive: false
+      status: 'in_progress'
     })
     setSetStates(updatedStates)
   }
 
-  const startRestTimer = (setIndex: number) => {
-    const updatedStates = [...setSates]
-    updatedStates[setIndex].restTimerActive = true
-    setSetStates(updatedStates)
+  const startRestTimer = () => {
+    setRestTimerActive(true)
   }
 
-  const pauseRestTimer = (setIndex: number) => {
-    const updatedStates = [...setSates]
-    updatedStates[setIndex].restTimerActive = false
-    setSetStates(updatedStates)
+  const pauseRestTimer = () => {
+    setRestTimerActive(false)
   }
 
-  const resetRestTimer = (setIndex: number) => {
-    const updatedStates = [...setSates]
-    updatedStates[setIndex].restTimerActive = false
-    updatedStates[setIndex].restTimerRemaining = defaultRestTime
-    setSetStates(updatedStates)
+  const resetRestTimer = () => {
+    setRestTimerActive(false)
+    setRestTimerRemaining(defaultRestTime)
   }
 
   const handleNextExercise = () => {
@@ -193,15 +178,17 @@ export default function ActiveWorkout() {
       setCurrentExerciseIndex(currentExerciseIndex + 1)
       setSetStates(
         Array(nextExercise.sets).fill(null).map((_, idx) => ({
-          status: idx === 0 ? 'in_progress' : 'pending',
-          restTimerRemaining: defaultRestTime,
-          restTimerActive: false
+          status: idx === 0 ? 'in_progress' : 'pending'
         }))
       )
       // Pre-fill with next exercise's template values
-      setCurrentReps(nextExercise.reps.toString())
       setCurrentWeight(nextExercise.weight?.toString() || '')
-      setCurrentRPE('7') // Default RPE suggestion
+      setCurrentReps(nextExercise.reps.toString())
+      setCurrentRPE('7')
+      
+      // Reset rest timer
+      setRestTimerActive(false)
+      setRestTimerRemaining(defaultRestTime)
     }
   }
 
@@ -211,15 +198,17 @@ export default function ActiveWorkout() {
       setCurrentExerciseIndex(currentExerciseIndex - 1)
       setSetStates(
         Array(prevExercise.sets).fill(null).map((_, idx) => ({
-          status: idx === 0 ? 'in_progress' : 'pending',
-          restTimerRemaining: defaultRestTime,
-          restTimerActive: false
+          status: idx === 0 ? 'in_progress' : 'pending'
         }))
       )
       // Pre-fill with previous exercise's template values
-      setCurrentReps(prevExercise.reps.toString())
       setCurrentWeight(prevExercise.weight?.toString() || '')
-      setCurrentRPE('7') // Default RPE suggestion
+      setCurrentReps(prevExercise.reps.toString())
+      setCurrentRPE('7')
+      
+      // Reset rest timer
+      setRestTimerActive(false)
+      setRestTimerRemaining(defaultRestTime)
     }
   }
 
@@ -331,9 +320,9 @@ export default function ActiveWorkout() {
     )
   }
 
-  // Active workout screen - COMPACT LIST VIEW
+  // Active workout screen - CHECKLIST MODE
   return (
-    <div className="min-h-screen bg-gray-900 p-4 pb-24">
+    <div className="min-h-screen bg-gray-900 p-4 pb-32">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -357,8 +346,8 @@ export default function ActiveWorkout() {
         </div>
 
         {/* Exercise Header with Target */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-3">
-          <div className="flex items-center gap-3">
+        <div className="bg-gray-800 rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
               <Dumbbell className="w-5 h-5 text-white" />
             </div>
@@ -371,9 +360,9 @@ export default function ActiveWorkout() {
           </div>
         </div>
 
-        {/* Sets List - Compact View */}
+        {/* Sets Checklist */}
         <div className="space-y-2 mb-4">
-          {setSates.map((setState, setIndex) => {
+          {setStates.map((setState, setIndex) => {
             const isCompleted = setState.status === 'completed'
             const isInProgress = setState.status === 'in_progress'
             const isPending = setState.status === 'pending'
@@ -389,118 +378,86 @@ export default function ActiveWorkout() {
                     : 'bg-gray-800 border-gray-700'
                 }`}
               >
-                <div className="p-3">
-                  {/* Set Header */}
-                  <div className="flex items-center justify-between mb-2">
+                {/* Completed Set - Collapsed */}
+                {isCompleted && setState.data && (
+                  <div className="p-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {isCompleted && (
-                        <Check className="w-5 h-5 text-green-500" />
-                      )}
-                      {isInProgress && (
-                        <X className="w-5 h-5 text-orange-500 rotate-45" />
-                      )}
-                      {isPending && (
-                        <div className="w-5 h-5 rounded-full border-2 border-gray-600" />
-                      )}
-                      <span className="text-white font-semibold">SET {setIndex + 1}</span>
+                      <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-white font-semibold">Set {setIndex + 1}</span>
                     </div>
-                    
-                    {isCompleted && setState.data && (
-                      <div className="text-gray-300 text-sm">
-                        {setState.data.reps} reps × {setState.data.weight} kg
-                        {setState.data.rpe && (
-                          <span className="ml-2 text-orange-400">RPE {setState.data.rpe}</span>
-                        )}
-                      </div>
-                    )}
+                    <div className="text-gray-300 text-sm">
+                      {setState.data.weight}kg × {setState.data.reps} reps
+                      {setState.data.rpe && (
+                        <span className="ml-2 text-orange-400">RPE {setState.data.rpe}</span>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  {/* Completed Set - Show rest timer */}
-                  {isCompleted && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className={`flex-1 text-center py-2 rounded font-mono text-lg font-bold ${
-                        setState.restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
-                        setState.restTimerRemaining! <= 10 ? 'bg-red-600 text-white' : 
-                        'bg-gray-700 text-white'
-                      }`}>
-                        Rest: {formatTime(setState.restTimerRemaining!)}
-                      </div>
-                      <div className="flex gap-1">
-                        {!setState.restTimerActive ? (
-                          <button
-                            onClick={() => startRestTimer(setIndex)}
-                            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
-                          >
-                            <Play className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => pauseRestTimer(setIndex)}
-                            className="p-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded transition-colors"
-                          >
-                            <Pause className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => resetRestTimer(setIndex)}
-                          className="p-2 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </button>
-                      </div>
+                {/* In Progress Set - Expanded */}
+                {isInProgress && (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-5 h-5 rounded-full border-2 border-orange-500 flex-shrink-0" />
+                      <span className="text-white font-semibold">Set {setIndex + 1}</span>
                     </div>
-                  )}
 
-                  {/* In Progress Set - Show input form */}
-                  {isInProgress && (
-                    <div className="space-y-2 mt-2">
+                    {/* Input Fields - Weight → Reps → RPE */}
+                    <div className="space-y-3">
                       <div className="grid grid-cols-3 gap-2">
-                        <input
-                          type="number"
-                          value={currentReps}
-                          onChange={(e) => setCurrentReps(e.target.value)}
-                          placeholder={currentExercise.reps.toString()}
-                          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                        <input
-                          type="number"
-                          step="0.5"
-                          value={currentWeight}
-                          onChange={(e) => setCurrentWeight(e.target.value)}
-                          placeholder={currentExercise.weight?.toString() || '0'}
-                          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                        <input
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={currentRPE}
-                          onChange={(e) => setCurrentRPE(e.target.value)}
-                          placeholder="RPE"
-                          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
+                        <div>
+                          <input
+                            type="number"
+                            step="0.5"
+                            value={currentWeight}
+                            onChange={(e) => setCurrentWeight(e.target.value)}
+                            placeholder={currentExercise.weight?.toString() || '0'}
+                            className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded text-white text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          />
+                          <p className="text-xs text-gray-400 text-center mt-1">kg</p>
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            value={currentReps}
+                            onChange={(e) => setCurrentReps(e.target.value)}
+                            placeholder={currentExercise.reps.toString()}
+                            className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded text-white text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          />
+                          <p className="text-xs text-gray-400 text-center mt-1">reps</p>
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            value={currentRPE}
+                            onChange={(e) => setCurrentRPE(e.target.value)}
+                            placeholder="7"
+                            className="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded text-white text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          />
+                          <p className="text-xs text-gray-400 text-center mt-1">RPE</p>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 text-center">
-                        <span>reps</span>
-                        <span>kg</span>
-                        <span>RPE</span>
-                      </div>
+
                       <button
                         onClick={() => handleCompleteSet(setIndex)}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded transition-colors"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        ✓ Complete Set
+                        <Check className="w-5 h-5" />
+                        Complete Set
                       </button>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Pending Set */}
-                  {isPending && (
-                    <div className="text-gray-500 text-sm text-center py-1">
-                      Waiting...
-                    </div>
-                  )}
-                </div>
+                {/* Pending Set - Collapsed */}
+                {isPending && (
+                  <div className="p-3 flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full border-2 border-gray-600 flex-shrink-0" />
+                    <span className="text-gray-500 font-semibold">Set {setIndex + 1}</span>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -508,7 +465,7 @@ export default function ActiveWorkout() {
           {/* Add Extra Set Button */}
           <button
             onClick={handleAddExtraSet}
-            className="w-full py-3 border-2 border-dashed border-gray-700 rounded-lg text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors"
+            className="w-full py-3 border-2 border-dashed border-gray-700 rounded-lg text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors font-medium"
           >
             + Add Extra Set
           </button>
@@ -530,21 +487,63 @@ export default function ActiveWorkout() {
         </div>
 
         {/* Bottom Navigation - Fixed */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4">
-          <div className="max-w-2xl mx-auto flex gap-3">
-            <button
-              onClick={handlePreviousExercise}
-              disabled={currentExerciseIndex === 0}
-              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              ← Previous
-            </button>
-            <button
-              onClick={handleFinishExercise}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
-            >
-              {currentExerciseIndex === totalExercises - 1 ? 'Finish Workout' : 'Next Exercise →'}
-            </button>
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800">
+          {/* Global Rest Timer Bar */}
+          {restTimerRemaining < defaultRestTime && (
+            <div className={`px-4 py-2 flex items-center justify-between ${
+              restTimerRemaining === 0 ? 'bg-green-600' : 
+              restTimerRemaining <= 10 ? 'bg-red-600' : 
+              'bg-gray-800'
+            }`}>
+              <span className="text-white font-semibold text-sm">Rest Timer</span>
+              <div className="flex items-center gap-3">
+                <span className="text-white font-mono text-lg font-bold">
+                  {formatTime(restTimerRemaining)}
+                </span>
+                <div className="flex gap-1">
+                  {!restTimerActive ? (
+                    <button
+                      onClick={startRestTimer}
+                      className="p-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                    >
+                      <Play className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={pauseRestTimer}
+                      className="p-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded transition-colors"
+                    >
+                      <Pause className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={resetRestTimer}
+                    className="p-2 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Navigation Buttons */}
+          <div className="p-4">
+            <div className="max-w-2xl mx-auto flex gap-3">
+              <button
+                onClick={handlePreviousExercise}
+                disabled={currentExerciseIndex === 0}
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={handleFinishExercise}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
+              >
+                {currentExerciseIndex === totalExercises - 1 ? 'Finish Workout' : 'Next Exercise →'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

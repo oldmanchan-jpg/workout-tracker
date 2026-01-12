@@ -369,7 +369,7 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder={currentExercise.weight?.toString()}
-                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
                     />
 
                     {/* Reps Input */}
@@ -383,7 +383,7 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder={currentExercise.reps.toString()}
-                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
                     />
 
                     {/* RPE Input */}
@@ -399,7 +399,7 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder="7"
-                      className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
                     />
 
                     {/* Checkmark */}
@@ -430,6 +430,21 @@ export default function ActiveWorkout() {
         <div className="bg-gray-800 rounded-lg p-4 mb-4">
           <h3 className="text-white font-semibold mb-3 text-sm uppercase text-gray-400">Timer</h3>
           <div className="flex items-center gap-3">
+            {/* Timer Duration Input */}
+            <div className="flex-shrink-0" style={{ width: '80px' }}>
+              <input
+                type="number"
+                value={Math.floor(restTimerRemaining)}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 0
+                  setRestTimerRemaining(value)
+                }}
+                className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="90"
+              />
+              <p className="text-xs text-gray-400 text-center mt-1">sec</p>
+            </div>
+
             {/* Timer Display */}
             <div className={`flex-1 text-center py-3 rounded-lg font-mono text-2xl font-bold ${
               restTimerRemaining === 0 ? 'bg-green-600 text-white' : 

@@ -30,16 +30,6 @@ export default function TopBar() {
               Dashboard
             </Link>
             <Link 
-              to="/library" 
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isActive('/library') 
-                  ? 'bg-primary text-white' 
-                  : 'text-secondary hover:text-primary hover:bg-white/10'
-              }`}
-            >
-              Library
-            </Link>
-            <Link 
               to="/progress" 
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 isActive('/progress') 

@@ -6,7 +6,6 @@ import SignUp from './components/Auth/SignUp'
 import Dashboard from '@/pages/Dashboard'
 import ActiveWorkout from './pages/ActiveWorkout'
 import Progress from '@/pages/Progress'
-import Library from '@/pages/Library'
 
 function AuthWrapper() {
   const { user, loading } = useAuth()
@@ -37,7 +36,6 @@ function AuthWrapper() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/workout" element={<ActiveWorkout />} />
         <Route path="/progress" element={<Progress />} />
-        <Route path="/library" element={<Library />} />
         <Route path="*" element={<Dashboard />} />
       </Routes>
     </Router>

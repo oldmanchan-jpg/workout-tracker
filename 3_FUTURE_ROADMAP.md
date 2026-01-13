@@ -1,199 +1,124 @@
 # 🗺️ Future Roadmap
 
-**Last Updated:** January 11, 2026, 12:42 PM
+**Last Updated:** January 13, 2026
 
 ---
 
-## 🎯 Immediate Next Steps (Priority 1)
+## 🚨 CRITICAL BLOCKER
 
-### 1. Testing & Bug Fixes
-**Timeline:** Next session
-- [ ] Test compact list view on actual mobile device
-- [ ] Verify rest timers work correctly
-- [ ] Test auto-complete feature with edge cases
-- [ ] Verify RPE saves to database correctly
-- [ ] Test "Add Extra Set" functionality
-- [ ] Test exercise navigation with incomplete sets
-- [ ] Ensure no memory leaks from timers
+### Fix Table Layout in ActiveWorkout.tsx
+**Status:** ❌ BLOCKING ALL PROGRESS  
+**File:** `src/pages/ActiveWorkout.tsx` (lines ~360-450)
 
-### 2. UX Refinements
-**Timeline:** Next 1-2 sessions
-- [ ] Add haptic feedback on set completion (mobile)
-- [ ] Sound/vibration when rest timer completes
-- [ ] Confirm dialog before skipping exercise with incomplete sets
-- [ ] Loading states during workout save
-- [ ] Better error messages if save fails
-- [ ] Offline indicator if no connection
+This must be fixed before ANY other work can proceed.
+
+**The Problem:**
+Inputs stack vertically instead of horizontal table rows.
+
+**Next Steps:**
+1. Debug with DevTools - see what CSS is actually applied
+2. Try explicit widths: `grid-cols-[40px_60px_80px_80px_60px_40px]`
+3. Try flexbox: `flex items-center gap-2` with fixed widths
+4. Last resort: HTML `<table>` element
 
 ---
 
-## 🚀 Short-Term Features (Priority 2)
+## 📋 Priority 1: Immediate (After Layout Fix)
 
-### Template Management
-**Effort:** Medium | **Impact:** High
-- [ ] Create custom workout templates
+### Testing & Verification
+- [ ] Test table layout on mobile device
+- [ ] Verify set completion flow
+- [ ] Verify timer with duration input
+- [ ] Test exercise navigation (prev/next)
+- [ ] Confirm RPE saves to database
+- [ ] Check for timer memory leaks
+
+### Quick Polish
+- [ ] Adjust spacing for mobile
+- [ ] Polish checkmark styling
+- [ ] Loading state during workout save
+- [ ] Better error messages on save failure
+
+---
+
+## 📋 Priority 2: Short-Term Features
+
+### Template Management (Admin Only)
+- [ ] Create custom templates
 - [ ] Edit existing templates
 - [ ] Delete templates
-- [ ] Duplicate templates
-- [ ] Categorize templates (Push/Pull/Legs, etc.)
-- [ ] Share templates between users (future)
+- [ ] Categorize (Push/Pull/Legs)
 
-### Exercise Library Enhancement
-**Effort:** Medium | **Impact:** Medium
-- [ ] Add exercise descriptions
-- [ ] Add exercise images/animations
-- [ ] Muscle group tagging
-- [ ] Equipment filtering
-- [ ] Search functionality
-- [ ] Exercise substitutions suggestions
+*Note: Clients CANNOT modify templates*
 
-### Workout History Details
-**Effort:** Small | **Impact:** Medium
+### Workout History
 - [ ] View detailed past workouts
 - [ ] Edit past workout data
 - [ ] Delete workouts
-- [ ] Export workout data (CSV/PDF)
-- [ ] Notes search/filter
+- [ ] Export data (CSV)
 
-### Profile & Settings
-**Effort:** Small | **Impact:** Medium
-- [ ] User profile page
+### Settings
 - [ ] Default rest timer duration
-- [ ] Weight unit preference (kg/lbs)
-- [ ] Theme customization (dark/light)
-- [ ] Notification preferences
+- [ ] Weight unit (kg/lbs)
+- [ ] Theme (dark/light)
 
 ---
 
-## 🎨 Medium-Term Features (Priority 3)
+## 📋 Priority 3: Medium-Term Features
 
-### Advanced Progress Analytics
-**Effort:** High | **Impact:** High
-- [ ] 1RM calculator based on reps/weight
+### Progress Analytics
+- [ ] 1RM calculator
 - [ ] Volume trends by muscle group
 - [ ] Personal records (PR) tracking
-- [ ] Strength standards comparison
-- [ ] RPE correlation with volume
-- [ ] Predict optimal working weight
-- [ ] Weekly/monthly summary reports
+- [ ] Weekly/monthly reports
 
-### Social Features
-**Effort:** High | **Impact:** Medium-High
-- [ ] Follow trainers/coaches
-- [ ] Share workouts (optional)
+### Exercise Library
+- [ ] Exercise descriptions
+- [ ] Muscle group tags
+- [ ] Equipment filtering
+- [ ] Search functionality
+
+---
+
+## 📋 Priority 4: Long-Term Vision
+
+### Social/Trainer Features
 - [ ] Trainer can view client workouts
 - [ ] Trainer can assign templates
-- [ ] Trainer feedback on workout notes
-- [ ] Achievement badges
-- [ ] Workout streaks
+- [ ] Trainer feedback on notes
 
-### Program Builder (For Trainers/Advanced Users)
-**Effort:** Very High | **Impact:** High
-- [ ] Multi-week programs
-- [ ] Progressive overload automation
-- [ ] Deload weeks
-- [ ] Periodization templates
-- [ ] Exercise progression rules
-- [ ] Auto-adjust weights based on RPE
-
-### Smart Features (AI/ML)
-**Effort:** Very High | **Impact:** Medium
-- [ ] Suggest optimal rest times based on RPE
-- [ ] Predict next workout performance
+### Smart Features
+- [ ] Suggest rest times based on RPE
+- [ ] Auto-adjust weights based on performance
 - [ ] Fatigue monitoring
-- [ ] Recovery recommendations
-- [ ] Form check via camera (stretch goal)
+
+### Platform Expansion
+- [ ] PWA for mobile install
+- [ ] Apple Watch companion
+- [ ] Offline mode with sync
 
 ---
 
-## 🔧 Technical Improvements
+## 🚫 Out of Scope
 
-### Performance
-**Effort:** Medium | **Impact:** High
-- [ ] Offline-first architecture with service workers
-- [ ] Local caching of workouts
-- [ ] Optimistic UI updates
-- [ ] Background sync when back online
-- [ ] Lazy loading for charts
-- [ ] Image optimization
-
-### Code Quality
-**Effort:** Medium | **Impact:** Medium
-- [ ] Unit tests for critical functions
-- [ ] Integration tests for workout flow
-- [ ] E2E tests with Playwright
-- [ ] Storybook for component documentation
-- [ ] Error boundary components
-- [ ] Sentry for error tracking
-
-### Infrastructure
-**Effort:** Medium | **Impact:** Medium
-- [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Automated deployment
-- [ ] Environment variables management
-- [ ] Database backups
-- [ ] Performance monitoring
-- [ ] Analytics (PostHog/Mixpanel)
+- Video hosting (use YouTube links)
+- Built-in messaging (use external platforms)
+- E-commerce
+- Medical/injury advice
 
 ---
 
-## 🌟 Long-Term Vision (Priority 4)
+## 📝 Feature Requests Log
 
-### Wearable Integration
-**Effort:** Very High | **Impact:** High
-- [ ] Apple Watch app
-- [ ] Android Wear app
-- [ ] Heart rate monitoring during sets
-- [ ] Auto-detect set completion via accelerometer
-- [ ] Voice commands for logging
+### Completed ✅
+- Manual timer control (Jan 11)
+- Pre-filled input values (Jan 11)
 
-### Nutrition Tracking
-**Effort:** Very High | **Impact:** Medium
-- [ ] Basic calorie/macro tracking
-- [ ] Meal planning
-- [ ] Barcode scanner
-- [ ] Integration with MyFitnessPal
-- [ ] Nutrition recommendations based on workout volume
+### In Progress ⚠️
+- Table-based layout like Strong app (BROKEN)
 
-### Marketplace (Monetization)
-**Effort:** Very High | **Impact:** High
-- [ ] Premium subscription tier
-- [ ] Paid workout programs from trainers
-- [ ] Custom template marketplace
-- [ ] Trainer certification program
-- [ ] Affiliate partnerships (supplements, equipment)
-
----
-
-## 🚫 Not Planned / Out of Scope
-
-- ❌ Video hosting (use YouTube/Vimeo links instead)
-- ❌ Built-in messaging/chat (use external platforms)
-- ❌ E-commerce for physical products
-- ❌ Complex macro calculators (link to external tools)
-- ❌ Medical advice or injury diagnosis
-
----
-
-## 📊 Feature Prioritization Framework
-
-When deciding what to build next, consider:
-
-1. **User Impact:** Does this solve a real pain point?
-2. **Mobile Experience:** Does this improve mobile usability?
-3. **Effort vs. Value:** Low effort + high value = do first
-4. **Dependencies:** What needs to be built first?
-5. **Feedback:** What are users requesting most?
-
----
-
-## 💬 Feature Requests Tracking
-
-### From Users
-- (None yet - app not in production)
-
-### From Internal Testing
-- Add sound/vibration for rest timer completion
+### Requested
+- Sound/vibration for timer completion
 - Swipe gestures for exercise navigation
 - Quick weight adjustment buttons (+2.5kg, -2.5kg)
 
@@ -201,22 +126,28 @@ When deciding what to build next, consider:
 
 ## 🎯 Milestone Goals
 
-### MVP Launch (Target: Q1 2026)
+### MVP Launch
+**Status:** BLOCKED by layout bug
+
+Requirements:
+- ⚠️ Fix table layout (BLOCKER)
 - ✅ Core workout logging
 - ✅ RPE tracking
 - ✅ Rest timer
-- ⚠️ Tested on real devices
-- ⚠️ Hosted on public URL
-- ⚠️ Onboarding flow
+- ⏳ Mobile testing
+- ⏳ Deploy to public URL
 
-### V1.0 (Target: Q2 2026)
-- Custom templates
-- Enhanced progress analytics
-- Profile customization
-- Mobile app (PWA → Native)
+### V1.0 (After MVP)
+- Custom templates (admin)
+- Enhanced analytics
+- Profile settings
 
-### V2.0 (Target: Q3 2026)
-- Trainer features
-- Social sharing
-- Advanced analytics
-- Offline mode
+---
+
+## 📐 Development Rules
+
+1. **Test immediately** after visual changes
+2. **2-task increments** max, then approval
+3. **Debug systematically** - DevTools first
+4. **Explain the WHY** for each approach
+5. **Fallback plans** when approach fails twice

@@ -1,211 +1,156 @@
 # ✅ Completed Work Log
 
-**Last Updated:** January 11, 2026, ~1:15 PM
+**Last Updated:** January 13, 2026
 
 ---
 
-## 📅 Session: January 11, 2026 - Part 2 (UX Refinements)
+## 🚨 Current Status: BLOCKED
 
-### 🔧 UX Improvements: Pre-filled Inputs & Manual Rest Timer
+**Blocker:** CSS Grid layout broken in ActiveWorkout.tsx  
+**Impact:** Cannot test, cannot deploy, cannot proceed with any UX work  
+**Priority:** CRITICAL - Must fix before anything else
+
+---
+
+## 📅 Session: January 12, 2026
+
+### Goal: Redesign ActiveWorkout to Match Strong App Style
+**Status:** ⚠️ PARTIALLY COMPLETED - Layout Issue Unresolved
+
+### What Was Completed ✅
+
+1. **Removed "+ Add Set" Button**
+   - Clients don't modify templates (admin-only feature)
+   - Cleaned up `handleAddExtraSet()` function
+
+2. **Timer Improvements**
+   - Added duration input field (80px) for user-adjustable timer
+   - Timer layout: Input (left) | Display (center) | Controls (right)
+   - Manual controls: Play/Pause/Reset
+   - Color coding: Green when done, Red when <10 sec
+
+3. **Header Simplifications**
+   - Moved "Finish" button to top-right
+   - Cleaner workout title section
+
+### What Is Broken ❌
+
+**Table Layout - Inputs Stacking Vertically**
+
+Expected (Strong app style):
+```
+Set | Prev  | kg   | Reps | RPE | ✓
+----|-------|------|------|-----|---
+1   | —     | [45] | [12] | [7] | □
+2   | 45×12 | [45] | [12] | [7] | □
+```
+
+Actual (broken):
+```
+Set
+Prev
+[45 - full width]
+[12 - full width]
+[7 - full width]
+□
+```
+
+**Attempted Fixes (All Failed):**
+- `grid grid-cols-[40px_60px_1fr_1fr_1fr_40px]`
+- Removed `w-full` from inputs
+- Added wrapper divs
+- Multiple restructuring attempts
+
+**Suspected Root Causes:**
+- CSS grid not applying to child inputs
+- Possible Tailwind compilation issue with arbitrary values
+- Inputs may need explicit width constraints
+- Wrapper divs breaking grid parent-child relationship
+
+---
+
+## 📅 Session: January 11, 2026 - Part 2
+
+### UX Improvements: Pre-filled Inputs & Manual Rest Timer
 **Status:** ✅ COMPLETED & PUSHED  
 **Commit:** `a243490`
 
-#### Issues Identified
-After initial implementation, user testing revealed:
-1. **Empty input fields** - Required manual entry for every set even when using template values
-2. **Auto-starting rest timer** - Timer started automatically, removing user control
-
-#### Fixes Implemented
+**Fixes Implemented:**
 
 1. **Pre-filled Input Fields**
-   - Input fields now pre-populated with template values:
-     - Reps: From template (e.g., "12")
-     - Weight: From template (e.g., "45")
-     - RPE: Default suggestion "7"
-   - **One-click set completion** - If template values are correct, just click "Complete Set"
-   - **Smart auto-fill** - After completing a set, fields keep last values for quick adjustments
-   - **Exercise navigation** - When switching exercises, inputs reset to new exercise's template values
-   - **Extra sets** - Values persist after completing all template sets
+   - Inputs now pre-populated with template values (reps, weight)
+   - Default RPE suggestion: 7
+   - One-click set completion when template values are correct
+   - Values persist after completing sets for quick adjustments
 
 2. **Manual Rest Timer**
-   - Changed `restTimerActive: true` to `restTimerActive: false` after set completion
-   - User must manually click Play ▶️ button to start rest timer
-   - Gives user full control over rest period timing
-   - Prevents unwanted timer running in background
-
-#### Code Changes
-**File:** `src/pages/ActiveWorkout.tsx`
-- Line ~53: Changed `useState('')` to `useState(currentExercise.reps.toString())` for reps
-- Line ~54: Changed `useState('')` to `useState(currentExercise.weight?.toString() || '')` for weight
-- Line ~55: Changed `useState('')` to `useState('7')` for default RPE
-- Line ~142: Changed `restTimerActive: true` to `restTimerActive: false`
-- Lines ~152-154: Simplified to always keep last values (no clearing after last set)
-- Lines ~205-207: Pre-fill with next exercise's template values
-- Lines ~221-223: Pre-fill with previous exercise's template values
-
-#### User Experience Impact
-✅ **Faster logging** - One click to complete a set with template values  
-✅ **Less typing** - Only adjust values when needed  
-✅ **User control** - Rest timer starts when user wants it  
-✅ **Consistent behavior** - Pre-filled inputs across all exercises  
+   - Timer no longer auto-starts after set completion
+   - User clicks Play to start timer manually
+   - Full control over rest period timing
 
 ---
 
-## 📅 Session: January 11, 2026 - Part 1 (Initial Implementation)
+## 📅 Session: January 11, 2026 - Part 1
 
-### 🎉 Major Feature: Compact List View Workout UI
-**Status:** ✅ COMPLETED & PUSHED
+### Major Feature: Compact List View Workout UI
+**Status:** ✅ COMPLETED & PUSHED  
+**Commit:** `843c246`
 
-#### What Was Built
-Completely redesigned the `ActiveWorkout.tsx` component to implement a mobile-optimized compact list view for workout logging.
+**Key Features Built:**
 
-#### Key Features Implemented
-
-1. **Compact List View Design**
-   - All sets displayed in a single scrollable list
-   - No need to toggle between forms
-   - Minimal scrolling required to see workout status
-   - Pre-structured based on template (4 sets = 4 cards)
-
-2. **Set Status System**
-   - **Visual indicators:**
-     - ✓ Green checkmark = Completed
-     - ❌ Orange X = In Progress  
-     - ⭕ Gray outline = Pending
-   - **Color-coded borders:**
-     - Green border = Completed set
-     - Orange border = In progress
-     - Gray border = Pending
-
-3. **RPE (Rate of Perceived Exertion) Tracking**
-   - Number input field (1-10 scale)
-   - Displayed alongside reps and weight
-   - Optional but validated when provided
-   - Saved to database with each set
-   - Shows in completed set display with orange highlight
-
-4. **Manual Rest Timer (Per-Set)**
-   - Individual countdown timer for each completed set
-   - Manual controls: Play ▶️, Pause ⏸️, Reset 🔄
-   - Customizable duration (default 90 seconds)
-   - Visual feedback:
-     - Red background when ≤10 seconds
-     - Green background when complete
-     - Standard gray when running normally
-   - Format: MM:SS
-   - Automatically resets when switching exercises
-
-5. **Auto-Complete Feature**
-   - Automatically pre-fills reps, weight, and RPE from previous set
-   - Reduces data entry time significantly
-   - Values remain editable after auto-fill
-   - Only available after first set is logged
-
-6. **Add Extra Sets**
-   - "+ Add Extra Set" button at bottom of list
-   - Allows going beyond template recommendation
-   - Maintains same input structure as template sets
-
-#### Technical Changes
+1. **Compact List View** - All sets in scrollable list, no toggles
+2. **Set Status System** - Visual indicators (✓ green, ✗ orange, ○ gray)
+3. **RPE Tracking** - 1-10 scale, saved to database
+4. **Per-Set Rest Timer** - Individual timers with Play/Pause/Reset
+5. **Auto-Complete** - Pre-fills from previous set values
+6. **Add Extra Sets** - Go beyond template (removed in Jan 12 session)
 
 **Files Modified:**
-- ✅ `src/pages/ActiveWorkout.tsx` (complete rewrite)
-- ✅ `src/types.ts` (added RPE field)
-- ✅ `src/services/workoutService.ts` (RPE support)
-- ✅ `README.md` (feature documentation)
-
-**New State Management:**
-- `SetState[]` array to track status of each set individually
-- Individual rest timer intervals using `useRef` with Map
-- Per-set rest timer state (remaining time, active status)
-
-**UI Improvements:**
-- Fixed bottom navigation bar
-- Inline input forms within set cards
-- Better visual hierarchy
-- Mobile-optimized touch targets
-- Smooth transitions between exercises
-
-#### Database Schema Updates
-- Added `rpe` field to set objects (optional number 1-10)
-- Backward compatible with existing workouts without RPE
-
----
-
-## 🔄 Git History
-
-### Commit: `843c246`
-**Date:** January 11, 2026
-**Message:** "feat: Implement compact list view for workout logging with RPE tracking, rest timer, and auto-complete"
-
-**Changes:**
-- 4 files changed
-- +423 insertions
-- -132 deletions
-
-**Files:**
-1. `src/pages/ActiveWorkout.tsx` - Complete redesign
-2. `src/types.ts` - Added RPE support
-3. `src/services/workoutService.ts` - Updated interfaces
-4. `README.md` - Enhanced documentation
+- `src/pages/ActiveWorkout.tsx` (complete rewrite)
+- `src/types.ts` (added RPE field)
+- `src/services/workoutService.ts` (RPE support)
 
 ---
 
 ## 🧪 Testing Status
-- ⚠️ **Manual Testing:** Required
-- ⚠️ **Mobile Testing:** Required  
-- ⚠️ **Rest Timer:** Needs verification
-- ⚠️ **Auto-complete:** Needs verification
-- ⚠️ **Database:** RPE saving needs testing
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Table Layout | ❌ BROKEN | Critical blocker |
+| Set Completion | ⏳ Blocked | Cannot test until layout fixed |
+| Rest Timer | ⏳ Blocked | Cannot test until layout fixed |
+| RPE Saving | ⏳ Blocked | Cannot test until layout fixed |
+| Mobile View | ⏳ Blocked | Cannot test until layout fixed |
 
 ---
 
-## 📝 Previous Work (Pre-Session)
+## 📁 Files Changed (Recent)
 
-### Initial Setup ✅
-- React + Vite + TypeScript project setup
-- Tailwind CSS configuration
-- Supabase integration
-- Authentication system (email/password)
-
-### Core Pages ✅
-- Dashboard with workout overview
-- Library with workout templates
-- Progress page with charts (Recharts)
-- Login/SignUp flows
-
-### Data Model ✅
-- Workout templates with exercises
-- Workout logging to Supabase
-- Exercise sets structure (reps, weight)
-- User authentication and data isolation
-
----
-
-## 🎯 Quality Checklist
-
-### Code Quality ✅
-- [x] TypeScript types properly defined
-- [x] No linter errors
-- [x] Proper React hooks usage (useEffect, useRef, useState)
-- [x] Memory leak prevention (timer cleanup)
-
-### Documentation ✅
-- [x] README updated with new features
-- [x] Code comments where needed
-- [x] Feature descriptions clear
-
-### Git Hygiene ✅
-- [x] Descriptive commit message
-- [x] All files staged properly
-- [x] Pushed to remote (origin/main)
+| File | Status | Last Change |
+|------|--------|-------------|
+| `src/pages/ActiveWorkout.tsx` | ⚠️ Has Bug | Jan 12 - Layout broken |
+| `src/types.ts` | ✅ Good | Jan 11 - Added RPE |
+| `src/services/workoutService.ts` | ✅ Good | Jan 11 - RPE support |
 
 ---
 
 ## 💡 Lessons Learned
 
-1. **Timer Management:** Using a Map in useRef is effective for managing multiple timers
-2. **State Structure:** Per-set state array makes status tracking clean
-3. **Auto-complete:** Improves UX significantly - should be default behavior
-4. **Visual Feedback:** Color coding makes status immediately obvious
-5. **Mobile-First:** Compact design prevents excessive scrolling
+1. **Test immediately** after any visual/layout changes
+2. **CSS Grid can fail silently** - use DevTools to verify
+3. **Have fallback plans** - flexbox, explicit widths, table element
+4. **Document blockers clearly** for next session
+5. **Don't stack untested changes** - one change, one test
+
+---
+
+## 🎯 Next Action
+
+**FIX THE TABLE LAYOUT** - Nothing else matters until this works.
+
+Debugging approach:
+1. Open DevTools, inspect the grid parent element
+2. Check if `grid` class is actually applied
+3. Check if children are direct children of grid
+4. Try explicit pixel widths instead of `1fr`
+5. If grid won't work, switch to flexbox or HTML table

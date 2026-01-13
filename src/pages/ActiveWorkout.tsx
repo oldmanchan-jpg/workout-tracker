@@ -328,7 +328,10 @@ export default function ActiveWorkout() {
           {/* Sets Table */}
           <div className="p-4">
             {/* Table Header */}
-            <div className="grid grid-cols-[40px_60px_1fr_1fr_1fr_40px] gap-2 mb-2 text-xs text-gray-400 font-medium">
+            <div 
+              className="grid gap-2 mb-2 text-xs text-gray-400 font-medium"
+              style={{ gridTemplateColumns: '40px 60px 1fr 1fr 1fr 40px' }}
+            >
               <div>Set</div>
               <div>Prev</div>
               <div className="text-center">kg</div>
@@ -347,7 +350,8 @@ export default function ActiveWorkout() {
                 return (
                   <div
                     key={setIndex}
-                    className="grid grid-cols-[40px_60px_1fr_1fr_1fr_40px] gap-2 items-center"
+                    className="grid gap-2 items-center"
+                    style={{ gridTemplateColumns: '40px 60px 1fr 1fr 1fr 40px' }}
                   >
                     {/* Set Number */}
                     <div className="text-white font-semibold text-sm">{setIndex + 1}</div>

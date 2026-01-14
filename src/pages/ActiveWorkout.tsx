@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import confetti from 'canvas-confetti'
 import type { Template } from '../types'
 import { saveWorkout } from '../services/workoutService'
 
@@ -75,6 +77,43 @@ export default function ActiveWorkout() {
       }
     }
   }, [])
+
+  // Trigger confetti when workout is finished
+  useEffect(() => {
+    if (isFinished) {
+      // Fire confetti multiple times for extra celebration
+      const duration = 3000
+      const animationEnd = Date.now() + duration
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+
+      function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min
+      }
+
+      const interval = window.setInterval(function() {
+        const timeLeft = animationEnd - Date.now()
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval)
+        }
+
+        const particleCount = 50 * (timeLeft / duration)
+        
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        })
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        })
+      }, 250)
+
+      return () => clearInterval(interval)
+    }
+  }, [isFinished])
 
   // Timer effect
   useEffect(() => {
@@ -256,44 +295,102 @@ export default function ActiveWorkout() {
     return (
       <div className="min-h-screen bg-gray-900 p-4">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-gray-800 rounded-lg p-8 text-center">
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-white" />
-            </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-8 text-center shadow-2xl"
+          >
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+              className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/50"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring" }}
+              >
+                <Check className="w-10 h-10 text-white" />
+              </motion.div>
+            </motion.div>
 
-            <h1 className="text-3xl font-bold text-white mb-2">Workout Complete!</h1>
-            <p className="text-gray-400 mb-8">Great job crushing that {template.name}!</p>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-3xl font-bold text-white mb-2"
+            >
+              Workout Complete!
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-gray-400 mb-8"
+            >
+              Great job crushing that {template.name}!
+            </motion.p>
 
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-gray-700 rounded-lg p-4">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg p-4 border border-gray-600 hover:border-orange-500/50 transition-all shadow-lg"
+              >
                 <p className="text-gray-400 text-sm mb-1">Total Volume</p>
                 <p className="text-2xl font-bold text-white">{totalVolume.toFixed(0)} kg</p>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg p-4 border border-gray-600 hover:border-orange-500/50 transition-all shadow-lg"
+              >
                 <p className="text-gray-400 text-sm mb-1">Total Reps</p>
                 <p className="text-2xl font-bold text-white">{totalReps}</p>
-              </div>
+              </motion.div>
             </div>
 
-            <div className="bg-gray-700 rounded-lg p-4 mb-6 text-left">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg p-4 mb-6 text-left border border-gray-600"
+            >
               <h3 className="text-white font-semibold mb-3">Workout Summary</h3>
               {exerciseLogs.map((log, idx) => (
-                <div key={idx} className="mb-3 last:mb-0">
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8 + (idx * 0.1), duration: 0.3 }}
+                  className="mb-3 last:mb-0"
+                >
                   <p className="text-white font-medium">{log.name}</p>
                   <p className="text-gray-400 text-sm">
                     {log.sets.length} sets completed
                   </p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(249, 115, 22, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/')}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-lg transition-all shadow-lg shadow-orange-500/30"
             >
               Back to Dashboard
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
       </div>
     )
@@ -304,24 +401,33 @@ export default function ActiveWorkout() {
     <div className="min-h-screen bg-gray-900 p-2 sm:p-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <button
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between mb-4"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: -5 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => {
               if (confirm('Are you sure you want to quit this workout?')) {
                 navigate('/')
               }
             }}
-            className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+            className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors border border-gray-700"
           >
             <ArrowLeft className="w-5 h-5" />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34, 197, 94, 0.5)" }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleFinishWorkout}
-            className="px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
+            className="px-4 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all text-sm sm:text-base shadow-lg shadow-green-600/30"
           >
             Finish
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {/* Workout Title */}
         <div className="mb-4">
@@ -338,14 +444,19 @@ export default function ActiveWorkout() {
             const allSetsCompleted = exercise.sets.every(s => s.status === 'completed')
             
             return (
-              <div 
+              <motion.div 
                 key={exerciseIndex}
-                className="bg-gray-800 rounded-lg overflow-hidden"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: exerciseIndex * 0.1, duration: 0.3 }}
+                className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700"
               >
                 {/* Exercise Header - Always visible */}
-                <button
+                <motion.button
+                  whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                  className="w-full px-3 py-3 flex items-center justify-between border-b border-gray-700 hover:bg-gray-750 transition-colors"
+                  className="w-full px-3 py-3 flex items-center justify-between border-b border-gray-700 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 font-semibold text-sm">{exerciseIndex + 1}.</span>
@@ -353,33 +464,48 @@ export default function ActiveWorkout() {
                       {exercise.name}
                     </h3>
                     {allSetsCompleted && (
-                      <Check className="w-4 h-4 text-green-500" />
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                      >
+                        <Check className="w-4 h-4 text-green-500" />
+                      </motion.div>
                     )}
                   </div>
-                  {exercise.isCollapsed ? (
+                  <motion.div
+                    animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <ChevronDown className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
+                  </motion.div>
+                </motion.button>
 
                 {/* Exercise Content - Collapsible */}
-                {!exercise.isCollapsed && (
-                  <div className="p-2 sm:p-3">
-                    {/* Compact Table for Mobile */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-xs text-gray-400">
-                            <th className="text-left pb-2 px-1">Set</th>
-                            <th className="text-center pb-2 px-1">kg</th>
-                            <th className="text-center pb-2 px-1">Reps</th>
-                            <th className="text-center pb-2 px-1">RPE</th>
-                            <th className="w-10 pb-2"></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {exercise.sets.map((setState, setIndex) => {
+                <AnimatePresence>
+                  {!exercise.isCollapsed && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-2 sm:p-3">
+                        {/* Compact Table for Mobile */}
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-xs text-gray-400">
+                                <th className="text-left pb-2 px-1">Set</th>
+                                <th className="text-center pb-2 px-1">kg</th>
+                                <th className="text-center pb-2 px-1">Reps</th>
+                                <th className="text-center pb-2 px-1">RPE</th>
+                                <th className="w-10 pb-2"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exercise.sets.map((setState, setIndex) => {
                             const isCompleted = setState.status === 'completed'
                             const isInProgress = setState.status === 'in_progress'
                             const previousSet = setIndex > 0 ? exercise.sets[setIndex - 1].data : null
@@ -471,29 +597,46 @@ export default function ActiveWorkout() {
                                 </td>
                               </tr>
                             )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             )
           })}
         </div>
 
         {/* Timer Section */}
-        <div className="bg-gray-800 rounded-lg p-3 mb-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700"
+        >
           <h3 className="text-white font-semibold mb-2 text-xs uppercase text-gray-400">Rest Timer</h3>
           
           {/* Timer Display - Full width on mobile */}
-          <div className={`w-full text-center py-4 rounded-lg font-mono text-3xl sm:text-4xl font-bold mb-3 ${
-            restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
-            restTimerRemaining <= 10 ? 'bg-red-600 text-white' : 
-            'bg-gray-700 text-white'
-          }`}>
+          <motion.div 
+            animate={{ 
+              scale: restTimerRemaining <= 10 && restTimerRemaining > 0 ? [1, 1.02, 1] : 1,
+              boxShadow: restTimerRemaining === 0 ? "0 0 30px rgba(34, 197, 94, 0.5)" : "none"
+            }}
+            transition={{ 
+              scale: { duration: 0.5, repeat: restTimerRemaining <= 10 && restTimerRemaining > 0 ? Infinity : 0 },
+              boxShadow: { duration: 0.3 }
+            }}
+            className={`w-full text-center py-4 rounded-lg font-mono text-3xl sm:text-4xl font-bold mb-3 transition-colors duration-300 ${
+              restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
+              restTimerRemaining <= 10 ? 'bg-red-600 text-white' : 
+              'bg-gray-700 text-white'
+            }`}
+          >
             {formatTime(restTimerRemaining)}
-          </div>
+          </motion.div>
 
           {/* Controls Row */}
           <div className="flex items-center gap-2">
@@ -515,30 +658,46 @@ export default function ActiveWorkout() {
 
             {/* Timer Controls */}
             <div className="flex-1 flex gap-2">
-              {!restTimerActive ? (
-                <button
-                  onClick={startRestTimer}
-                  className="flex-1 p-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <Play className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  onClick={pauseRestTimer}
-                  className="flex-1 p-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <Pause className="w-5 h-5" />
-                </button>
-              )}
-              <button
+              <AnimatePresence mode="wait">
+                {!restTimerActive ? (
+                  <motion.button
+                    key="play"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={startRestTimer}
+                    className="flex-1 p-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                  >
+                    <Play className="w-5 h-5" />
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    key="pause"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={pauseRestTimer}
+                    className="flex-1 p-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                  >
+                    <Pause className="w-5 h-5" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: -180 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={resetRestTimer}
-                className="flex-1 p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                className="flex-1 p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
               >
                 <RotateCcw className="w-5 h-5" />
-              </button>
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Workout Notes */}
         <div className="bg-gray-800 rounded-lg p-3 mb-3">

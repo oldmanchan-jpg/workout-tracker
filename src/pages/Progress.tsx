@@ -6,11 +6,13 @@ import { motion } from 'framer-motion'
 import CountUp from 'react-countup'
 import TopBar from '@/components/TopBar'
 import { getAllWorkouts, calculateWorkoutStats, type SavedWorkout } from '../services/workoutService'
+import { useSettings } from '../hooks/useSettings'
 
 export default function Progress() {
   const [workouts, setWorkouts] = useState<SavedWorkout[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { weightUnit, convertWeight } = useSettings()
 
   useEffect(() => {
     loadWorkouts()
@@ -96,10 +98,10 @@ export default function Progress() {
       const date = new Date(workout.workout_date)
       return {
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        volume: workout.total_volume || 0
+        volume: convertWeight(workout.total_volume || 0)
       }
     })
-  }, [workouts])
+  }, [workouts, convertWeight])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -181,8 +183,8 @@ export default function Progress() {
             {[
               { icon: Activity, value: stats.totalWorkouts, label: 'Workouts', color: '#22d3ee' },
               { icon: Target, value: stats.totalReps, label: 'Total Reps', color: '#818cf8' },
-              { icon: TrendingUp, value: stats.totalVolume, label: 'Volume', suffix: 'kg', color: '#4ade80' },
-              { icon: Zap, value: stats.avgVolume, label: 'Avg/Session', suffix: 'kg', color: '#fbbf24' }
+              { icon: TrendingUp, value: convertWeight(stats.totalVolume), label: 'Volume', suffix: weightUnit, color: '#4ade80' },
+              { icon: Zap, value: convertWeight(stats.avgVolume), label: 'Avg/Session', suffix: weightUnit, color: '#fbbf24' }
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -291,9 +293,9 @@ export default function Progress() {
               <p className="text-sm mb-1" style={{ color: '#52525b' }}>Volume</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold" style={{ color: '#fafafa' }}>
-                  <CountUp end={weekComparison.thisWeek.volume} duration={1} decimals={0} />
+                  <CountUp end={convertWeight(weekComparison.thisWeek.volume)} duration={1} decimals={0} />
                 </span>
-                <span className="text-sm" style={{ color: '#52525b' }}>kg</span>
+                <span className="text-sm" style={{ color: '#52525b' }}>{weightUnit}</span>
               </div>
               {weekComparison.volumeChange !== 0 && (
                 <p 
@@ -376,7 +378,7 @@ export default function Progress() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="font-medium" style={{ color: '#22d3ee' }}>
-                      {workout.total_volume?.toFixed(0)} kg
+                      {convertWeight(workout.total_volume || 0).toFixed(0)} {weightUnit}
                     </p>
                     <p className="text-xs" style={{ color: '#52525b' }}>
                       {workout.total_reps} reps

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Check, ChevronDown, Play, Pause, RotateCcw } from 'lucide-react'
 import { saveWorkout } from '../services/workoutService'
+import { useSettings } from '../hooks/useSettings'
 import type { Template } from '../types'
 
 interface SetLog {
@@ -34,6 +35,7 @@ interface ExerciseLog {
 export default function ActiveWorkout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { restTimerDefault, weightUnit, formatWeight } = useSettings()
   const template = location.state?.template as Template | undefined
 
   if (!template) {
@@ -60,10 +62,9 @@ export default function ActiveWorkout() {
   const [isFinished, setIsFinished] = useState(false)
   const [notes, setNotes] = useState('')
   
-  // Rest timer
-  const [restTimerRemaining, setRestTimerRemaining] = useState(90)
+  // Rest timer - use user preference for default
+  const [restTimerRemaining, setRestTimerRemaining] = useState(restTimerDefault)
   const [restTimerActive, setRestTimerActive] = useState(false)
-  const [defaultRestTime] = useState(90)
   
   const timerInterval = useRef<number | null>(null)
 
@@ -112,7 +113,7 @@ export default function ActiveWorkout() {
   const pauseRestTimer = () => setRestTimerActive(false)
   const resetRestTimer = () => {
     setRestTimerActive(false)
-    setRestTimerRemaining(defaultRestTime)
+    setRestTimerRemaining(restTimerDefault)
   }
 
   const toggleExerciseCollapse = (exerciseIndex: number) => {
@@ -308,7 +309,7 @@ export default function ActiveWorkout() {
               }}>
                 <p style={{ fontSize: '14px', color: '#a1a1aa', margin: '0 0 8px' }}>Total Volume</p>
                 <p style={{ fontSize: '24px', fontWeight: '700', color: '#22d3ee', margin: 0 }}>
-                  {totalVolume.toFixed(0)} kg
+                  {formatWeight(totalVolume)}
                 </p>
               </div>
               <div style={{
@@ -547,7 +548,7 @@ export default function ActiveWorkout() {
                     overflowX: 'hidden'
                   }}>
                     <span style={{ width: '32px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Set</span>
-                    <span style={{ width: '64px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>KG</span>
+                    <span style={{ width: '64px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>{weightUnit.toUpperCase()}</span>
                     <span style={{ width: '64px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>Reps</span>
                     <span style={{ width: '48px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>RPE</span>
                     <span style={{ width: '48px' }}></span>

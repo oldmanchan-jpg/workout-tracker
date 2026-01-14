@@ -3,7 +3,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useProfile } from '../hooks/useProfile'
-import { LogOut } from 'lucide-react'
+import { LogOut, Settings } from 'lucide-react'
 
 export default function TopBar() {
   const location = useLocation()
@@ -32,6 +32,12 @@ export default function TopBar() {
             <Link to="/progress" className={`w-2 h-2 rounded-full transition-all ${isActive('/progress') ? 'bg-cyan-400 w-6' : 'bg-gray-600'}`} />
           </div>
 
+          <Link
+            to="/settings"
+            className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 transition-colors"
+          >
+            <Settings size={20} />
+          </Link>
           <button
             onClick={signOut}
             className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
@@ -80,6 +86,13 @@ export default function TopBar() {
                 Admin
               </Link>
             )}
+            <Link
+              to="/settings"
+              className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 transition-colors"
+              title="Settings"
+            >
+              <Settings size={20} />
+            </Link>
             <button
               onClick={signOut}
               className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-secondary hover:text-primary hover:bg-white/10"

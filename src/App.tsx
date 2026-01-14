@@ -10,6 +10,7 @@ import Dashboard from '@/pages/Dashboard'
 import ActiveWorkout from './pages/ActiveWorkout'
 import Progress from '@/pages/Progress'
 import Admin from './pages/Admin'
+import Settings from './pages/Settings'
 
 function AuthWrapper() {
   const { user, loading } = useAuth()
@@ -48,6 +49,7 @@ function AuthWrapper() {
           <Route path="/workout" element={<ActiveWorkout />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </SwipeablePages>

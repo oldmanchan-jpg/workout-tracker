@@ -487,16 +487,16 @@ export default function ActiveWorkout() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                    className="overflow-hidden overflow-x-hidden"
                   >
-                    <div className="px-4 pb-4">
+                    <div className="px-4 pb-4 overflow-x-hidden">
                       {/* Table Header */}
                       <div className="flex items-center gap-1 sm:gap-2 text-[#9a9fa4] text-xs font-medium mb-2 px-1">
                         <span className="w-8 sm:w-10 shrink-0 text-center">SET</span>
                         <span className="flex-1 text-center max-w-[70px] sm:max-w-none">KG</span>
                         <span className="flex-1 text-center max-w-[70px] sm:max-w-none">REPS</span>
-                        <span className="hidden sm:flex flex-1 text-center">RPE</span>
-                        <span className="w-10 sm:w-12 shrink-0 flex justify-center"></span>
+                        <span className="hidden sm:block flex-1 text-center">RPE</span>
+                        <span className="w-10 shrink-0 flex justify-center"></span>
                       </div>
 
                       {/* Sets */}
@@ -535,12 +535,12 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.weight?.toString() || '0'}
-                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all max-w-[70px] sm:max-w-none ${
+                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center transition-all max-w-[70px] sm:max-w-none ${
                                 isInProgress 
-                                  ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
+                                  ? 'bg-[#29e33c] text-black font-bold border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
-                                  ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                  : 'bg-black/30 text-[#9a9fa4] border border-white/10'
+                                  ? 'bg-[#29e33c]/20 text-[#29e33c] font-semibold border border-[#29e33c]/30'
+                                  : 'bg-[#1a1a1a] text-gray-500 font-semibold border border-gray-700'
                               }`}
                             />
 
@@ -556,12 +556,12 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.reps.toString()}
-                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all max-w-[70px] sm:max-w-none ${
+                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center transition-all max-w-[70px] sm:max-w-none ${
                                 isInProgress 
-                                  ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
+                                  ? 'bg-[#29e33c] text-black font-bold border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
-                                  ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                  : 'bg-black/30 text-[#9a9fa4] border border-white/10'
+                                  ? 'bg-[#29e33c]/20 text-[#29e33c] font-semibold border border-[#29e33c]/30'
+                                  : 'bg-[#1a1a1a] text-gray-500 font-semibold border border-gray-700'
                               }`}
                             />
 
@@ -580,31 +580,31 @@ export default function ActiveWorkout() {
                                 }}
                                 disabled={!isInProgress}
                                 placeholder="7"
-                                className={`w-full px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all ${
+                                className={`w-full px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center transition-all ${
                                   isInProgress 
-                                    ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
+                                    ? 'bg-[#29e33c] text-black font-bold border-2 border-[#29e33c] focus:outline-none' 
                                     : isCompleted
-                                    ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                    : 'bg-black/30 text-[#9a9fa4] border border-white/10'
+                                    ? 'bg-[#29e33c]/20 text-[#29e33c] font-semibold border border-[#29e33c]/30'
+                                    : 'bg-[#1a1a1a] text-gray-500 font-semibold border border-gray-700'
                                 }`}
                               />
                             </div>
 
                             {/* Checkmark */}
-                            <div className="w-10 sm:w-12 shrink-0 flex justify-center">
+                            <div className="w-10 shrink-0 flex justify-center">
                               {isCompleted ? (
-                                <div className="w-10 h-10 bg-[#29e33c] rounded-full flex items-center justify-center">
-                                  <Check className="w-5 h-5 text-black" strokeWidth={3} />
+                                <div className="w-8 h-8 bg-[#29e33c] rounded-full flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-black" strokeWidth={3} />
                                 </div>
                               ) : isInProgress ? (
                                 <button
                                   onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                  className="w-10 h-10 rounded-full border-2 border-[#29e33c] flex items-center justify-center hover:bg-[#29e33c]/20 transition-colors"
+                                  className="w-8 h-8 rounded-full border-2 border-[#29e33c] flex items-center justify-center hover:bg-[#29e33c]/20 transition-colors"
                                 >
-                                  <Check className="w-5 h-5 text-[#29e33c]" />
+                                  <Check className="w-4 h-4 text-[#29e33c]" />
                                 </button>
                               ) : (
-                                <div className="w-10 h-10 rounded-full border-2 border-white/10" />
+                                <div className="w-8 h-8 rounded-full border-2 border-white/10" />
                               )}
                             </div>
                           </div>

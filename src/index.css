@@ -807,6 +807,11 @@ body[class*="bg-"] {
 /* ========================================
    ADDITIONAL UTILITY CLASSES
    ======================================== */
+/* Safe Area Support for iPhone Notch */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Positioning */
 .relative { position: relative; }
 .absolute { position: absolute; }

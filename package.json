@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "canvas-confetti": "^1.9.4",
+    "framer-motion": "^12.26.2",
     "lucide-react": "^0.539.0",
     "playwright": "^1.54.2",
     "react": "^18.2.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.1",
     "recharts": "^3.6.0"

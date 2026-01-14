@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Template } from '@/types'
-import { Play, ChevronRight, Dumbbell, Lightbulb } from 'lucide-react'
+import { Play, Dumbbell, ChevronRight, Clock, Flame, Target } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import TopBar from '@/components/TopBar'
@@ -18,163 +18,172 @@ export default function Dashboard() {
     navigate('/workout', { state: { template: selectedTemplate } })
   }
 
+  // Calculate estimated workout time (rough estimate: 3 min per set)
+  const estimatedTime = selectedTemplate 
+    ? selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets * 3, 0)
+    : 0
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0b' }}>
+    <div className="min-h-screen bg-black">
       <TopBar />
       
-      <main className="max-w-lg mx-auto p-4 space-y-6">
-        {/* Hero Section */}
+      <main className="max-w-lg mx-auto px-4 pb-8 space-y-6">
+        {/* Welcome Section */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center py-8"
+          className="pt-4"
         >
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity, repeatDelay: 2 }}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ 
-              background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
-              boxShadow: '0 0 40px rgba(34, 211, 238, 0.3)'
-            }}
-          >
-            <Dumbbell className="w-8 h-8" style={{ color: '#0a0a0b' }} />
-          </motion.div>
-          <h1 className="text-2xl font-bold mb-2" style={{ color: '#fafafa' }}>
-            Ready to train?
+          <p className="text-[#9a9fa4] text-sm font-medium">Welcome back</p>
+          <h1 className="text-white text-2xl font-semibold mt-1">
+            Ready to <span className="text-[#29e33c]">Train</span>?
           </h1>
-          <p style={{ color: '#a1a1aa' }}>
+          <p className="text-[#9a9fa4] text-sm mt-2">
             Select a workout and crush your goals
           </p>
         </motion.div>
 
-        {/* Template Selection Card */}
+        {/* Quick Stats Row */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="bg-[#282a2c] rounded-[21px] p-4"
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center">
+                <Dumbbell className="w-6 h-6 text-[#29e33c]" />
+              </div>
+              <div>
+                <p className="text-[#9a9fa4] text-xs">This Week</p>
+                <p className="text-white font-semibold text-lg">3 Workouts</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[#9a9fa4] text-xs">Volume</p>
+              <p className="text-[#29e33c] font-semibold text-lg">12,450 kg</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Template Selection */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="rounded-2xl p-5"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          className="space-y-4"
         >
-          {/* Dropdown */}
-          <label className="block text-sm font-medium mb-2" style={{ color: '#52525b' }}>
-            WORKOUT TEMPLATE
-          </label>
-          <select
-            value={selectedTemplateId}
-            onChange={(e) => setSelectedTemplateId(e.target.value)}
-            className="w-full h-14 px-4 rounded-xl font-semibold text-lg appearance-none cursor-pointer outline-none transition-all"
-            style={{ 
-              backgroundColor: '#1c1c1f', 
-              border: '1px solid #27272a',
-              color: '#fafafa',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2352525b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 12px center',
-              backgroundSize: '24px'
-            }}
-          >
-            {templates.map(template => (
-              <option key={template.id} value={template.id}>
-                {template.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center justify-between">
+            <h2 className="text-white font-semibold text-lg">Workout Template</h2>
+            <span className="text-[#9a9fa4] text-sm">{templates.length} available</span>
+          </div>
+
+          {/* Template Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              className="w-full px-4 py-4 bg-[#282a2c] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-colors cursor-pointer"
+            >
+              {templates.map(template => (
+                <option key={template.id} value={template.id} className="bg-[#282a2c]">
+                  {template.name}
+                </option>
+              ))}
+            </select>
+            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9a9fa4] rotate-90 pointer-events-none" />
+          </div>
         </motion.div>
 
-        {/* Template Preview */}
+        {/* Selected Template Preview */}
         {selectedTemplate && (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="bg-[#282a2c] rounded-[21px] overflow-hidden"
           >
-            {/* Header */}
-            <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid #27272a' }}>
-              <h2 className="font-semibold" style={{ color: '#fafafa' }}>
-                {selectedTemplate.name}
-              </h2>
-              <span 
-                className="px-3 py-1 rounded-full text-sm font-medium"
-                style={{ backgroundColor: 'rgba(34, 211, 238, 0.1)', color: '#22d3ee' }}
-              >
-                {selectedTemplate.exercises.length} exercises
-              </span>
+            {/* Template Header */}
+            <div className="p-4 border-b border-white/5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold text-xl">
+                  {selectedTemplate.name}
+                </h3>
+                <span className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium">
+                  {selectedTemplate.exercises.length} exercises
+                </span>
+              </div>
+              
+              {/* Meta Info */}
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+                  <Clock className="w-4 h-4" />
+                  <span>~{estimatedTime} min</span>
+                </div>
+                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+                  <Flame className="w-4 h-4" />
+                  <span>{selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets, 0)} sets</span>
+                </div>
+              </div>
             </div>
 
             {/* Exercise List */}
-            <div className="p-2">
+            <div className="p-4 space-y-2 max-h-[280px] overflow-y-auto">
               {selectedTemplate.exercises.map((ex, idx) => (
                 <motion.div 
                   key={idx}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + (idx * 0.05), duration: 0.3 }}
-                  className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                  style={{ backgroundColor: 'transparent' }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="flex items-center gap-3 p-3 bg-black/30 rounded-[12px] hover:bg-black/50 transition-colors"
                 >
-                  <span 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
-                    style={{ backgroundColor: '#1c1c1f', color: '#22d3ee' }}
-                  >
+                  <div className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0">
                     {idx + 1}
-                  </span>
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate" style={{ color: '#fafafa' }}>
-                      {ex.name}
-                    </p>
-                    <p className="text-sm" style={{ color: '#52525b' }}>
+                    <p className="text-white font-medium truncate">{ex.name}</p>
+                    <p className="text-[#9a9fa4] text-sm">
                       {ex.sets} sets × {ex.reps} reps
+                      {ex.weight && <span className="text-[#29e33c]"> • {ex.weight}kg</span>}
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: '#3f3f46' }} />
+                  <ChevronRight className="w-5 h-5 text-[#9a9fa4] flex-shrink-0" />
                 </motion.div>
               ))}
             </div>
 
             {/* Start Button */}
-            <div className="p-4" style={{ borderTop: '1px solid #27272a' }}>
+            <div className="p-4 pt-2">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onStartWorkout}
-                className="w-full py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all"
-                style={{ 
-                  background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
-                  color: '#0a0a0b',
-                  boxShadow: '0 0 30px rgba(34, 211, 238, 0.3)'
-                }}
+                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#29e33c]/30"
               >
-                <Play className="w-5 h-5" fill="currentColor" />
+                <Play className="w-6 h-6" fill="black" />
                 Start Workout
               </motion.button>
             </div>
           </motion.div>
         )}
 
-        {/* Quick Stats or Tips */}
+        {/* Bottom Tip */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="rounded-2xl p-4"
-          style={{ 
-            background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%)',
-            border: '1px solid rgba(34, 211, 238, 0.2)'
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-start gap-3 p-4 bg-[#282a2c] rounded-[16px] border border-[#29e33c]/20"
         >
-          <div className="flex items-start gap-3">
-            <Lightbulb className="w-6 h-6 flex-shrink-0 mt-0.5" style={{ color: '#22d3ee' }} />
-            <div>
-              <h3 className="font-medium mb-1" style={{ color: '#22d3ee' }}>Pro Tip</h3>
-              <p className="text-sm leading-relaxed" style={{ color: '#a1a1aa' }}>
-                Track your RPE (Rate of Perceived Exertion) on a scale of 1-10 for each set. 
-                This helps you monitor intensity and optimize recovery.
-              </p>
-            </div>
+          <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0">
+            <Target className="w-5 h-5 text-[#29e33c]" />
+          </div>
+          <div>
+            <p className="text-white font-medium text-sm">Track Your RPE</p>
+            <p className="text-[#9a9fa4] text-xs mt-1">
+              Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
+            </p>
           </div>
         </motion.div>
       </main>

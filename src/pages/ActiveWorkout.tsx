@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import confetti from 'canvas-confetti'
-import type { Template } from '../types'
+import { ArrowLeft, Check, ChevronDown, Play, Pause, RotateCcw } from 'lucide-react'
 import { saveWorkout } from '../services/workoutService'
+import type { Template } from '../types'
 
 interface SetLog {
   reps: number
@@ -43,11 +41,11 @@ export default function ActiveWorkout() {
     return null
   }
 
-  // Initialize all exercises - COLLAPSED BY DEFAULT except first one
+  // Initialize exercises - only first one expanded
   const [exercises, setExercises] = useState<ExerciseState[]>(
     template.exercises.map((ex, idx) => ({
       name: ex.name,
-      isCollapsed: idx !== 0,
+      isCollapsed: idx !== 0, // Only first is expanded
       sets: Array(ex.sets).fill(null).map((_, setIdx) => ({
         status: idx === 0 && setIdx === 0 ? 'in_progress' : 'pending'
       })),
@@ -62,7 +60,7 @@ export default function ActiveWorkout() {
   const [isFinished, setIsFinished] = useState(false)
   const [notes, setNotes] = useState('')
   
-  // Single global timer
+  // Rest timer
   const [restTimerRemaining, setRestTimerRemaining] = useState(90)
   const [restTimerActive, setRestTimerActive] = useState(false)
   const [defaultRestTime] = useState(90)
@@ -77,42 +75,6 @@ export default function ActiveWorkout() {
       }
     }
   }, [])
-
-  // Trigger confetti when workout is finished
-  useEffect(() => {
-    if (isFinished) {
-      const duration = 3000
-      const animationEnd = Date.now() + duration
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
-
-      function randomInRange(min: number, max: number) {
-        return Math.random() * (max - min) + min
-      }
-
-      const interval = window.setInterval(function() {
-        const timeLeft = animationEnd - Date.now()
-
-        if (timeLeft <= 0) {
-          return clearInterval(interval)
-        }
-
-        const particleCount = 50 * (timeLeft / duration)
-        
-        confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-        })
-        confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-        })
-      }, 250)
-
-      return () => clearInterval(interval)
-    }
-  }, [isFinished])
 
   // Timer effect
   useEffect(() => {
@@ -177,31 +139,49 @@ export default function ActiveWorkout() {
 
     const newSet: SetLog = { reps, weight, rpe }
     
-    setExercises(prev => prev.map((ex, exIdx) => {
-      if (exIdx !== exerciseIndex) return ex
+    setExercises(prev => {
+      const updated = prev.map((ex, exIdx) => {
+        if (exIdx !== exerciseIndex) return ex
 
-      const updatedSets = [...ex.sets]
-      updatedSets[setIndex] = {
-        status: 'completed',
-        data: newSet
-      }
-
-      // Move to next set if available
-      if (setIndex + 1 < updatedSets.length) {
-        updatedSets[setIndex + 1] = {
-          ...updatedSets[setIndex + 1],
-          status: 'in_progress'
+        const updatedSets = [...ex.sets]
+        updatedSets[setIndex] = {
+          status: 'completed',
+          data: newSet
         }
-      } else {
-        // Exercise complete - find next exercise and activate its first set
-        const nextExerciseIndex = exIdx + 1
-        if (nextExerciseIndex < exercises.length) {
+
+        // Move to next set if available
+        if (setIndex + 1 < updatedSets.length) {
+          updatedSets[setIndex + 1] = {
+            ...updatedSets[setIndex + 1],
+            status: 'in_progress'
+          }
+        }
+
+        // Check if exercise is complete
+        const allComplete = updatedSets.every(s => s.status === 'completed')
+        
+        return {
+          ...ex,
+          sets: updatedSets,
+          isCollapsed: allComplete
+        }
+      })
+
+      // Auto-progression: if exercise complete, open next exercise
+      const completedExercise = updated[exerciseIndex]
+      const allComplete = completedExercise.sets.every(s => s.status === 'completed')
+      
+      if (allComplete) {
+        const nextIndex = exerciseIndex + 1
+        if (nextIndex < updated.length) {
           setTimeout(() => {
             setExercises(prevEx => prevEx.map((e, i) => {
-              if (i === nextExerciseIndex && e.sets[0]) {
-                const newSets = [...e.sets]
-                newSets[0] = { ...newSets[0], status: 'in_progress' }
-                return { ...e, sets: newSets, isCollapsed: false }
+              if (i === nextIndex) {
+                return {
+                  ...e,
+                  isCollapsed: false,
+                  sets: e.sets.map((s, si) => si === 0 ? { ...s, status: 'in_progress' } : s)
+                }
               }
               return e
             }))
@@ -209,15 +189,8 @@ export default function ActiveWorkout() {
         }
       }
 
-      // Check if exercise is complete and collapse it
-      const allComplete = updatedSets.every(s => s.status === 'completed')
-      
-      return {
-        ...ex,
-        sets: updatedSets,
-        isCollapsed: allComplete
-      }
-    }))
+      return updated
+    })
 
     // Auto-start rest timer after completing a set
     resetRestTimer()
@@ -286,14 +259,6 @@ export default function ActiveWorkout() {
     ))
   }
 
-  // Get timer state for styling
-  const getTimerState = () => {
-    if (restTimerRemaining === 0) return 'complete'
-    if (restTimerRemaining <= 10) return 'critical'
-    if (restTimerRemaining <= 30) return 'warning'
-    return 'default'
-  }
-
   // Finished screen
   if (isFinished) {
     const exerciseLogs: ExerciseLog[] = exercises.map(ex => ({
@@ -303,506 +268,620 @@ export default function ActiveWorkout() {
     const { totalVolume, totalReps } = calculateTotals(exerciseLogs)
 
     return (
-      <div className="min-h-screen p-4" style={{ backgroundColor: '#0a0a0b' }}>
-        <div className="max-w-lg mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
-          >
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)', boxShadow: '0 0 40px rgba(74, 222, 128, 0.4)' }}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: "spring" }}
-              >
-                <Check className="w-12 h-12" style={{ color: '#0a0a0b' }} strokeWidth={3} />
-              </motion.div>
-            </motion.div>
-
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-3xl font-bold mb-2"
-              style={{ color: '#fafafa' }}
-            >
-              Workout Complete!
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="mb-8"
-              style={{ color: '#a1a1aa' }}
-            >
-              Great job crushing {template.name}!
-            </motion.p>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-                className="rounded-xl p-4"
-                style={{ backgroundColor: '#1c1c1f', border: '1px solid #27272a' }}
-              >
-                <p className="text-sm mb-1" style={{ color: '#a1a1aa' }}>Total Volume</p>
-                <p className="text-2xl font-bold" style={{ color: '#22d3ee' }}>{totalVolume.toFixed(0)} kg</p>
-              </motion.div>
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="rounded-xl p-4"
-                style={{ backgroundColor: '#1c1c1f', border: '1px solid #27272a' }}
-              >
-                <p className="text-sm mb-1" style={{ color: '#a1a1aa' }}>Total Reps</p>
-                <p className="text-2xl font-bold" style={{ color: '#22d3ee' }}>{totalReps}</p>
-              </motion.div>
+      <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0b', padding: '16px' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{
+            backgroundColor: '#141416',
+            borderRadius: '16px',
+            border: '1px solid #27272a',
+            padding: '32px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              boxShadow: '0 0 40px rgba(74, 222, 128, 0.4)'
+            }}>
+              <Check size={48} color="#0a0a0b" strokeWidth={3} />
             </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              className="rounded-xl p-4 mb-6 text-left"
-              style={{ backgroundColor: '#1c1c1f', border: '1px solid #27272a' }}
-            >
-              <h3 className="font-semibold mb-3" style={{ color: '#fafafa' }}>Summary</h3>
-              {exerciseLogs.map((log, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + (idx * 0.1), duration: 0.3 }}
-                  className="mb-3 last:mb-0 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(74, 222, 128, 0.2)' }}>
-                      <Check className="w-4 h-4" style={{ color: '#4ade80' }} />
-                    </div>
-                    <span style={{ color: '#fafafa' }}>{log.name}</span>
-                  </div>
-                  <span style={{ color: '#a1a1aa' }}>{log.sets.length} sets</span>
-                </motion.div>
-              ))}
-            </motion.div>
+            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#fafafa', margin: '0 0 8px' }}>
+              Workout Complete!
+            </h1>
+            <p style={{ fontSize: '16px', color: '#a1a1aa', margin: '0 0 32px' }}>
+              Great job crushing {template.name}!
+            </p>
 
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
+              <div style={{
+                flex: 1,
+                backgroundColor: '#1c1c1f',
+                borderRadius: '12px',
+                border: '1px solid #27272a',
+                padding: '16px'
+              }}>
+                <p style={{ fontSize: '14px', color: '#a1a1aa', margin: '0 0 8px' }}>Total Volume</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#22d3ee', margin: 0 }}>
+                  {totalVolume.toFixed(0)} kg
+                </p>
+              </div>
+              <div style={{
+                flex: 1,
+                backgroundColor: '#1c1c1f',
+                borderRadius: '12px',
+                border: '1px solid #27272a',
+                padding: '16px'
+              }}>
+                <p style={{ fontSize: '14px', color: '#a1a1aa', margin: '0 0 8px' }}>Total Reps</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#22d3ee', margin: 0 }}>
+                  {totalReps}
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              backgroundColor: '#1c1c1f',
+              borderRadius: '12px',
+              border: '1px solid #27272a',
+              padding: '16px',
+              marginBottom: '24px',
+              textAlign: 'left'
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#fafafa', margin: '0 0 12px' }}>
+                Summary
+              </h3>
+              {exerciseLogs.map((log, idx) => (
+                <div key={idx} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: idx < exerciseLogs.length - 1 ? '12px' : 0
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Check size={16} color="#4ade80" />
+                    </div>
+                    <span style={{ fontSize: '16px', color: '#fafafa' }}>{log.name}</span>
+                  </div>
+                  <span style={{ fontSize: '16px', color: '#a1a1aa' }}>{log.sets.length} sets</span>
+                </div>
+              ))}
+            </div>
+
+            <button
               onClick={() => navigate('/')}
-              className="w-full font-semibold py-4 rounded-xl transition-all"
-              style={{ 
+              style={{
+                width: '100%',
+                padding: '16px',
+                borderRadius: '12px',
                 background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
+                border: 'none',
+                fontSize: '16px',
+                fontWeight: '600',
                 color: '#0a0a0b',
+                cursor: 'pointer',
                 boxShadow: '0 0 30px rgba(34, 211, 238, 0.3)'
               }}
             >
               Back to Dashboard
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
-  // Active workout screen - NO TOPBAR, FOCUSED UI
+  // Active workout screen
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0b' }}>
-      {/* MINIMAL HEADER - No TopBar */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{ backgroundColor: '#0a0a0b', borderBottom: '1px solid #27272a' }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0b', overflowX: 'hidden' }}>
+      {/* Header */}
+      <header style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        padding: '12px 16px'
+      }}>
+        {/* Back button - 44x44px */}
+        <button
           onClick={() => {
-            if (confirm('Quit workout? Your progress will be lost.')) {
+            if (confirm('Quit workout?')) {
               navigate('/')
             }
           }}
-          className="w-11 h-11 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: '#1c1c1f', border: '1px solid #3f3f46' }}
+          style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            backgroundColor: '#1c1c1f',
+            border: '1px solid #27272a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#a1a1aa' }} />
-        </motion.button>
+          <ArrowLeft size={20} color="#a1a1aa" />
+        </button>
 
-        <div className="text-center">
-          <h1 className="font-semibold" style={{ color: '#fafafa' }}>{template.name}</h1>
-          <p className="text-xs" style={{ color: '#52525b' }}>
+        {/* Title centered */}
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#fafafa', margin: 0 }}>
+            {template.name}
+          </h1>
+          <p style={{ fontSize: '13px', color: '#52525b', margin: 0 }}>
             {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        {/* Finish button */}
+        <button
           onClick={handleFinishWorkout}
-          className="px-5 py-2.5 rounded-xl font-semibold text-sm"
-          style={{ 
-            background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+          style={{
+            padding: '10px 20px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
+            border: 'none',
+            fontSize: '15px',
+            fontWeight: '600',
             color: '#0a0a0b',
-            boxShadow: '0 0 20px rgba(74, 222, 128, 0.3)'
+            cursor: 'pointer'
           }}
         >
           Finish
-        </motion.button>
-      </motion.header>
+        </button>
+      </header>
 
-      {/* MAIN CONTENT */}
-      <main className="p-4 pb-8 space-y-4 max-w-lg mx-auto">
-        {/* Exercise Accordions */}
+      {/* Exercise Cards Container */}
+      <div style={{ padding: '0 16px', maxWidth: '100%', overflowX: 'hidden' }}>
         {exercises.map((exercise, exerciseIndex) => {
           const templateExercise = template.exercises[exerciseIndex]
-          const allSetsCompleted = exercise.sets.every(s => s.status === 'completed')
           const completedCount = exercise.sets.filter(s => s.status === 'completed').length
           const totalSets = exercise.sets.length
+          const allSetsCompleted = completedCount === totalSets
+          const hasActiveSet = exercise.sets.some(s => s.status === 'in_progress')
           
           return (
-            <motion.div 
+            <div
               key={exerciseIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: exerciseIndex * 0.05, duration: 0.3 }}
-              className="rounded-2xl overflow-hidden"
-              style={{ 
-                backgroundColor: '#141416', 
-                border: allSetsCompleted ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid #27272a' 
+              style={{
+                backgroundColor: '#141416',
+                borderRadius: '16px',
+                border: allSetsCompleted ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid #27272a',
+                marginBottom: '12px',
+                overflow: 'hidden'
               }}
             >
-              {/* Exercise Header */}
-              <motion.button
-                whileTap={{ scale: 0.99 }}
+              {/* Accordion Header - 60px min height for tapping */}
+              <button
                 onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                className="w-full px-4 py-4 flex items-center justify-between"
-                style={{ backgroundColor: allSetsCompleted ? 'rgba(74, 222, 128, 0.05)' : 'transparent' }}
+                style={{
+                  width: '100%',
+                  minHeight: '60px',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  backgroundColor: allSetsCompleted ? 'rgba(74, 222, 128, 0.05)' : 'transparent',
+                  border: 'none',
+                  borderBottom: exercise.isCollapsed ? 'none' : '1px solid #27272a',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <span 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-                    style={{ 
-                      backgroundColor: allSetsCompleted ? 'rgba(74, 222, 128, 0.2)' : '#1c1c1f',
-                      color: allSetsCompleted ? '#4ade80' : '#22d3ee'
-                    }}
-                  >
-                    {allSetsCompleted ? <Check className="w-4 h-4" /> : exerciseIndex + 1}
-                  </span>
-                  <div className="text-left">
-                    <h3 
-                      className="font-semibold text-base"
-                      style={{ color: allSetsCompleted ? '#4ade80' : '#fafafa' }}
-                    >
-                      {exercise.name}
-                    </h3>
-                    <p className="text-sm" style={{ color: '#52525b' }}>
-                      {completedCount}/{totalSets} sets
-                    </p>
-                  </div>
+                {/* Number/Check badge - 40x40px */}
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '12px',
+                  backgroundColor: allSetsCompleted ? 'rgba(74, 222, 128, 0.15)' : hasActiveSet ? 'rgba(34, 211, 238, 0.1)' : '#1c1c1f',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {allSetsCompleted ? (
+                    <Check size={20} color="#4ade80" strokeWidth={3} />
+                  ) : (
+                    <span style={{ fontSize: '16px', fontWeight: '700', color: hasActiveSet ? '#22d3ee' : '#52525b' }}>
+                      {exerciseIndex + 1}
+                    </span>
+                  )}
                 </div>
-                <motion.div
-                  animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChevronDown className="w-5 h-5" style={{ color: '#52525b' }} />
-                </motion.div>
-              </motion.button>
 
-              {/* Exercise Content */}
-              <AnimatePresence>
-                {!exercise.isCollapsed && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-4 pb-4">
-                      {/* Table Header */}
-                      <div 
-                        className="grid gap-2 pb-2 mb-2 text-xs font-medium"
-                        style={{ 
-                          gridTemplateColumns: '40px 1fr 1fr 56px 56px',
-                          color: '#52525b',
-                          borderBottom: '1px solid #27272a'
+                {/* Exercise name + progress */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: allSetsCompleted ? '#4ade80' : '#fafafa',
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {exercise.name}
+                  </h3>
+                  <span style={{ fontSize: '13px', color: '#52525b' }}>
+                    {completedCount}/{totalSets} sets
+                  </span>
+                </div>
+
+                {/* Chevron */}
+                <ChevronDown 
+                  size={20} 
+                  color="#52525b"
+                  style={{
+                    transform: exercise.isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                    transition: 'transform 0.2s ease',
+                    flexShrink: 0
+                  }}
+                />
+              </button>
+
+              {/* Accordion Content - only show if not collapsed */}
+              {!exercise.isCollapsed && (
+                <div style={{ padding: '16px' }}>
+                  {/* Column headers */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    paddingBottom: '10px',
+                    marginBottom: '8px',
+                    borderBottom: '1px solid #27272a',
+                    minWidth: 0,
+                    overflowX: 'hidden'
+                  }}>
+                    <span style={{ width: '32px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Set</span>
+                    <span style={{ width: '64px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>KG</span>
+                    <span style={{ width: '64px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>Reps</span>
+                    <span style={{ width: '48px', fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>RPE</span>
+                    <span style={{ width: '48px' }}></span>
+                  </div>
+
+                  {/* Each set row */}
+                  {exercise.sets.map((setState, setIndex) => {
+                    const isActive = setState.status === 'in_progress'
+                    const isCompleted = setState.status === 'completed'
+                    
+                    // Input style based on state
+                    const getInputStyle = () => {
+                      if (isActive) {
+                        return {
+                          backgroundColor: '#1e293b',
+                          border: '2px solid #22d3ee',
+                          color: '#fafafa'
+                        }
+                      }
+                      if (isCompleted) {
+                        return {
+                          backgroundColor: 'rgba(74, 222, 128, 0.08)',
+                          border: '1px solid rgba(74, 222, 128, 0.3)',
+                          color: '#4ade80'
+                        }
+                      }
+                      return {
+                        backgroundColor: '#1c1c1f',
+                        border: '1px solid #27272a',
+                        color: '#52525b'
+                      }
+                    }
+
+                    const inputStyle = getInputStyle()
+
+                    return (
+                      <div
+                        key={setIndex}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 0',
+                          borderBottom: setIndex < exercise.sets.length - 1 ? '1px solid #1c1c1f' : 'none',
+                          minWidth: 0,
+                          overflowX: 'hidden'
                         }}
                       >
-                        <span>SET</span>
-                        <span className="text-center">KG</span>
-                        <span className="text-center">REPS</span>
-                        <span className="text-center">RPE</span>
-                        <span></span>
+                        {/* Set number - 32px fixed */}
+                        <div style={{ width: '32px', flexShrink: 0 }}>
+                          <span style={{ fontSize: '16px', fontWeight: '700', color: '#fafafa' }}>
+                            {setIndex + 1}
+                          </span>
+                        </div>
+
+                        {/* KG input - 64px fixed, 48px height */}
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.5"
+                          value={isCompleted && setState.data ? setState.data.weight.toString() : (isActive ? exercise.currentInputs.weight : '')}
+                          onChange={(e) => isActive && updateInput(exerciseIndex, 'weight', e.target.value)}
+                          disabled={!isActive}
+                          placeholder={templateExercise.weight?.toString() || ''}
+                          style={{
+                            width: '64px',
+                            height: '48px',
+                            borderRadius: '10px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            textAlign: 'center',
+                            flexShrink: 0,
+                            outline: 'none',
+                            ...inputStyle
+                          }}
+                        />
+
+                        {/* Reps input - 64px fixed, 48px height */}
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={isCompleted && setState.data ? setState.data.reps.toString() : (isActive ? exercise.currentInputs.reps : '')}
+                          onChange={(e) => isActive && updateInput(exerciseIndex, 'reps', e.target.value)}
+                          disabled={!isActive}
+                          placeholder={templateExercise.reps?.toString() || ''}
+                          style={{
+                            width: '64px',
+                            height: '48px',
+                            borderRadius: '10px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            textAlign: 'center',
+                            flexShrink: 0,
+                            outline: 'none',
+                            ...inputStyle
+                          }}
+                        />
+
+                        {/* RPE input - 48px fixed, 48px height */}
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="1"
+                          max="10"
+                          value={isCompleted && setState.data?.rpe ? setState.data.rpe.toString() : (isActive ? exercise.currentInputs.rpe : '')}
+                          onChange={(e) => isActive && updateInput(exerciseIndex, 'rpe', e.target.value)}
+                          disabled={!isActive}
+                          placeholder="7"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '10px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            textAlign: 'center',
+                            flexShrink: 0,
+                            outline: 'none',
+                            ...inputStyle
+                          }}
+                        />
+
+                        {/* Checkmark - 48px fixed, MUST BE VERY VISIBLE */}
+                        <div style={{ width: '48px', height: '48px', flexShrink: 0 }}>
+                          {isCompleted ? (
+                            <div style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '12px',
+                              background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 0 15px rgba(74, 222, 128, 0.4)'
+                            }}>
+                              <Check size={24} color="white" strokeWidth={3} />
+                            </div>
+                          ) : isActive ? (
+                            <button
+                              onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
+                              style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '12px',
+                                border: '3px solid #22d3ee',
+                                backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <Check size={24} color="#22d3ee" strokeWidth={2} />
+                            </button>
+                          ) : (
+                            <div style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '12px',
+                              border: '2px solid #27272a',
+                              backgroundColor: '#1c1c1f'
+                            }} />
+                          )}
+                        </div>
                       </div>
-
-                      {/* Sets */}
-                      {exercise.sets.map((setState, setIndex) => {
-                        const isCompleted = setState.status === 'completed'
-                        const isInProgress = setState.status === 'in_progress'
-                        const previousSet = setIndex > 0 ? exercise.sets[setIndex - 1].data : null
-
-                        return (
-                          <div 
-                            key={setIndex}
-                            className="grid gap-2 py-2 items-center"
-                            style={{ 
-                              gridTemplateColumns: '40px 1fr 1fr 56px 56px',
-                              borderBottom: setIndex < exercise.sets.length - 1 ? '1px solid #1c1c1f' : 'none'
-                            }}
-                          >
-                            {/* Set Number */}
-                            <div>
-                              <span className="font-bold" style={{ color: '#fafafa' }}>{setIndex + 1}</span>
-                              {previousSet && (
-                                <p className="text-xs" style={{ color: '#52525b' }}>
-                                  {previousSet.weight}×{previousSet.reps}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Weight Input */}
-                            <input
-                              type="number"
-                              inputMode="decimal"
-                              step="0.5"
-                              value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? exercise.currentInputs.weight : '')}
-                              onChange={(e) => isInProgress && updateInput(exerciseIndex, 'weight', e.target.value)}
-                              disabled={!isInProgress}
-                              placeholder={templateExercise.weight?.toString() || '0'}
-                              className="w-full h-12 rounded-lg text-center font-semibold transition-all outline-none"
-                              style={
-                                isCompleted 
-                                  ? { backgroundColor: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ade80' }
-                                  : isInProgress 
-                                    ? { backgroundColor: '#1e293b', border: '2px solid #22d3ee', color: '#fafafa', boxShadow: '0 0 0 4px rgba(34, 211, 238, 0.1)' }
-                                    : { backgroundColor: '#1c1c1f', border: '1px solid #27272a', color: '#52525b' }
-                              }
-                            />
-
-                            {/* Reps Input */}
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? exercise.currentInputs.reps : '')}
-                              onChange={(e) => isInProgress && updateInput(exerciseIndex, 'reps', e.target.value)}
-                              disabled={!isInProgress}
-                              placeholder={templateExercise.reps.toString()}
-                              className="w-full h-12 rounded-lg text-center font-semibold transition-all outline-none"
-                              style={
-                                isCompleted 
-                                  ? { backgroundColor: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ade80' }
-                                  : isInProgress 
-                                    ? { backgroundColor: '#1e293b', border: '2px solid #22d3ee', color: '#fafafa', boxShadow: '0 0 0 4px rgba(34, 211, 238, 0.1)' }
-                                    : { backgroundColor: '#1c1c1f', border: '1px solid #27272a', color: '#52525b' }
-                              }
-                            />
-
-                            {/* RPE Input */}
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              min="1"
-                              max="10"
-                              value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? exercise.currentInputs.rpe : '')}
-                              onChange={(e) => isInProgress && updateInput(exerciseIndex, 'rpe', e.target.value)}
-                              disabled={!isInProgress}
-                              placeholder="7"
-                              className="w-full h-12 rounded-lg text-center font-semibold transition-all outline-none"
-                              style={
-                                isCompleted 
-                                  ? { backgroundColor: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ade80' }
-                                  : isInProgress 
-                                    ? { backgroundColor: '#1e293b', border: '2px solid #22d3ee', color: '#fafafa', boxShadow: '0 0 0 4px rgba(34, 211, 238, 0.1)' }
-                                    : { backgroundColor: '#1c1c1f', border: '1px solid #27272a', color: '#52525b' }
-                              }
-                            />
-
-                            {/* CHECKMARK - FIXED: Large, visible, proper touch target */}
-                            <div className="flex justify-center">
-                              {isCompleted ? (
-                                <motion.div
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                                  className="w-11 h-11 rounded-full flex items-center justify-center"
-                                  style={{ 
-                                    background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-                                    boxShadow: '0 0 15px rgba(74, 222, 128, 0.4)'
-                                  }}
-                                >
-                                  <Check className="w-6 h-6" style={{ color: '#0a0a0b' }} strokeWidth={3} />
-                                </motion.div>
-                              ) : isInProgress ? (
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
-                                  style={{ 
-                                    border: '3px solid #22d3ee',
-                                    backgroundColor: 'rgba(34, 211, 238, 0.1)'
-                                  }}
-                                >
-                                  <Check className="w-5 h-5" style={{ color: '#22d3ee', opacity: 0.5 }} />
-                                </motion.button>
-                              ) : (
-                                <div 
-                                  className="w-11 h-11 rounded-full"
-                                  style={{ border: '2px solid #27272a' }}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           )
         })}
+      </div>
 
-        {/* REST TIMER */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-4"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
-        >
-          <h3 className="text-sm font-medium mb-3" style={{ color: '#52525b' }}>REST TIMER</h3>
-          
-          {/* Timer Display */}
-          <motion.div 
-            animate={{ 
-              scale: getTimerState() === 'critical' ? [1, 1.02, 1] : 1,
-            }}
-            transition={{ 
-              duration: 0.5, 
-              repeat: getTimerState() === 'critical' ? Infinity : 0 
-            }}
-            className="rounded-xl py-6 mb-4 font-mono text-5xl font-bold text-center"
-            style={{ 
-              backgroundColor: getTimerState() === 'complete' 
-                ? 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)'
-                : '#1c1c1f',
-              background: getTimerState() === 'complete' 
-                ? 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)'
-                : '#1c1c1f',
-              color: getTimerState() === 'complete' ? '#0a0a0b' 
-                : getTimerState() === 'critical' ? '#f87171'
-                : getTimerState() === 'warning' ? '#fbbf24'
-                : '#fafafa',
-              boxShadow: getTimerState() === 'critical' ? '0 0 30px rgba(248, 113, 113, 0.3)' 
-                : getTimerState() === 'warning' ? '0 0 20px rgba(251, 191, 36, 0.2)'
-                : getTimerState() === 'complete' ? '0 0 30px rgba(74, 222, 128, 0.4)'
+      {/* Timer Section */}
+      <div style={{ padding: '0 16px', marginTop: '16px' }}>
+        <div style={{
+          backgroundColor: '#141416',
+          borderRadius: '16px',
+          border: '1px solid #27272a',
+          padding: '16px'
+        }}>
+          <p style={{ 
+            fontSize: '11px', 
+            fontWeight: '600', 
+            color: '#52525b', 
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: '12px',
+            margin: '0 0 12px'
+          }}>
+            Rest Timer
+          </p>
+
+          {/* Timer display - BIG */}
+          <div style={{
+            backgroundColor: restTimerRemaining === 0 ? '#22c55e' : '#1c1c1f',
+            borderRadius: '16px',
+            padding: '24px 0',
+            textAlign: 'center',
+            marginBottom: '16px',
+            boxShadow: restTimerRemaining <= 10 && restTimerRemaining > 0
+              ? '0 0 30px rgba(248, 113, 113, 0.4)'
+              : restTimerRemaining === 0
+                ? '0 0 30px rgba(74, 222, 128, 0.5)'
                 : 'none'
-            }}
-          >
-            {formatTime(restTimerRemaining)}
-          </motion.div>
-
-          {/* Timer Controls */}
-          <div className="flex gap-3">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={restTimerRemaining}
-              onChange={(e) => setRestTimerRemaining(parseInt(e.target.value) || 0)}
-              className="w-20 h-12 rounded-lg text-center font-semibold outline-none"
-              style={{ backgroundColor: '#1c1c1f', border: '1px solid #3f3f46', color: '#fafafa' }}
-            />
-
-            <AnimatePresence mode="wait">
-              {!restTimerActive ? (
-                <motion.button
-                  key="play"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={startRestTimer}
-                  className="flex-1 h-12 rounded-lg flex items-center justify-center font-semibold gap-2"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-                    color: '#0a0a0b'
-                  }}
-                >
-                  <Play className="w-5 h-5" fill="currentColor" />
-                  Start
-                </motion.button>
-              ) : (
-                <motion.button
-                  key="pause"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={pauseRestTimer}
-                  className="flex-1 h-12 rounded-lg flex items-center justify-center font-semibold gap-2"
-                  style={{ 
-                    backgroundColor: '#fbbf24',
-                    color: '#0a0a0b'
-                  }}
-                >
-                  <Pause className="w-5 h-5" fill="currentColor" />
-                  Pause
-                </motion.button>
-              )}
-            </AnimatePresence>
-
-            <motion.button
-              whileHover={{ scale: 1.02, rotate: -90 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={resetRestTimer}
-              className="w-12 h-12 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#1c1c1f', border: '1px solid #3f3f46' }}
-            >
-              <RotateCcw className="w-5 h-5" style={{ color: '#a1a1aa' }} />
-            </motion.button>
+          }}>
+            <span style={{
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+              fontSize: '48px',
+              fontWeight: '700',
+              color: restTimerRemaining === 0 
+                ? '#0a0a0b' 
+                : restTimerRemaining <= 10 
+                  ? '#f87171' 
+                  : restTimerRemaining <= 30 
+                    ? '#fbbf24' 
+                    : '#fafafa'
+            }}>
+              {formatTime(restTimerRemaining)}
+            </span>
           </div>
-        </motion.div>
 
-        {/* NOTES */}
-        <div 
-          className="rounded-2xl p-4"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
-        >
-          <label className="block text-sm font-medium mb-3" style={{ color: '#52525b' }}>
-            WORKOUT NOTES
+          {/* Timer controls */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            {/* Time input */}
+            <div>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={restTimerRemaining}
+                onChange={(e) => setRestTimerRemaining(parseInt(e.target.value) || 0)}
+                style={{
+                  width: '64px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  border: '1px solid #3f3f46',
+                  backgroundColor: '#1c1c1f',
+                  color: '#fafafa',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  fontFamily: 'ui-monospace, monospace',
+                  textAlign: 'center',
+                  outline: 'none'
+                }}
+              />
+              <p style={{ fontSize: '11px', color: '#52525b', textAlign: 'center', marginTop: '4px', margin: '4px 0 0' }}>sec</p>
+            </div>
+
+            {/* Start/Pause */}
+            <button
+              onClick={restTimerActive ? pauseRestTimer : startRestTimer}
+              style={{
+                flex: 1,
+                height: '48px',
+                borderRadius: '12px',
+                border: 'none',
+                background: restTimerActive 
+                  ? '#fbbf24' 
+                  : 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                color: '#0a0a0b',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              {restTimerActive ? <Pause size={20} /> : <Play size={20} />}
+              {restTimerActive ? 'Pause' : 'Start'}
+            </button>
+
+            {/* Reset */}
+            <button
+              onClick={resetRestTimer}
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                border: '1px solid #3f3f46',
+                backgroundColor: '#1c1c1f',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <RotateCcw size={20} color="#a1a1aa" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Notes Section */}
+      <div style={{ padding: '0 16px', marginTop: '12px', marginBottom: '32px' }}>
+        <div style={{
+          backgroundColor: '#141416',
+          borderRadius: '16px',
+          border: '1px solid #27272a',
+          padding: '16px'
+        }}>
+          <label style={{ 
+            fontSize: '11px', 
+            fontWeight: '600', 
+            color: '#52525b', 
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            display: 'block',
+            marginBottom: '8px'
+          }}>
+            Workout Notes
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="How did you feel? Any notes for next time..."
+            placeholder="How did you feel? Any notes..."
             rows={3}
-            className="w-full rounded-lg p-3 resize-none outline-none transition-all"
-            style={{ 
-              backgroundColor: '#1c1c1f', 
-              border: '1px solid #27272a', 
+            style={{
+              width: '100%',
+              borderRadius: '12px',
+              border: '1px solid #27272a',
+              backgroundColor: '#1c1c1f',
               color: '#fafafa',
-              fontSize: '16px'
+              fontSize: '16px',
+              padding: '12px',
+              resize: 'none',
+              outline: 'none',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box'
             }}
           />
         </div>
-      </main>
+      </div>
     </div>
   )
 }

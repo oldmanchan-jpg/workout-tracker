@@ -7,7 +7,7 @@ export default function PendingApproval() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-lg p-8 max-w-md text-center">
-        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)' }}>
           <Clock className="w-8 h-8 text-white" />
         </div>
         

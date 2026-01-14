@@ -133,7 +133,7 @@ export default function Progress() {
       <div className="min-h-screen" style={{ backgroundColor: '#0a0a0b' }}>
         <TopBar />
         <main className="max-w-lg mx-auto p-4">
-          <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}>
+          <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: '#141416', border: '1px solid #27272a', borderRadius: '16px' }}>
             <div 
               className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'rgba(248, 113, 113, 0.1)' }}
@@ -190,7 +190,7 @@ export default function Progress() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
                 className="rounded-2xl p-4"
-                style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+                style={{ backgroundColor: '#141416', border: '1px solid #27272a', borderRadius: '16px' }}
               >
                 <stat.icon className="w-5 h-5 mb-2" style={{ color: stat.color }} />
                 <div className="text-2xl font-bold" style={{ color: '#fafafa' }}>
@@ -210,7 +210,7 @@ export default function Progress() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
             className="rounded-2xl p-4"
-            style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+            style={{ backgroundColor: '#141416', border: '1px solid #27272a', borderRadius: '16px' }}
           >
             <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#fafafa' }}>
               <TrendingUp className="w-5 h-5" style={{ color: '#22d3ee' }} />
@@ -259,7 +259,7 @@ export default function Progress() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
           className="rounded-2xl p-4"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          style={{ backgroundColor: '#141416', border: '1px solid #27272a', borderRadius: '16px' }}
         >
           <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#fafafa' }}>
             <Calendar className="w-5 h-5" style={{ color: '#818cf8' }} />
@@ -314,7 +314,7 @@ export default function Progress() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          style={{ backgroundColor: '#141416', border: '1px solid #27272a', borderRadius: '16px' }}
         >
           <div className="p-4" style={{ borderBottom: '1px solid #27272a' }}>
             <h3 className="font-semibold flex items-center gap-2" style={{ color: '#fafafa' }}>
@@ -347,14 +347,18 @@ export default function Progress() {
               </Link>
             </div>
           ) : (
-            <div className="divide-y" style={{ borderColor: '#1c1c1f' }}>
+            <div className="space-y-2 p-2">
               {workouts.slice(0, 5).map((workout, index) => (
                 <motion.div
                   key={workout.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 + (index * 0.1), duration: 0.3 }}
-                  className="p-4 flex items-center gap-3"
+                  className="p-4 flex items-center gap-3 rounded-xl"
+                  style={{
+                    backgroundColor: '#1c1c1f',
+                    border: '1px solid #27272a'
+                  }}
                 >
                   <div 
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"

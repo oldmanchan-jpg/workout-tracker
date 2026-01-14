@@ -64,7 +64,7 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)' }}>
               <UserPlus className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 placeholder="you@example.com"
                 disabled={loading || success}
               />
@@ -98,7 +98,7 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 placeholder="••••••••"
                 disabled={loading || success}
               />
@@ -114,7 +114,7 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 placeholder="••••••••"
                 disabled={loading || success}
               />
@@ -135,7 +135,8 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
             <button
               type="submit"
               disabled={loading || success}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)' }}
             >
               {loading ? 'Creating Account...' : success ? 'Success!' : 'Sign Up'}
             </button>
@@ -147,7 +148,8 @@ export default function SignUp({ onSwitchToLogin }: SignUpProps) {
               <button
                 type="button"
                 onClick={onSwitchToLogin}
-                className="text-orange-500 hover:text-orange-400 font-medium"
+                className="font-medium transition-colors hover:opacity-80"
+                style={{ color: '#22d3ee' }}
               >
                 Log In
               </button>

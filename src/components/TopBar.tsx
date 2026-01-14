@@ -10,6 +10,11 @@ export default function TopBar() {
   const { signOut } = useAuth()
   const { isAdmin } = useProfile()
   
+  // Hide on workout page - it has its own header
+  if (location.pathname === '/workout') {
+    return null
+  }
+  
   const isActive = (path: string) => location.pathname === path
 
   return (
@@ -23,8 +28,8 @@ export default function TopBar() {
           
           {/* Page Indicators for Mobile */}
           <div className="flex items-center gap-2">
-            <Link to="/" className={`w-2 h-2 rounded-full transition-all ${isActive('/') ? 'bg-orange-500 w-6' : 'bg-gray-600'}`} />
-            <Link to="/progress" className={`w-2 h-2 rounded-full transition-all ${isActive('/progress') ? 'bg-orange-500 w-6' : 'bg-gray-600'}`} />
+            <Link to="/" className={`w-2 h-2 rounded-full transition-all ${isActive('/') ? 'bg-cyan-400 w-6' : 'bg-gray-600'}`} />
+            <Link to="/progress" className={`w-2 h-2 rounded-full transition-all ${isActive('/progress') ? 'bg-cyan-400 w-6' : 'bg-gray-600'}`} />
           </div>
 
           <button
@@ -70,7 +75,7 @@ export default function TopBar() {
             {isAdmin && (
               <Link
                 to="/admin"
-                className="text-gray-300 hover:text-orange-500 transition-colors"
+                className="text-gray-300 hover:text-cyan-400 transition-colors"
               >
                 Admin
               </Link>

@@ -43,7 +43,7 @@ export default function Login({ onSwitchToSignUp }: LoginProps) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)' }}>
               <LogIn className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -62,7 +62,7 @@ export default function Login({ onSwitchToSignUp }: LoginProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 placeholder="you@example.com"
                 disabled={loading}
               />
@@ -77,7 +77,7 @@ export default function Login({ onSwitchToSignUp }: LoginProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                 placeholder="••••••••"
                 disabled={loading}
               />
@@ -92,7 +92,8 @@ export default function Login({ onSwitchToSignUp }: LoginProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)' }}
             >
               {loading ? 'Logging in...' : 'Log In'}
             </button>
@@ -104,7 +105,8 @@ export default function Login({ onSwitchToSignUp }: LoginProps) {
               <button
                 type="button"
                 onClick={onSwitchToSignUp}
-                className="text-orange-500 hover:text-orange-400 font-medium"
+                className="font-medium transition-colors hover:opacity-80"
+                style={{ color: '#22d3ee' }}
               >
                 Sign Up
               </button>

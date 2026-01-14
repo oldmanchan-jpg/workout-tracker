@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Template } from '@/types'
-import { Play, ChevronRight, Dumbbell } from 'lucide-react'
+import { Play, ChevronRight, Dumbbell, Lightbulb } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import TopBar from '@/components/TopBar'
@@ -67,7 +67,7 @@ export default function Dashboard() {
             className="w-full h-14 px-4 rounded-xl font-semibold text-lg appearance-none cursor-pointer outline-none transition-all"
             style={{ 
               backgroundColor: '#1c1c1f', 
-              border: '1px solid #3f3f46',
+              border: '1px solid #27272a',
               color: '#fafafa',
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2352525b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
               backgroundRepeat: 'no-repeat',
@@ -167,7 +167,7 @@ export default function Dashboard() {
           }}
         >
           <div className="flex items-start gap-3">
-            <span className="text-2xl">💡</span>
+            <Lightbulb className="w-6 h-6 flex-shrink-0 mt-0.5" style={{ color: '#22d3ee' }} />
             <div>
               <h3 className="font-medium mb-1" style={{ color: '#22d3ee' }}>Pro Tip</h3>
               <p className="text-sm leading-relaxed" style={{ color: '#a1a1aa' }}>

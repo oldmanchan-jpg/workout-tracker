@@ -4,6 +4,7 @@ import { useProfile, Profile } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
 import { Users, Shield, CheckCircle, XCircle, UserPlus } from 'lucide-react'
 import { motion } from 'framer-motion'
+import TopBar from '@/components/TopBar'
 
 export default function Admin() {
   const navigate = useNavigate()
@@ -78,8 +79,9 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen p-4" style={{ backgroundColor: '#0a0a0b' }}>
-      <div className="max-w-lg mx-auto space-y-4">
+    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0b' }}>
+      <TopBar />
+      <div className="max-w-lg mx-auto p-4 space-y-4">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -176,8 +178,8 @@ export default function Admin() {
                   <div 
                     className="w-11 h-11 rounded-full flex items-center justify-center font-bold flex-shrink-0"
                     style={{ 
-                      backgroundColor: client.is_active ? 'rgba(74, 222, 128, 0.2)' : '#1c1c1f',
-                      color: client.is_active ? '#4ade80' : '#52525b'
+                      backgroundColor: client.is_active ? '#4ade80' : '#52525b',
+                      color: client.is_active ? '#0a0a0b' : '#fafafa'
                     }}
                   >
                     {(client.full_name || client.email).charAt(0).toUpperCase()}
@@ -211,8 +213,7 @@ export default function Admin() {
                             color: '#0a0a0b'
                           }
                         : { 
-                            backgroundColor: '#1c1c1f',
-                            border: '1px solid #3f3f46',
+                            backgroundColor: '#3f3f46',
                             color: '#a1a1aa'
                           }
                     }

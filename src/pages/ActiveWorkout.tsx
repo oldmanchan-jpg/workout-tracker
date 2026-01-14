@@ -449,18 +449,18 @@ export default function ActiveWorkout() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: exerciseIndex * 0.1, duration: 0.3 }}
-                className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg overflow-hidden border border-gray-700"
               >
                 {/* Exercise Header - Always visible */}
                 <motion.button
                   whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                  className="w-full px-3 py-3 flex items-center justify-between border-b border-gray-700 transition-colors"
+                  className="w-full px-3 py-3 flex items-center justify-between border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 transition-all"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 font-semibold text-sm">{exerciseIndex + 1}.</span>
-                    <h3 className={`font-bold text-left ${allSetsCompleted ? 'text-green-500' : 'text-blue-400'}`}>
+                    <h3 className={`font-bold text-left ${allSetsCompleted ? 'text-green-500' : 'text-orange-400'}`}>
                       {exercise.name}
                     </h3>
                     {allSetsCompleted && (
@@ -615,7 +615,7 @@ export default function ActiveWorkout() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700"
+          className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-3 mb-3 border border-gray-700"
         >
           <h3 className="text-white font-semibold mb-2 text-xs uppercase text-gray-400">Rest Timer</h3>
           
@@ -700,7 +700,7 @@ export default function ActiveWorkout() {
         </motion.div>
 
         {/* Workout Notes */}
-        <div className="bg-gray-800 rounded-lg p-3 mb-3">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-3 mb-3 border border-gray-700">
           <label htmlFor="workout-notes" className="block text-gray-400 font-medium mb-2 text-xs uppercase">
             Workout Notes
           </label>

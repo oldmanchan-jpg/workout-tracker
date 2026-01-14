@@ -61,9 +61,13 @@ export default function Admin() {
 
   if (profileLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="bg-white rounded-2xl p-8 shadow-2xl">
-          <p className="text-gray-900 font-bold text-lg">Loading admin panel...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0b' }}>
+        <div className="text-center">
+          <div 
+            className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
+            style={{ borderColor: '#22d3ee', borderTopColor: 'transparent' }}
+          />
+          <p style={{ color: '#52525b' }}>Loading admin panel...</p>
         </div>
       </div>
     )
@@ -74,143 +78,153 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header - WHITE CARD */}
+    <div className="min-h-screen p-4" style={{ backgroundColor: '#0a0a0b' }}>
+      <div className="max-w-lg mx-auto space-y-4">
+        {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-6 sm:p-8 shadow-2xl border-2 border-orange-100"
+          className="rounded-2xl p-6 text-center"
+          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
         >
-          <div className="flex items-center gap-4">
-            <motion.div 
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.5 }}
-              className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg"
-            >
-              <Shield className="w-8 h-8 text-white" />
-            </motion.div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-700 text-base sm:text-lg font-medium">Manage your clients and their access</p>
-            </div>
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ 
+              background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
+              boxShadow: '0 0 30px rgba(129, 140, 248, 0.3)'
+            }}
+          >
+            <Shield className="w-8 h-8" style={{ color: '#0a0a0b' }} />
           </div>
+          <h1 className="text-2xl font-bold mb-1" style={{ color: '#fafafa' }}>
+            Admin Panel
+          </h1>
+          <p style={{ color: '#52525b' }}>Manage your clients</p>
         </motion.div>
 
-        {/* Stats - WHITE CARDS */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="bg-white rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-gray-200"
+            transition={{ delay: 0.1 }}
+            className="rounded-2xl p-4"
+            style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
           >
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3 mx-auto">
-              <Users className="w-6 h-6 text-blue-600" />
+            <Users className="w-5 h-5 mb-2" style={{ color: '#22d3ee' }} />
+            <div className="text-3xl font-bold" style={{ color: '#fafafa' }}>
+              {clients.length}
             </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-gray-900 mb-1">{clients.length}</p>
-              <p className="text-sm font-bold text-gray-600 uppercase">Total Clients</p>
-            </div>
+            <p className="text-sm" style={{ color: '#52525b' }}>Total Clients</p>
           </motion.div>
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="bg-white rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-gray-200"
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl p-4"
+            style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
           >
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3 mx-auto">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <CheckCircle className="w-5 h-5 mb-2" style={{ color: '#4ade80' }} />
+            <div className="text-3xl font-bold" style={{ color: '#4ade80' }}>
+              {clients.filter(c => c.is_active).length}
             </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-green-600 mb-1">
-                {clients.filter(c => c.is_active).length}
-              </p>
-              <p className="text-sm font-bold text-gray-600 uppercase">Active Now</p>
-            </div>
+            <p className="text-sm" style={{ color: '#52525b' }}>Active</p>
           </motion.div>
         </div>
 
-        {/* Client List - WHITE CARD */}
+        {/* Client List */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-gray-200"
+          transition={{ delay: 0.3 }}
+          className="rounded-2xl overflow-hidden"
+          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
         >
-          <div className="p-5 sm:p-6 border-b-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Users className="w-6 h-6 text-orange-600" />
-              Client List
+          <div className="p-4" style={{ borderBottom: '1px solid #27272a' }}>
+            <h2 className="font-semibold flex items-center gap-2" style={{ color: '#fafafa' }}>
+              <Users className="w-5 h-5" style={{ color: '#22d3ee' }} />
+              Clients
             </h2>
           </div>
 
           {clients.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-8 text-center">
               <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="mb-6"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="mb-4"
               >
-                <UserPlus className="w-24 h-24 text-gray-300 mx-auto" />
+                <UserPlus className="w-16 h-16 mx-auto" style={{ color: '#27272a' }} />
               </motion.div>
-              <p className="text-gray-600 font-bold text-xl mb-2">No clients yet</p>
-              <p className="text-gray-500 text-base">
-                Clients will appear here when they sign up and await your approval.
+              <p className="font-medium mb-1" style={{ color: '#a1a1aa' }}>No clients yet</p>
+              <p className="text-sm" style={{ color: '#52525b' }}>
+                They'll appear here when they sign up
               </p>
             </div>
           ) : (
-            <div className="divide-y-2 divide-gray-200">
+            <div className="divide-y" style={{ borderColor: '#1c1c1f' }}>
               {clients.map((client, index) => (
                 <motion.div 
                   key={client.id}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + (index * 0.1), duration: 0.4 }}
-                  className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-gray-50 transition-all"
+                  transition={{ delay: 0.4 + (index * 0.1) }}
+                  className="p-4 flex items-center gap-3"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-lg ${
-                      client.is_active ? 'bg-green-500' : 'bg-gray-400'
-                    }`}>
-                      {(client.full_name || client.email).charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-gray-900 font-bold text-lg">
-                        {client.full_name || client.email}
-                      </p>
-                      {client.full_name && (
-                        <p className="text-gray-600 text-sm font-medium">{client.email}</p>
-                      )}
-                      <p className="text-gray-500 text-sm font-semibold mt-1">
-                        Joined {new Date(client.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
+                  {/* Avatar */}
+                  <div 
+                    className="w-11 h-11 rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                    style={{ 
+                      backgroundColor: client.is_active ? 'rgba(74, 222, 128, 0.2)' : '#1c1c1f',
+                      color: client.is_active ? '#4ade80' : '#52525b'
+                    }}
+                  >
+                    {(client.full_name || client.email).charAt(0).toUpperCase()}
                   </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate" style={{ color: '#fafafa' }}>
+                      {client.full_name || client.email}
+                    </p>
+                    {client.full_name && (
+                      <p className="text-sm truncate" style={{ color: '#52525b' }}>
+                        {client.email}
+                      </p>
+                    )}
+                    <p className="text-xs" style={{ color: '#3f3f46' }}>
+                      Joined {new Date(client.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {/* Toggle Button */}
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => toggleActiveStatus(client.id, client.is_active)}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-base transition-all shadow-lg ${
+                    className="px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 flex-shrink-0"
+                    style={
                       client.is_active
-                        ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-600/30'
-                        : 'bg-gray-600 hover:bg-gray-700 text-white shadow-gray-600/30'
-                    }`}
+                        ? { 
+                            background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                            color: '#0a0a0b'
+                          }
+                        : { 
+                            backgroundColor: '#1c1c1f',
+                            border: '1px solid #3f3f46',
+                            color: '#a1a1aa'
+                          }
+                    }
                   >
                     {client.is_active ? (
                       <>
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-4 h-4" />
                         Active
                       </>
                     ) : (
                       <>
-                        <XCircle className="w-5 h-5" />
+                        <XCircle className="w-4 h-4" />
                         Activate
                       </>
                     )}

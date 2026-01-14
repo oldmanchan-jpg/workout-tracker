@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import type { Template } from '../types'
@@ -43,11 +43,11 @@ export default function ActiveWorkout() {
     return null
   }
 
-  // Initialize all exercises with their sets
+  // Initialize all exercises - COLLAPSED BY DEFAULT except first one
   const [exercises, setExercises] = useState<ExerciseState[]>(
     template.exercises.map((ex, idx) => ({
       name: ex.name,
-      isCollapsed: false,
+      isCollapsed: idx !== 0, // ✅ FIX: Only first exercise is open
       sets: Array(ex.sets).fill(null).map((_, setIdx) => ({
         status: idx === 0 && setIdx === 0 ? 'in_progress' : 'pending'
       })),
@@ -81,7 +81,6 @@ export default function ActiveWorkout() {
   // Trigger confetti when workout is finished
   useEffect(() => {
     if (isFinished) {
-      // Fire confetti multiple times for extra celebration
       const duration = 3000
       const animationEnd = Date.now() + duration
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
@@ -202,7 +201,7 @@ export default function ActiveWorkout() {
               if (i === nextExerciseIndex && e.sets[0]) {
                 const newSets = [...e.sets]
                 newSets[0] = { ...newSets[0], status: 'in_progress' }
-                return { ...e, sets: newSets }
+                return { ...e, sets: newSets, isCollapsed: false } // ✅ Auto-open next exercise
               }
               return e
             }))
@@ -396,9 +395,9 @@ export default function ActiveWorkout() {
     )
   }
 
-  // Active workout screen - ACCORDION VIEW
+  // Active workout screen - IMPROVED MOBILE UI
   return (
-    <div className="min-h-screen bg-gray-900 p-2 sm:p-4">
+    <div className="min-h-screen bg-gray-900 p-3 sm:p-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <motion.div 
@@ -415,24 +414,24 @@ export default function ActiveWorkout() {
                 navigate('/')
               }
             }}
-            className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors border border-gray-700"
+            className="p-3 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors border-2 border-gray-700"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34, 197, 94, 0.5)" }}
             whileTap={{ scale: 0.95 }}
             onClick={handleFinishWorkout}
-            className="px-4 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all text-sm sm:text-base shadow-lg shadow-green-600/30"
+            className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-lg transition-all text-base shadow-lg shadow-green-600/30"
           >
-            Finish
+            Finish Workout
           </motion.button>
         </motion.div>
 
-        {/* Workout Title */}
-        <div className="mb-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">{template.name}</h1>
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-400">
+        {/* Workout Title - LARGER FONT */}
+        <div className="mb-5">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{template.name}</h1>
+          <div className="flex items-center gap-3 text-base text-gray-400">
             <span>📅 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
           </div>
         </div>
@@ -442,6 +441,8 @@ export default function ActiveWorkout() {
           {exercises.map((exercise, exerciseIndex) => {
             const templateExercise = template.exercises[exerciseIndex]
             const allSetsCompleted = exercise.sets.every(s => s.status === 'completed')
+            const completedCount = exercise.sets.filter(s => s.status === 'completed').length
+            const totalSets = exercise.sets.length
             
             return (
               <motion.div 
@@ -449,27 +450,33 @@ export default function ActiveWorkout() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: exerciseIndex * 0.1, duration: 0.3 }}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg overflow-hidden border border-gray-700"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg overflow-hidden border-2 border-gray-700"
               >
-                {/* Exercise Header - Always visible */}
+                {/* Exercise Header - LARGER & MORE VISIBLE */}
                 <motion.button
                   whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                  className="w-full px-3 py-3 flex items-center justify-between border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 transition-all"
+                  className="w-full px-4 py-4 flex items-center justify-between border-b-2 border-gray-700 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 transition-all"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500 font-semibold text-sm">{exerciseIndex + 1}.</span>
-                    <h3 className={`font-bold text-left ${allSetsCompleted ? 'text-green-500' : 'text-orange-400'}`}>
-                      {exercise.name}
-                    </h3>
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-400 font-bold text-lg">{exerciseIndex + 1}.</span>
+                    <div className="text-left">
+                      <h3 className={`font-bold text-lg ${allSetsCompleted ? 'text-green-400' : 'text-orange-400'}`}>
+                        {exercise.name}
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        {completedCount}/{totalSets} sets complete
+                      </p>
+                    </div>
                     {allSetsCompleted && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        className="ml-2"
                       >
-                        <Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-6 h-6 text-green-400" />
                       </motion.div>
                     )}
                   </div>
@@ -477,7 +484,7 @@ export default function ActiveWorkout() {
                     animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-6 h-6 text-gray-400" />
                   </motion.div>
                 </motion.button>
 
@@ -491,17 +498,17 @@ export default function ActiveWorkout() {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="p-2 sm:p-3">
-                        {/* Compact Table for Mobile */}
+                      <div className="p-3 sm:p-4 bg-gray-900">
+                        {/* IMPROVED TABLE - BETTER CONTRAST & LARGER */}
                         <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
+                          <table className="w-full text-base">
                             <thead>
-                              <tr className="text-xs text-gray-400">
-                                <th className="text-left pb-2 px-1">Set</th>
-                                <th className="text-center pb-2 px-1">kg</th>
-                                <th className="text-center pb-2 px-1">Reps</th>
-                                <th className="text-center pb-2 px-1">RPE</th>
-                                <th className="w-10 pb-2"></th>
+                              <tr className="text-sm font-bold text-gray-300 border-b-2 border-gray-700">
+                                <th className="text-left pb-3 px-2">Set</th>
+                                <th className="text-center pb-3 px-2">kg</th>
+                                <th className="text-center pb-3 px-2">Reps</th>
+                                <th className="text-center pb-3 px-2">RPE</th>
+                                <th className="w-12 pb-3"></th>
                               </tr>
                             </thead>
                             <tbody>
@@ -512,18 +519,18 @@ export default function ActiveWorkout() {
 
                             return (
                               <tr key={setIndex} className="border-t border-gray-700">
-                                {/* Set Number & Previous */}
-                                <td className="py-2 px-1">
-                                  <div className="text-white font-semibold">{setIndex + 1}</div>
+                                {/* Set Number & Previous - LARGER */}
+                                <td className="py-3 px-2">
+                                  <div className="text-white font-bold text-lg">{setIndex + 1}</div>
                                   {previousSet && (
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-sm text-gray-400">
                                       {previousSet.weight}×{previousSet.reps}
                                     </div>
                                   )}
                                 </td>
 
-                                {/* Weight Input */}
-                                <td className="py-2 px-1">
+                                {/* Weight Input - LARGER & BETTER CONTRAST */}
+                                <td className="py-3 px-2">
                                   <input
                                     type="number"
                                     inputMode="decimal"
@@ -536,12 +543,16 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.weight?.toString()}
-                                    className="w-full px-1 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                                    className={`w-full px-2 py-3 rounded-lg text-center text-base font-semibold focus:outline-none focus:ring-4 transition-all ${
+                                      isInProgress 
+                                        ? 'bg-white text-gray-900 border-2 border-orange-500 focus:ring-orange-500/50' 
+                                        : 'bg-gray-800 text-gray-300 border-2 border-gray-700'
+                                    }`}
                                   />
                                 </td>
 
-                                {/* Reps Input */}
-                                <td className="py-2 px-1">
+                                {/* Reps Input - LARGER & BETTER CONTRAST */}
+                                <td className="py-3 px-2">
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -553,12 +564,16 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.reps.toString()}
-                                    className="w-full px-1 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                                    className={`w-full px-2 py-3 rounded-lg text-center text-base font-semibold focus:outline-none focus:ring-4 transition-all ${
+                                      isInProgress 
+                                        ? 'bg-white text-gray-900 border-2 border-orange-500 focus:ring-orange-500/50' 
+                                        : 'bg-gray-800 text-gray-300 border-2 border-gray-700'
+                                    }`}
                                   />
                                 </td>
 
-                                {/* RPE Input */}
-                                <td className="py-2 px-1">
+                                {/* RPE Input - LARGER & BETTER CONTRAST */}
+                                <td className="py-3 px-2">
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -572,26 +587,37 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder="7"
-                                    className="w-full px-1 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                                    className={`w-full px-2 py-3 rounded-lg text-center text-base font-semibold focus:outline-none focus:ring-4 transition-all ${
+                                      isInProgress 
+                                        ? 'bg-white text-gray-900 border-2 border-orange-500 focus:ring-orange-500/50' 
+                                        : 'bg-gray-800 text-gray-300 border-2 border-gray-700'
+                                    }`}
                                   />
                                 </td>
 
-                                {/* Checkmark */}
-                                <td className="py-2 px-1">
+                                {/* Checkmark - MUCH MORE VISIBLE */}
+                                <td className="py-3 px-2">
                                   {isCompleted ? (
                                     <div className="flex items-center justify-center">
-                                      <Check className="w-5 h-5 text-green-500" />
+                                      <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: "spring" }}
+                                        className="w-9 h-9 bg-green-500 rounded-full flex items-center justify-center"
+                                      >
+                                        <Check className="w-6 h-6 text-white" strokeWidth={3} />
+                                      </motion.div>
                                     </div>
                                   ) : isInProgress ? (
                                     <button
                                       onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                      className="flex items-center justify-center p-2 hover:bg-gray-700 rounded transition-colors w-full"
+                                      className="flex items-center justify-center p-2 hover:bg-orange-500/20 rounded-lg transition-all w-full"
                                     >
-                                      <div className="w-5 h-5 rounded border-2 border-gray-500 hover:border-gray-400" />
+                                      <div className="w-9 h-9 rounded-full border-4 border-orange-500 hover:bg-orange-500/30 transition-all" />
                                     </button>
                                   ) : (
                                     <div className="flex items-center justify-center">
-                                      <div className="w-5 h-5 rounded border-2 border-gray-700" />
+                                      <div className="w-9 h-9 rounded-full border-4 border-gray-700" />
                                     </div>
                                   )}
                                 </td>
@@ -610,16 +636,16 @@ export default function ActiveWorkout() {
           })}
         </div>
 
-        {/* Timer Section */}
+        {/* Timer Section - LARGER */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-3 mb-3 border border-gray-700"
+          className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-4 mb-4 border-2 border-gray-700"
         >
-          <h3 className="text-white font-semibold mb-2 text-xs uppercase text-gray-400">Rest Timer</h3>
+          <h3 className="text-white font-bold mb-3 text-base uppercase text-gray-300">Rest Timer</h3>
           
-          {/* Timer Display - Full width on mobile */}
+          {/* Timer Display - LARGER */}
           <motion.div 
             animate={{ 
               scale: restTimerRemaining <= 10 && restTimerRemaining > 0 ? [1, 1.02, 1] : 1,
@@ -629,7 +655,7 @@ export default function ActiveWorkout() {
               scale: { duration: 0.5, repeat: restTimerRemaining <= 10 && restTimerRemaining > 0 ? Infinity : 0 },
               boxShadow: { duration: 0.3 }
             }}
-            className={`w-full text-center py-4 rounded-lg font-mono text-3xl sm:text-4xl font-bold mb-3 transition-colors duration-300 ${
+            className={`w-full text-center py-6 rounded-xl font-mono text-5xl sm:text-6xl font-bold mb-4 transition-colors duration-300 ${
               restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
               restTimerRemaining <= 10 ? 'bg-red-600 text-white' : 
               'bg-gray-700 text-white'
@@ -638,10 +664,10 @@ export default function ActiveWorkout() {
             {formatTime(restTimerRemaining)}
           </motion.div>
 
-          {/* Controls Row */}
-          <div className="flex items-center gap-2">
+          {/* Controls Row - LARGER BUTTONS */}
+          <div className="flex items-center gap-3">
             {/* Timer Duration Input */}
-            <div className="flex-shrink-0" style={{ width: '70px' }}>
+            <div className="flex-shrink-0" style={{ width: '90px' }}>
               <input
                 type="number"
                 inputMode="numeric"
@@ -650,14 +676,14 @@ export default function ActiveWorkout() {
                   const value = parseInt(e.target.value) || 0
                   setRestTimerRemaining(value)
                 }}
-                className="w-full px-2 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-900 text-center text-base font-bold focus:outline-none focus:ring-4 focus:ring-orange-500/50"
                 placeholder="90"
               />
-              <p className="text-xs text-gray-400 text-center mt-1">sec</p>
+              <p className="text-sm text-gray-400 text-center mt-1 font-semibold">seconds</p>
             </div>
 
-            {/* Timer Controls */}
-            <div className="flex-1 flex gap-2">
+            {/* Timer Controls - LARGER */}
+            <div className="flex-1 flex gap-3">
               <AnimatePresence mode="wait">
                 {!restTimerActive ? (
                   <motion.button
@@ -668,9 +694,9 @@ export default function ActiveWorkout() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={startRestTimer}
-                    className="flex-1 p-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                    className="flex-1 p-4 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors flex items-center justify-center shadow-lg font-bold"
                   >
-                    <Play className="w-5 h-5" />
+                    <Play className="w-6 h-6" />
                   </motion.button>
                 ) : (
                   <motion.button
@@ -681,9 +707,9 @@ export default function ActiveWorkout() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={pauseRestTimer}
-                    className="flex-1 p-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                    className="flex-1 p-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl transition-colors flex items-center justify-center shadow-lg font-bold"
                   >
-                    <Pause className="w-5 h-5" />
+                    <Pause className="w-6 h-6" />
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -691,17 +717,17 @@ export default function ActiveWorkout() {
                 whileHover={{ scale: 1.05, rotate: -180 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={resetRestTimer}
-                className="flex-1 p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                className="flex-1 p-4 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-colors flex items-center justify-center shadow-lg font-bold"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-6 h-6" />
               </motion.button>
             </div>
           </div>
         </motion.div>
 
-        {/* Workout Notes */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-3 mb-3 border border-gray-700">
-          <label htmlFor="workout-notes" className="block text-gray-400 font-medium mb-2 text-xs uppercase">
+        {/* Workout Notes - LARGER */}
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl rounded-lg p-4 mb-4 border-2 border-gray-700">
+          <label htmlFor="workout-notes" className="block text-gray-300 font-bold mb-3 text-base uppercase">
             Workout Notes
           </label>
           <textarea
@@ -709,7 +735,7 @@ export default function ActiveWorkout() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="How did you feel?"
-            className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-orange-500/50 resize-none font-medium"
             rows={3}
           />
         </div>

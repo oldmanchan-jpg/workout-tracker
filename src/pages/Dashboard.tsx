@@ -7,11 +7,13 @@ import {
 } from 'lucide-react'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import TopBar from '@/components/TopBar'
+import { useProfile } from '../hooks/useProfile'
 
 export default function Dashboard() {
   const [templates] = useState<Template[]>(workoutTemplates)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
   const navigate = useNavigate()
+  const { profile, isAdmin, loading: profileLoading } = useProfile()
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
 
@@ -34,6 +36,16 @@ export default function Dashboard() {
             <p className="text-gray-600 text-lg">Choose a template and start logging your progress</p>
           </div>
         </div>
+
+        {/* Temporary role test - remove later */}
+        {profile && (
+          <div className="bg-gray-800 p-3 rounded-lg mb-4 text-sm">
+            <span className="text-gray-400">Logged in as: </span>
+            <span className={isAdmin ? 'text-orange-500 font-bold' : 'text-white'}>
+              {isAdmin ? '👑 ADMIN' : 'CLIENT'}
+            </span>
+          </div>
+        )}
 
         {/* Template Selection */}
         <div className="bg-white rounded-lg p-6 shadow-lg">

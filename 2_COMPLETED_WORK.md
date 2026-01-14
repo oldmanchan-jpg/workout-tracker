@@ -1,114 +1,79 @@
 # ✅ Completed Work Log
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 13, 2026 - Evening Session
 
 ---
 
-## 🚨 Current Status: BLOCKED
+## 🎉 Current Status: UNBLOCKED - Moving Forward
 
-**Blocker:** CSS Grid layout broken in ActiveWorkout.tsx  
-**Impact:** Cannot test, cannot deploy, cannot proceed with any UX work  
-**Priority:** CRITICAL - Must fix before anything else
+**Previous Blocker (RESOLVED):** CSS Grid layout in ActiveWorkout.tsx ✅
+**Current Phase:** Admin System Planning
+
+---
+
+## 📅 Session: January 13, 2026 - Evening
+
+### Goal: Remove Library + Redesign Progress Page
+**Status:** ✅ COMPLETED & DEPLOYED
+
+### What Was Completed ✅
+
+1. **Removed Library Page**
+   - Deleted `src/pages/Library.tsx`
+   - Removed Library link from `TopBar.tsx`
+   - Removed `/library` route from `App.tsx`
+   - Navigation now: Dashboard | Progress | Logout
+
+2. **Redesigned Progress Page**
+   - Compact 2x2 stat cards (Total Workouts, Total Reps, Volume, Avg Volume)
+   - Added **Volume Trend Chart** using Recharts (line chart, last 10 workouts)
+   - Added **This Week vs Last Week** comparison with percentage changes
+   - Dark theme consistent throughout
+   - Removed cheesy motivational banner
+   - Cleaner workout history list
+
+3. **Installed Recharts Dependency**
+   - `npm install recharts`
+   - Fixed Vercel build failure
+
+### Deployment
+- **Commit:** `3125888` (recharts dependency)
+- **Vercel:** Build successful, live at production URL
+
+---
+
+## 📅 Session: January 13, 2026 - Morning
+
+### Goal: Fix Table Layout in ActiveWorkout.tsx
+**Status:** ✅ COMPLETED
+
+- Table layout now displays correctly as horizontal rows
+- Set | Prev | kg | Reps | RPE | ✓ format working
+- Strong app-style interface achieved
 
 ---
 
 ## 📅 Session: January 12, 2026
 
-### Goal: Redesign ActiveWorkout to Match Strong App Style
-**Status:** ⚠️ PARTIALLY COMPLETED - Layout Issue Unresolved
+### Redesign ActiveWorkout (Partial)
+**Status:** ✅ Layout Fixed (Jan 13)
 
-### What Was Completed ✅
-
-1. **Removed "+ Add Set" Button**
-   - Clients don't modify templates (admin-only feature)
-   - Cleaned up `handleAddExtraSet()` function
-
-2. **Timer Improvements**
-   - Added duration input field (80px) for user-adjustable timer
-   - Timer layout: Input (left) | Display (center) | Controls (right)
-   - Manual controls: Play/Pause/Reset
-   - Color coding: Green when done, Red when <10 sec
-
-3. **Header Simplifications**
-   - Moved "Finish" button to top-right
-   - Cleaner workout title section
-
-### What Is Broken ❌
-
-**Table Layout - Inputs Stacking Vertically**
-
-Expected (Strong app style):
-```
-Set | Prev  | kg   | Reps | RPE | ✓
-----|-------|------|------|-----|---
-1   | —     | [45] | [12] | [7] | □
-2   | 45×12 | [45] | [12] | [7] | □
-```
-
-Actual (broken):
-```
-Set
-Prev
-[45 - full width]
-[12 - full width]
-[7 - full width]
-□
-```
-
-**Attempted Fixes (All Failed):**
-- `grid grid-cols-[40px_60px_1fr_1fr_1fr_40px]`
-- Removed `w-full` from inputs
-- Added wrapper divs
-- Multiple restructuring attempts
-
-**Suspected Root Causes:**
-- CSS grid not applying to child inputs
-- Possible Tailwind compilation issue with arbitrary values
-- Inputs may need explicit width constraints
-- Wrapper divs breaking grid parent-child relationship
+- Timer improvements with duration input
+- Header simplifications
+- Removed "+ Add Set" button (clients can't modify templates)
 
 ---
 
-## 📅 Session: January 11, 2026 - Part 2
+## 📅 Session: January 11, 2026
 
-### UX Improvements: Pre-filled Inputs & Manual Rest Timer
-**Status:** ✅ COMPLETED & PUSHED  
-**Commit:** `a243490`
+### Compact List View + RPE Tracking
+**Status:** ✅ COMPLETED
 
-**Fixes Implemented:**
-
-1. **Pre-filled Input Fields**
-   - Inputs now pre-populated with template values (reps, weight)
-   - Default RPE suggestion: 7
-   - One-click set completion when template values are correct
-   - Values persist after completing sets for quick adjustments
-
-2. **Manual Rest Timer**
-   - Timer no longer auto-starts after set completion
-   - User clicks Play to start timer manually
-   - Full control over rest period timing
-
----
-
-## 📅 Session: January 11, 2026 - Part 1
-
-### Major Feature: Compact List View Workout UI
-**Status:** ✅ COMPLETED & PUSHED  
-**Commit:** `843c246`
-
-**Key Features Built:**
-
-1. **Compact List View** - All sets in scrollable list, no toggles
-2. **Set Status System** - Visual indicators (✓ green, ✗ orange, ○ gray)
-3. **RPE Tracking** - 1-10 scale, saved to database
-4. **Per-Set Rest Timer** - Individual timers with Play/Pause/Reset
-5. **Auto-Complete** - Pre-fills from previous set values
-6. **Add Extra Sets** - Go beyond template (removed in Jan 12 session)
-
-**Files Modified:**
-- `src/pages/ActiveWorkout.tsx` (complete rewrite)
-- `src/types.ts` (added RPE field)
-- `src/services/workoutService.ts` (RPE support)
+- All sets in scrollable list
+- Per-set status indicators
+- RPE tracking (1-10 scale)
+- Per-set rest timers
+- Pre-filled input values from template
 
 ---
 
@@ -116,41 +81,29 @@ Prev
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Table Layout | ❌ BROKEN | Critical blocker |
-| Set Completion | ⏳ Blocked | Cannot test until layout fixed |
-| Rest Timer | ⏳ Blocked | Cannot test until layout fixed |
-| RPE Saving | ⏳ Blocked | Cannot test until layout fixed |
-| Mobile View | ⏳ Blocked | Cannot test until layout fixed |
+| Table Layout | ✅ Working | Fixed Jan 13 |
+| Set Completion | ✅ Working | Tested |
+| Rest Timer | ✅ Working | Manual start/pause/reset |
+| RPE Saving | ✅ Working | Saves to database |
+| Progress Page | ✅ Working | New design deployed |
+| Volume Chart | ✅ Working | Recharts integration |
+| Week Comparison | ✅ Working | Shows % change |
+| Library Removal | ✅ Done | Clean removal |
 
 ---
 
-## 📁 Files Changed (Recent)
+## 📁 Files Changed (This Session)
 
-| File | Status | Last Change |
-|------|--------|-------------|
-| `src/pages/ActiveWorkout.tsx` | ⚠️ Has Bug | Jan 12 - Layout broken |
-| `src/types.ts` | ✅ Good | Jan 11 - Added RPE |
-| `src/services/workoutService.ts` | ✅ Good | Jan 11 - RPE support |
-
----
-
-## 💡 Lessons Learned
-
-1. **Test immediately** after any visual/layout changes
-2. **CSS Grid can fail silently** - use DevTools to verify
-3. **Have fallback plans** - flexbox, explicit widths, table element
-4. **Document blockers clearly** for next session
-5. **Don't stack untested changes** - one change, one test
+| File | Change | Status |
+|------|--------|--------|
+| `src/pages/Progress.tsx` | Complete redesign | ✅ Deployed |
+| `src/pages/Library.tsx` | Deleted | ✅ Done |
+| `src/components/TopBar.tsx` | Removed Library link | ✅ Deployed |
+| `src/App.tsx` | Removed Library route | ✅ Deployed |
+| `package.json` | Added recharts | ✅ Deployed |
 
 ---
 
-## 🎯 Next Action
+## 🎯 What's Next
 
-**FIX THE TABLE LAYOUT** - Nothing else matters until this works.
-
-Debugging approach:
-1. Open DevTools, inspect the grid parent element
-2. Check if `grid` class is actually applied
-3. Check if children are direct children of grid
-4. Try explicit pixel widths instead of `1fr`
-5. If grid won't work, switch to flexbox or HTML table
+See `3_FUTURE_ROADMAP.md` for detailed next steps - primarily the Admin System build.

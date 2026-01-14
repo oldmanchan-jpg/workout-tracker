@@ -491,12 +491,12 @@ export default function ActiveWorkout() {
                   >
                     <div className="px-4 pb-4">
                       {/* Table Header */}
-                      <div className="grid grid-cols-[40px_1fr_1fr_1fr_48px] gap-2 text-[#9a9fa4] text-xs font-medium mb-2 px-1">
-                        <span>SET</span>
-                        <span className="text-center">KG</span>
-                        <span className="text-center">REPS</span>
-                        <span className="text-center">RPE</span>
-                        <span></span>
+                      <div className="flex items-center gap-2 text-[#9a9fa4] text-xs font-medium mb-2 px-1">
+                        <span className="w-10 shrink-0 text-center">SET</span>
+                        <span className="flex-1 text-center">KG</span>
+                        <span className="flex-1 text-center">REPS</span>
+                        <span className="flex-1 text-center">RPE</span>
+                        <span className="w-12 shrink-0 flex justify-center"></span>
                       </div>
 
                       {/* Sets */}
@@ -508,12 +508,12 @@ export default function ActiveWorkout() {
                         return (
                           <div 
                             key={setIndex} 
-                            className={`grid grid-cols-[40px_1fr_1fr_1fr_48px] gap-2 items-center py-2 ${
+                            className={`flex items-center gap-2 py-2 ${
                               isInProgress ? 'bg-black/30 -mx-2 px-2 rounded-[10px]' : ''
                             }`}
                           >
                             {/* Set Number */}
-                            <div className="text-center">
+                            <div className="w-10 shrink-0 text-center">
                               <span className="text-white font-bold">{setIndex + 1}</span>
                               {previousSet && (
                                 <p className="text-[#9a9fa4] text-[10px]">
@@ -535,7 +535,7 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.weight?.toString() || '0'}
-                              className={`w-full px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
+                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
                                 isInProgress 
                                   ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
@@ -556,7 +556,7 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.reps.toString()}
-                              className={`w-full px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
+                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
                                 isInProgress 
                                   ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
@@ -579,7 +579,7 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder="7"
-                              className={`w-full px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
+                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
                                 isInProgress 
                                   ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
@@ -589,7 +589,7 @@ export default function ActiveWorkout() {
                             />
 
                             {/* Checkmark */}
-                            <div className="flex justify-center">
+                            <div className="w-12 shrink-0 flex justify-center">
                               {isCompleted ? (
                                 <div className="w-10 h-10 bg-[#29e33c] rounded-full flex items-center justify-center">
                                   <Check className="w-5 h-5 text-black" strokeWidth={3} />

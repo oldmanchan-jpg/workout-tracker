@@ -2,11 +2,13 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useProfile } from '../hooks/useProfile'
 import { LogOut } from 'lucide-react'
 
 export default function TopBar() {
   const location = useLocation()
   const { signOut } = useAuth()
+  const { isAdmin } = useProfile()
   
   const isActive = (path: string) => location.pathname === path
 
@@ -42,13 +44,23 @@ export default function TopBar() {
           </nav>
         </div>
         
-        <button
-          onClick={signOut}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-secondary hover:text-primary hover:bg-white/10"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="text-gray-300 hover:text-orange-500 transition-colors"
+            >
+              Admin
+            </Link>
+          )}
+          <button
+            onClick={signOut}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-secondary hover:text-primary hover:bg-white/10"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   )

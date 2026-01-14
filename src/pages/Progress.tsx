@@ -235,13 +235,13 @@ export default function Progress() {
         )}
 
         {/* This Week vs Last Week */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4">This Week vs Last Week</h3>
-          <div className="grid grid-cols-2 gap-6">
+        <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-4">This Week vs Last Week</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Workout Count Comparison */}
             <div>
               <div className="text-gray-400 text-sm mb-2">Workouts Completed</div>
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
                 <div className="text-2xl font-bold text-white">
                   {weekComparison.thisWeek.count}
                 </div>
@@ -266,7 +266,7 @@ export default function Progress() {
             {/* Volume Comparison */}
             <div>
               <div className="text-gray-400 text-sm mb-2">Total Volume</div>
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
                 <div className="text-2xl font-bold text-white">
                   {weekComparison.thisWeek.volume.toFixed(0)} kg
                 </div>
@@ -291,8 +291,8 @@ export default function Progress() {
         </div>
 
         {/* Workout History */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4">Workout History</h3>
+        <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Workout History</h3>
           
           {workouts.length === 0 ? (
             <div className="text-center py-8">
@@ -309,23 +309,23 @@ export default function Progress() {
               {workouts.map((workout) => (
                 <div 
                   key={workout.id} 
-                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-orange-500/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-orange-500/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <Activity className="w-4 h-4 text-orange-500" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="font-medium text-white">{workout.template_name}</div>
                       <div className="text-sm text-gray-400">{formatDate(workout.workout_date)}</div>
                       {workout.notes && (
-                        <div className="text-sm text-gray-400 mt-1 italic border-l-2 border-orange-500/50 pl-2">
+                        <div className="text-sm text-gray-400 mt-1 italic border-l-2 border-orange-500/50 pl-2 break-words">
                           "{workout.notes}"
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right pl-11 sm:pl-0">
                     <div className="text-sm text-gray-400">
                       {workout.exercises?.length || 0} exercises
                     </div>

@@ -62,6 +62,12 @@ export default function ActiveWorkout() {
   const [currentRPE, setCurrentRPE] = useState('7')
   
   const timerInterval = useRef<number | null>(null)
+  
+  // Swipe detection for mobile navigation
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
+  const [swipeOffset, setSwipeOffset] = useState(0)
+  const minSwipeDistance = 50
 
   const currentLog = exerciseLogs[currentExerciseIndex]
   const totalExercises = template.exercises.length
@@ -184,6 +190,43 @@ export default function ActiveWorkout() {
     }
   }
 
+  // Swipe handlers
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchEndX.current = null
+    touchStartX.current = e.targetTouches[0].clientX
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    touchEndX.current = e.targetTouches[0].clientX
+    const diff = touchEndX.current - touchStartX.current
+    // Only allow swipe if there's a next/previous exercise
+    if ((diff > 0 && currentExerciseIndex > 0) || (diff < 0 && currentExerciseIndex < totalExercises - 1)) {
+      setSwipeOffset(diff * 0.3) // Dampened movement for visual feedback
+    }
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) {
+      setSwipeOffset(0)
+      return
+    }
+    
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe && currentExerciseIndex < totalExercises - 1) {
+      handleNextExercise()
+    } else if (isRightSwipe && currentExerciseIndex > 0) {
+      handlePreviousExercise()
+    }
+
+    setSwipeOffset(0)
+    touchStartX.current = null
+    touchEndX.current = null
+  }
+
   const handleFinishWorkout = async () => {
     const hasAnySets = exerciseLogs.some(log => log.sets.length > 0)
     if (!hasAnySets) {
@@ -288,10 +331,15 @@ export default function ActiveWorkout() {
 
   // Active workout screen - STRONG-STYLE TABLE VIEW
   return (
-    <div className="min-h-screen bg-gray-900 p-4 pb-32">
+    <div 
+      className="min-h-screen bg-gray-900 p-2 sm:p-4 pb-24"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => {
               if (confirm('Are you sure you want to quit this workout?')) {
@@ -304,36 +352,42 @@ export default function ActiveWorkout() {
           </button>
           <button
             onClick={handleFinishWorkout}
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+            className="px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
           >
             Finish
           </button>
         </div>
 
         {/* Workout Title */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">{template.name}</h1>
-          <div className="flex items-center gap-3 text-sm text-gray-400">
+        <div className="mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">{template.name}</h1>
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-400">
             <span>📅 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
           </div>
         </div>
 
         {/* Current Exercise Card */}
-        <div className="bg-gray-800 rounded-lg mb-4">
+        <div 
+          className="bg-gray-800 rounded-lg mb-3 transition-transform duration-100"
+          style={{ transform: `translateX(${swipeOffset}px)` }}
+        >
           {/* Exercise Header */}
-          <div className="px-4 py-3 border-b border-gray-700">
-            <h2 className="text-xl font-bold text-blue-400">{currentExercise.name}</h2>
+          <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-blue-400">{currentExercise.name}</h2>
+            <div className="text-xs text-gray-500">
+              {currentExerciseIndex + 1} / {totalExercises}
+            </div>
           </div>
 
           {/* Sets Table */}
-          <div className="p-4">
+          <div className="p-2 sm:p-3 overflow-x-auto">
             {/* Table Header */}
             <div 
-              className="grid gap-2 mb-2 text-xs text-gray-400 font-medium"
-              style={{ gridTemplateColumns: '40px 60px 1fr 1fr 1fr 40px' }}
+              className="grid gap-1 sm:gap-2 mb-2 text-xs text-gray-400 font-medium min-w-[320px]"
+              style={{ gridTemplateColumns: '30px 50px 1fr 1fr 1fr 36px' }}
             >
-              <div>Set</div>
-              <div>Prev</div>
+              <div className="text-center">Set</div>
+              <div className="text-center">Prev</div>
               <div className="text-center">kg</div>
               <div className="text-center">Reps</div>
               <div className="text-center">RPE</div>
@@ -341,7 +395,7 @@ export default function ActiveWorkout() {
             </div>
 
             {/* Sets Rows */}
-            <div className="space-y-1">
+            <div className="space-y-1.5 min-w-[320px]">
               {setStates.map((setState, setIndex) => {
                 const isCompleted = setState.status === 'completed'
                 const isInProgress = setState.status === 'in_progress'
@@ -350,20 +404,21 @@ export default function ActiveWorkout() {
                 return (
                   <div
                     key={setIndex}
-                    className="grid gap-2 items-center"
-                    style={{ gridTemplateColumns: '40px 60px 1fr 1fr 1fr 40px' }}
+                    className="grid gap-1 sm:gap-2 items-center"
+                    style={{ gridTemplateColumns: '30px 50px 1fr 1fr 1fr 36px' }}
                   >
                     {/* Set Number */}
-                    <div className="text-white font-semibold text-sm">{setIndex + 1}</div>
+                    <div className="text-white font-semibold text-sm text-center">{setIndex + 1}</div>
 
                     {/* Previous */}
-                    <div className="text-gray-500 text-xs truncate">
+                    <div className="text-gray-500 text-xs text-center truncate">
                       {previousSet ? `${previousSet.weight}×${previousSet.reps}` : '—'}
                     </div>
 
                     {/* Weight Input */}
                     <input
                       type="number"
+                      inputMode="decimal"
                       step="0.5"
                       value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? currentWeight : '')}
                       onChange={(e) => {
@@ -373,12 +428,13 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder={currentExercise.weight?.toString()}
-                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-1 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700 min-h-[44px]"
                     />
 
                     {/* Reps Input */}
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? currentReps : '')}
                       onChange={(e) => {
                         if (isInProgress) {
@@ -387,12 +443,13 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder={currentExercise.reps.toString()}
-                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-1 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700 min-h-[44px]"
                     />
 
                     {/* RPE Input */}
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="1"
                       max="10"
                       value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? currentRPE : '')}
@@ -403,7 +460,7 @@ export default function ActiveWorkout() {
                       }}
                       disabled={!isInProgress}
                       placeholder="7"
-                      className="px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700"
+                      className="px-1 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-700 min-h-[44px]"
                     />
 
                     {/* Checkmark */}
@@ -414,13 +471,13 @@ export default function ActiveWorkout() {
                     ) : isInProgress ? (
                       <button
                         onClick={() => handleCompleteSet(setIndex)}
-                        className="flex items-center justify-center p-1 hover:bg-gray-700 rounded transition-colors"
+                        className="flex items-center justify-center p-1 hover:bg-gray-700 rounded transition-colors min-h-[44px]"
                       >
-                        <div className="w-5 h-5 rounded border-2 border-gray-500 hover:border-gray-400" />
+                        <div className="w-6 h-6 rounded border-2 border-gray-500 hover:border-gray-400" />
                       </button>
                     ) : (
                       <div className="flex items-center justify-center">
-                        <div className="w-5 h-5 rounded border-2 border-gray-700" />
+                        <div className="w-6 h-6 rounded border-2 border-gray-700" />
                       </div>
                     )}
                   </div>
@@ -431,53 +488,56 @@ export default function ActiveWorkout() {
         </div>
 
         {/* Timer Section */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-4">
-          <h3 className="text-white font-semibold mb-3 text-sm uppercase text-gray-400">Timer</h3>
-          <div className="flex items-center gap-3">
+        <div className="bg-gray-800 rounded-lg p-3 mb-3">
+          <h3 className="text-white font-semibold mb-2 text-xs uppercase text-gray-400">Rest Timer</h3>
+          
+          {/* Timer Display - Full width on mobile */}
+          <div className={`w-full text-center py-4 rounded-lg font-mono text-3xl sm:text-4xl font-bold mb-3 ${
+            restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
+            restTimerRemaining <= 10 ? 'bg-red-600 text-white' : 
+            'bg-gray-700 text-white'
+          }`}>
+            {formatTime(restTimerRemaining)}
+          </div>
+
+          {/* Controls Row */}
+          <div className="flex items-center gap-2">
             {/* Timer Duration Input */}
-            <div className="flex-shrink-0" style={{ width: '80px' }}>
+            <div className="flex-shrink-0" style={{ width: '70px' }}>
               <input
                 type="number"
+                inputMode="numeric"
                 value={Math.floor(restTimerRemaining)}
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 0
                   setRestTimerRemaining(value)
                 }}
-                className="w-full px-2 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
                 placeholder="90"
               />
               <p className="text-xs text-gray-400 text-center mt-1">sec</p>
             </div>
 
-            {/* Timer Display */}
-            <div className={`flex-1 text-center py-3 rounded-lg font-mono text-2xl font-bold ${
-              restTimerRemaining === 0 ? 'bg-green-600 text-white' : 
-              restTimerRemaining <= 10 ? 'bg-red-600 text-white' : 
-              'bg-gray-700 text-white'
-            }`}>
-              {formatTime(restTimerRemaining)}
-            </div>
-
             {/* Timer Controls */}
-            <div className="flex gap-2">
+            <div className="flex-1 flex gap-2">
               {!restTimerActive ? (
                 <button
                   onClick={startRestTimer}
-                  className="p-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  className="flex-1 p-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center min-h-[44px]"
                 >
                   <Play className="w-5 h-5" />
                 </button>
               ) : (
                 <button
                   onClick={pauseRestTimer}
-                  className="p-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+                  className="flex-1 p-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center justify-center min-h-[44px]"
                 >
                   <Pause className="w-5 h-5" />
                 </button>
               )}
               <button
                 onClick={resetRestTimer}
-                className="p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="flex-1 p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center min-h-[44px]"
               >
                 <RotateCcw className="w-5 h-5" />
               </button>
@@ -486,8 +546,8 @@ export default function ActiveWorkout() {
         </div>
 
         {/* Workout Notes */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-4">
-          <label htmlFor="workout-notes" className="block text-gray-400 font-medium mb-2 text-sm uppercase">
+        <div className="bg-gray-800 rounded-lg p-3 mb-3">
+          <label htmlFor="workout-notes" className="block text-gray-400 font-medium mb-2 text-xs uppercase">
             Workout Notes
           </label>
           <textarea
@@ -495,26 +555,26 @@ export default function ActiveWorkout() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="How did you feel?"
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows={3}
           />
         </div>
       </div>
 
       {/* Bottom Navigation - Fixed */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4">
-        <div className="max-w-2xl mx-auto flex gap-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-2 sm:p-3 safe-area-inset-bottom">
+        <div className="max-w-2xl mx-auto flex gap-2">
           {currentExerciseIndex > 0 && (
             <button
               onClick={handlePreviousExercise}
-              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-colors"
+              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-colors text-sm sm:text-base min-h-[44px]"
             >
               ← Previous
             </button>
           )}
           <button
             onClick={currentExerciseIndex < totalExercises - 1 ? handleNextExercise : handleFinishWorkout}
-            className={`flex-1 font-semibold py-3 rounded-lg transition-colors ${
+            className={`flex-1 font-semibold py-3 rounded-lg transition-colors text-sm sm:text-base min-h-[44px] ${
               currentExerciseIndex < totalExercises - 1 
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
                 : 'bg-green-600 hover:bg-green-700 text-white'

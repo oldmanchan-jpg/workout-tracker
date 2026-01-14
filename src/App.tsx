@@ -5,6 +5,7 @@ import { useProfile } from './hooks/useProfile'
 import Login from './components/Auth/Login'
 import SignUp from './components/Auth/SignUp'
 import PendingApproval from './components/PendingApproval'
+import SwipeablePages from './components/SwipeablePages'
 import Dashboard from '@/pages/Dashboard'
 import ActiveWorkout from './pages/ActiveWorkout'
 import Progress from '@/pages/Progress'
@@ -41,13 +42,15 @@ function AuthWrapper() {
   // If logged in, show the main app
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/workout" element={<ActiveWorkout />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<Dashboard />} />
-      </Routes>
+      <SwipeablePages>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/workout" element={<ActiveWorkout />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
+      </SwipeablePages>
     </Router>
   )
 }

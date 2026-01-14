@@ -491,12 +491,12 @@ export default function ActiveWorkout() {
                   >
                     <div className="px-4 pb-4">
                       {/* Table Header */}
-                      <div className="flex items-center gap-2 text-[#9a9fa4] text-xs font-medium mb-2 px-1">
-                        <span className="w-10 shrink-0 text-center">SET</span>
-                        <span className="flex-1 text-center">KG</span>
-                        <span className="flex-1 text-center">REPS</span>
-                        <span className="flex-1 text-center">RPE</span>
-                        <span className="w-12 shrink-0 flex justify-center"></span>
+                      <div className="flex items-center gap-1 sm:gap-2 text-[#9a9fa4] text-xs font-medium mb-2 px-1">
+                        <span className="w-8 sm:w-10 shrink-0 text-center">SET</span>
+                        <span className="flex-1 text-center max-w-[70px] sm:max-w-none">KG</span>
+                        <span className="flex-1 text-center max-w-[70px] sm:max-w-none">REPS</span>
+                        <span className="hidden sm:flex flex-1 text-center">RPE</span>
+                        <span className="w-10 sm:w-12 shrink-0 flex justify-center"></span>
                       </div>
 
                       {/* Sets */}
@@ -508,12 +508,12 @@ export default function ActiveWorkout() {
                         return (
                           <div 
                             key={setIndex} 
-                            className={`flex items-center gap-2 py-2 ${
+                            className={`flex items-center gap-1 sm:gap-2 py-2 ${
                               isInProgress ? 'bg-black/30 -mx-2 px-2 rounded-[10px]' : ''
                             }`}
                           >
                             {/* Set Number */}
-                            <div className="w-10 shrink-0 text-center">
+                            <div className="w-8 sm:w-10 shrink-0 text-center">
                               <span className="text-white font-bold">{setIndex + 1}</span>
                               {previousSet && (
                                 <p className="text-[#9a9fa4] text-[10px]">
@@ -535,12 +535,12 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.weight?.toString() || '0'}
-                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
+                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all max-w-[70px] sm:max-w-none ${
                                 isInProgress 
                                   ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
                                   ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                  : 'bg-black/30 text-[#9a9fa4] border border-white/5'
+                                  : 'bg-black/30 text-[#9a9fa4] border border-white/10'
                               }`}
                             />
 
@@ -556,40 +556,42 @@ export default function ActiveWorkout() {
                               }}
                               disabled={!isInProgress}
                               placeholder={templateExercise.reps.toString()}
-                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
+                              className={`flex-1 px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all max-w-[70px] sm:max-w-none ${
                                 isInProgress 
                                   ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
                                   : isCompleted
                                   ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                  : 'bg-black/30 text-[#9a9fa4] border border-white/5'
+                                  : 'bg-black/30 text-[#9a9fa4] border border-white/10'
                               }`}
                             />
 
                             {/* RPE Input */}
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              min="1"
-                              max="10"
-                              value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? exercise.currentInputs.rpe : '')}
-                              onChange={(e) => {
-                                if (isInProgress) {
-                                  updateInput(exerciseIndex, 'rpe', e.target.value)
-                                }
-                              }}
-                              disabled={!isInProgress}
-                              placeholder="7"
-                              className={`flex-1 px-2 py-3 rounded-[8px] text-center font-semibold transition-all ${
-                                isInProgress 
-                                  ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
-                                  : isCompleted
-                                  ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
-                                  : 'bg-black/30 text-[#9a9fa4] border border-white/5'
-                              }`}
-                            />
+                            <div className="hidden sm:flex flex-1">
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                min="1"
+                                max="10"
+                                value={isCompleted && setState.data?.rpe ? setState.data.rpe : (isInProgress ? exercise.currentInputs.rpe : '')}
+                                onChange={(e) => {
+                                  if (isInProgress) {
+                                    updateInput(exerciseIndex, 'rpe', e.target.value)
+                                  }
+                                }}
+                                disabled={!isInProgress}
+                                placeholder="7"
+                                className={`w-full px-1 sm:px-2 py-2 sm:py-3 rounded-[8px] text-center font-semibold transition-all ${
+                                  isInProgress 
+                                    ? 'bg-[#29e33c] text-black border-2 border-[#29e33c] focus:outline-none' 
+                                    : isCompleted
+                                    ? 'bg-[#29e33c]/20 text-[#29e33c] border border-[#29e33c]/30'
+                                    : 'bg-black/30 text-[#9a9fa4] border border-white/10'
+                                }`}
+                              />
+                            </div>
 
                             {/* Checkmark */}
-                            <div className="w-12 shrink-0 flex justify-center">
+                            <div className="w-10 sm:w-12 shrink-0 flex justify-center">
                               {isCompleted ? (
                                 <div className="w-10 h-10 bg-[#29e33c] rounded-full flex items-center justify-center">
                                   <Check className="w-5 h-5 text-black" strokeWidth={3} />

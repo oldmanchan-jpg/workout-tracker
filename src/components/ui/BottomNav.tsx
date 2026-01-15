@@ -1,8 +1,19 @@
 import { Activity, BarChart2, Home, User } from 'lucide-react'
 
-export default function BottomNav() {
+export type BottomNavProps = {
+  className?: string
+}
+
+export default function BottomNav({ className }: BottomNavProps) {
   return (
-    <div className="h-16 w-full rounded-pill bg-hp-surface border border-hp-border flex items-center justify-around px-6">
+    <div
+      className={[
+        'h-16 w-full rounded-pill bg-hp-surface border border-hp-border flex items-center justify-around px-6',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <button type="button" className="flex flex-col items-center gap-1 text-hp-accent">
         <Home className="h-5 w-5" />
         <span className="h-1 w-6 rounded-full bg-hp-accent" />

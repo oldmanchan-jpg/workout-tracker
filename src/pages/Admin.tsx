@@ -66,12 +66,12 @@ export default function Admin() {
         <TopBar />
         <main className="max-w-lg mx-auto px-4 py-6">
           <div className="animate-pulse space-y-6">
-            <div className="h-24 bg-[#282a2c] rounded-[21px]" />
+            <div className="h-24 bg-[#141416] rounded-[21px] border border-white/5" />
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-28 bg-[#282a2c] rounded-[16px]" />
-              <div className="h-28 bg-[#282a2c] rounded-[16px]" />
+              <div className="h-28 bg-[#141416] rounded-[16px] border border-white/5" />
+              <div className="h-28 bg-[#141416] rounded-[16px] border border-white/5" />
             </div>
-            <div className="h-64 bg-[#282a2c] rounded-[21px]" />
+            <div className="h-64 bg-[#141416] rounded-[21px] border border-white/5" />
           </div>
         </main>
       </div>
@@ -96,7 +96,10 @@ export default function Admin() {
           animate={{ opacity: 1, y: 0 }}
           className="pt-4 flex items-center gap-4"
         >
-          <div className="w-14 h-14 bg-[#29e33c] rounded-full flex items-center justify-center">
+          <div 
+            className="w-14 h-14 bg-[#29e33c] rounded-full flex items-center justify-center"
+            style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.4)' }}
+          >
             <Shield className="w-7 h-7 text-black" />
           </div>
           <div>
@@ -112,19 +115,28 @@ export default function Admin() {
           transition={{ delay: 0.1 }}
           className="grid grid-cols-2 gap-4"
         >
-          <div className="bg-[#282a2c] rounded-[16px] p-4">
-            <div className="w-10 h-10 bg-[#29e33c]/20 rounded-full flex items-center justify-center mb-3">
+          <div className="bg-[#141416] rounded-[16px] p-4 border border-white/5">
+            <div 
+              className="w-10 h-10 bg-[#29e33c]/20 rounded-full flex items-center justify-center mb-3"
+            >
               <Users className="w-5 h-5 text-[#29e33c]" />
             </div>
             <p className="text-3xl font-bold text-white">{clients.length}</p>
             <p className="text-[#9a9fa4] text-sm">Total Clients</p>
           </div>
 
-          <div className="bg-[#282a2c] rounded-[16px] p-4">
-            <div className="w-10 h-10 bg-[#29e33c]/20 rounded-full flex items-center justify-center mb-3">
+          <div className="bg-[#141416] rounded-[16px] p-4 border border-white/5">
+            <div 
+              className="w-10 h-10 bg-[#29e33c]/20 rounded-full flex items-center justify-center mb-3"
+            >
               <CheckCircle className="w-5 h-5 text-[#29e33c]" />
             </div>
-            <p className="text-3xl font-bold text-[#29e33c]">{activeClients}</p>
+            <p 
+              className="text-3xl font-bold text-[#29e33c]"
+              style={{ textShadow: '0 0 20px rgba(41, 227, 60, 0.3)' }}
+            >
+              {activeClients}
+            </p>
             <p className="text-[#9a9fa4] text-sm">Active Now</p>
           </div>
         </motion.div>
@@ -134,7 +146,7 @@ export default function Admin() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-[#282a2c] rounded-[21px] overflow-hidden"
+          className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
         >
           <div className="px-4 py-4 border-b border-white/5">
             <div className="flex items-center justify-between">
@@ -169,13 +181,16 @@ export default function Admin() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + (index * 0.05) }}
-                  className="p-4 flex items-center gap-4"
+                  className="p-4 flex items-center gap-4 hover:bg-[#1c1c1f] transition-colors"
                 >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
-                    client.is_active 
-                      ? 'bg-[#29e33c] text-black' 
-                      : 'bg-[#9a9fa4]/20 text-[#9a9fa4]'
-                  }`}>
+                  <div 
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                      client.is_active 
+                        ? 'bg-[#29e33c] text-black' 
+                        : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/10'
+                    }`}
+                    style={client.is_active ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
+                  >
                     {(client.full_name || client.email).charAt(0).toUpperCase()}
                   </div>
                   
@@ -194,13 +209,16 @@ export default function Admin() {
                     </p>
                   </div>
 
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => toggleActiveStatus(client.id, client.is_active)}
-                    className={`px-4 py-2 rounded-[10px] flex items-center gap-2 font-medium text-sm transition-colors ${
+                    className={`px-4 py-2 rounded-[10px] flex items-center gap-2 font-medium text-sm transition-all ${
                       client.is_active
                         ? 'bg-[#29e33c] text-black'
-                        : 'bg-[#9a9fa4]/20 text-[#9a9fa4] hover:bg-[#29e33c]/20 hover:text-[#29e33c]'
+                        : 'bg-[#1c1c1f] text-[#9a9fa4] hover:bg-[#29e33c]/20 hover:text-[#29e33c] border border-white/10'
                     }`}
+                    style={client.is_active ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
                   >
                     {client.is_active ? (
                       <>
@@ -213,7 +231,7 @@ export default function Admin() {
                         Activate
                       </>
                     )}
-                  </button>
+                  </motion.button>
                 </motion.div>
               ))}
             </div>

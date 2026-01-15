@@ -118,11 +118,11 @@ export default function Progress() {
         <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
           {/* Skeleton */}
           <div className="animate-pulse space-y-6">
-            <div className="h-8 w-32 bg-[#282a2c] rounded-lg" />
-            <div className="h-[200px] bg-[#282a2c] rounded-[21px]" />
+            <div className="h-8 w-32 bg-[#141416] rounded-lg" />
+            <div className="h-[200px] bg-[#141416] rounded-[21px] border border-white/5" />
             <div className="grid grid-cols-3 gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-[#282a2c] rounded-[16px]" />
+                <div key={i} className="h-24 bg-[#141416] rounded-[16px] border border-white/5" />
               ))}
             </div>
           </div>
@@ -136,15 +136,18 @@ export default function Progress() {
       <div className="min-h-screen bg-black">
         <TopBar />
         <main className="max-w-lg mx-auto px-4 py-6">
-          <div className="bg-[#282a2c] rounded-[21px] p-8 text-center">
+          <div className="bg-[#141416] rounded-[21px] p-8 text-center border border-white/5">
             <Activity className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <p className="text-red-400 text-lg mb-4">{error}</p>
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={loadWorkouts}
               className="px-6 py-3 bg-[#29e33c] text-black font-bold rounded-[12px]"
+              style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' }}
             >
               Retry
-            </button>
+            </motion.button>
           </div>
         </main>
       </div>
@@ -176,17 +179,20 @@ export default function Progress() {
           className="flex gap-2"
         >
           {(['week', 'month', 'year'] as const).map((range) => (
-            <button
+            <motion.button
               key={range}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setTimeRange(range)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 timeRange === range 
                   ? 'bg-[#29e33c] text-black' 
-                  : 'text-[#9a9fa4] hover:text-white'
+                  : 'bg-[#1c1c1f] text-[#9a9fa4] hover:text-white border border-white/5'
               }`}
+              style={timeRange === range ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
             >
               {range.charAt(0).toUpperCase() + range.slice(1)}
-            </button>
+            </motion.button>
           ))}
         </motion.div>
 
@@ -195,7 +201,7 @@ export default function Progress() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-[#282a2c] rounded-[21px] overflow-hidden"
+          className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
         >
           {/* Chart Area with Gradient */}
           <div className="relative h-[200px] p-4">
@@ -204,7 +210,7 @@ export default function Progress() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="volumeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#29e33c" stopOpacity={1} />
+                      <stop offset="0%" stopColor="#29e33c" stopOpacity={0.8} />
                       <stop offset="100%" stopColor="#29e33c" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -218,11 +224,12 @@ export default function Progress() {
                   <YAxis hide />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#151718', 
-                      border: 'none',
-                      borderRadius: '8px',
+                      backgroundColor: '#1c1c1f', 
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
                       color: '#fff',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      boxShadow: '0 0 20px rgba(0,0,0,0.5)'
                     }}
                     formatter={(value: number) => [`${value.toFixed(0)} kg`, 'Volume']}
                   />
@@ -232,8 +239,8 @@ export default function Progress() {
                     stroke="#29e33c" 
                     strokeWidth={3}
                     fill="url(#volumeGradient)"
-                    dot={{ fill: '#29e33c', r: 4, strokeWidth: 2, stroke: '#282a2c' }}
-                    activeDot={{ r: 6, stroke: '#29e33c', strokeWidth: 3 }}
+                    dot={{ fill: '#29e33c', r: 4, strokeWidth: 2, stroke: '#141416' }}
+                    activeDot={{ r: 6, stroke: '#29e33c', strokeWidth: 3, filter: 'drop-shadow(0 0 6px rgba(41, 227, 60, 0.6))' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -251,16 +258,19 @@ export default function Progress() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
                   className="text-5xl font-bold text-white"
+                  style={{ textShadow: '0 0 30px rgba(0,0,0,0.8)' }}
                 >
                   <CountUp end={stats.totalVolume} duration={2} separator="," decimals={0} />
                 </motion.p>
                 <p className="text-[#9a9fa4] text-sm mt-1">Total Volume (kg)</p>
                 {weekComparison.volumeChange !== 0 && (
-                  <div className={`inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-full text-xs font-medium ${
-                    weekComparison.volumeChange > 0 
-                      ? 'bg-[#29e33c]/20 text-[#29e33c]' 
-                      : 'bg-red-500/20 text-red-400'
-                  }`}>
+                  <div 
+                    className={`inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-full text-xs font-medium ${
+                      weekComparison.volumeChange > 0 
+                        ? 'bg-[#29e33c]/20 text-[#29e33c]' 
+                        : 'bg-red-500/20 text-red-400'
+                    }`}
+                  >
                     {weekComparison.volumeChange > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(weekComparison.volumeChange).toFixed(0)}%
                   </div>
@@ -270,7 +280,7 @@ export default function Progress() {
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-4 px-4 pb-4">
+          <div className="grid grid-cols-3 gap-4 px-4 pb-4 border-t border-white/5 pt-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-white">
                 <CountUp end={stats?.totalWorkouts || 0} duration={1.5} />
@@ -297,15 +307,19 @@ export default function Progress() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-[#282a2c] rounded-[21px] p-4"
+          className="bg-[#141416] rounded-[21px] p-4 border border-white/5"
         >
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-[#29e33c]" />
+            <div 
+              className="w-8 h-8 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
+            >
+              <Calendar className="w-4 h-4 text-[#29e33c]" />
+            </div>
             <h3 className="text-white font-semibold">This Week</h3>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-black/30 rounded-[12px] p-4">
+            <div className="bg-[#1c1c1f] rounded-[12px] p-4 border border-white/5">
               <p className="text-[#9a9fa4] text-xs mb-1">Workouts</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-white">
@@ -323,7 +337,7 @@ export default function Progress() {
               <p className="text-[#9a9fa4] text-xs mt-1">vs {weekComparison.lastWeek.count} last week</p>
             </div>
 
-            <div className="bg-black/30 rounded-[12px] p-4">
+            <div className="bg-[#1c1c1f] rounded-[12px] p-4 border border-white/5">
               <p className="text-[#9a9fa4] text-xs mb-1">Volume</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-white">
@@ -355,7 +369,7 @@ export default function Progress() {
           </div>
           
           {workouts.length === 0 ? (
-            <div className="bg-[#282a2c] rounded-[21px] p-8 text-center">
+            <div className="bg-[#141416] rounded-[21px] p-8 text-center border border-white/5">
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -365,9 +379,14 @@ export default function Progress() {
               <p className="text-white font-medium mb-2">No workouts yet!</p>
               <p className="text-[#9a9fa4] text-sm mb-4">Start your first workout to track progress</p>
               <Link to="/">
-                <button className="px-6 py-3 bg-[#29e33c] text-black font-bold rounded-[12px]">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 bg-[#29e33c] text-black font-bold rounded-[12px]"
+                  style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' }}
+                >
                   Start First Workout
-                </button>
+                </motion.button>
               </Link>
             </div>
           ) : (
@@ -378,9 +397,12 @@ export default function Progress() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + (index * 0.1) }}
-                  className="bg-[#282a2c] rounded-[16px] p-4 flex items-center gap-4 hover:bg-[#323436] transition-colors cursor-pointer"
+                  whileHover={{ scale: 1.01 }}
+                  className="bg-[#141416] rounded-[16px] p-4 flex items-center gap-4 hover:bg-[#1c1c1f] transition-all cursor-pointer border border-white/5"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0">
+                  <div 
+                    className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0"
+                  >
                     <Activity className="w-6 h-6 text-[#29e33c]" />
                   </div>
                   <div className="flex-1 min-w-0">

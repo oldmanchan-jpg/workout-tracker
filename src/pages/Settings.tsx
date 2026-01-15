@@ -49,25 +49,24 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0b' }}>
-        <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#29e33c]" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0b' }}>
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <div className="sticky top-0 z-10" style={{ backgroundColor: '#0a0a0b', borderBottom: '1px solid #27272a' }}>
+      <div className="sticky top-0 z-10 bg-black/95 backdrop-blur-sm border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: '#a1a1aa' }}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c1c1f] text-[#9a9fa4] hover:text-white transition-colors border border-white/5"
           >
-            <ArrowLeft size={24} />
+            <ArrowLeft size={20} />
           </motion.button>
           
           <h1 className="text-xl font-bold text-white">Settings</h1>
@@ -77,12 +76,12 @@ export default function Settings() {
             whileTap={{ scale: 0.95 }}
             onClick={handleSave}
             disabled={!hasChanges || saving}
-            className="px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50"
-            style={{
-              background: hasChanges ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : '#27272a',
-              color: hasChanges ? 'white' : '#71717a',
-              boxShadow: hasChanges ? '0 0 20px rgba(249, 115, 22, 0.3)' : 'none'
-            }}
+            className={`px-4 py-2 rounded-[10px] font-semibold transition-all disabled:opacity-50 ${
+              hasChanges 
+                ? 'bg-[#29e33c] text-black' 
+                : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/5'
+            }`}
+            style={hasChanges ? { boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' } : {}}
           >
             {saving ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -108,69 +107,59 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl p-5"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
           <div className="flex items-center gap-3 mb-4">
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: '#22c55e20' }}
+              className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
             >
-              <Timer size={20} style={{ color: '#4ade80' }} />
+              <Timer size={20} className="text-[#29e33c]" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Default Rest Timer</h2>
-              <p className="text-sm" style={{ color: '#71717a' }}>Set your preferred rest duration</p>
+              <p className="text-sm text-[#9a9fa4]">Set your preferred rest duration</p>
             </div>
           </div>
 
           {/* Preset buttons */}
           <div className="grid grid-cols-5 gap-2 mb-4">
-            {REST_TIMER_PRESETS.map((seconds) => (
-              <motion.button
-                key={seconds}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleTimerPreset(seconds)}
-                className="py-3 rounded-xl font-semibold text-sm transition-all"
-                style={{
-                  backgroundColor: localPrefs.restTimerDefault === seconds && !customTimer
-                    ? '#22c55e'
-                    : '#1c1c1f',
-                  color: localPrefs.restTimerDefault === seconds && !customTimer
-                    ? '#0a0a0b'
-                    : '#a1a1aa',
-                  border: '1px solid',
-                  borderColor: localPrefs.restTimerDefault === seconds && !customTimer
-                    ? '#22c55e'
-                    : '#27272a'
-                }}
-              >
-                {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
-              </motion.button>
-            ))}
+            {REST_TIMER_PRESETS.map((seconds) => {
+              const isSelected = localPrefs.restTimerDefault === seconds && !customTimer
+              return (
+                <motion.button
+                  key={seconds}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleTimerPreset(seconds)}
+                  className={`py-3 rounded-[10px] font-semibold text-sm transition-all border ${
+                    isSelected
+                      ? 'bg-[#29e33c] text-black border-[#29e33c]'
+                      : 'bg-[#1c1c1f] text-[#9a9fa4] border-white/5 hover:border-[#29e33c]/50'
+                  }`}
+                  style={isSelected ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
+                >
+                  {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
+                </motion.button>
+              )
+            })}
           </div>
 
           {/* Custom input */}
           <div className="flex items-center gap-3">
-            <span className="text-sm" style={{ color: '#71717a' }}>Custom:</span>
+            <span className="text-sm text-[#9a9fa4]">Custom:</span>
             <input
               type="number"
               inputMode="numeric"
               placeholder="seconds"
               value={customTimer}
               onChange={(e) => handleCustomTimer(e.target.value)}
-              className="flex-1 h-12 px-4 rounded-xl text-center font-semibold outline-none transition-all"
-              style={{
-                backgroundColor: '#1c1c1f',
-                border: '1px solid',
-                borderColor: customTimer ? '#22c55e' : '#27272a',
-                color: '#fafafa'
-              }}
+              className={`flex-1 h-12 px-4 rounded-[10px] text-center font-semibold outline-none transition-all bg-[#1c1c1f] text-white border ${
+                customTimer ? 'border-[#29e33c]' : 'border-white/5'
+              } focus:border-[#29e33c]`}
               min={1}
               max={600}
             />
-            <span className="text-sm" style={{ color: '#71717a' }}>sec</span>
+            <span className="text-sm text-[#9a9fa4]">sec</span>
           </div>
         </motion.div>
 
@@ -179,41 +168,40 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl p-5"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
           <div className="flex items-center gap-3 mb-4">
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: '#3b82f620' }}
+              className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"
             >
-              <Scale size={20} style={{ color: '#60a5fa' }} />
+              <Scale size={20} className="text-blue-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Weight Unit</h2>
-              <p className="text-sm" style={{ color: '#71717a' }}>Choose your preferred unit</p>
+              <p className="text-sm text-[#9a9fa4]">Choose your preferred unit</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {(['kg', 'lbs'] as const).map((unit) => (
-              <motion.button
-                key={unit}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setLocalPrefs(prev => ({ ...prev, weightUnit: unit }))}
-                className="py-4 rounded-xl font-semibold text-lg transition-all"
-                style={{
-                  backgroundColor: localPrefs.weightUnit === unit ? '#3b82f6' : '#1c1c1f',
-                  color: localPrefs.weightUnit === unit ? 'white' : '#a1a1aa',
-                  border: '1px solid',
-                  borderColor: localPrefs.weightUnit === unit ? '#3b82f6' : '#27272a',
-                  boxShadow: localPrefs.weightUnit === unit ? '0 0 20px rgba(59, 130, 246, 0.3)' : 'none'
-                }}
-              >
-                {unit === 'kg' ? 'Kilograms (kg)' : 'Pounds (lbs)'}
-              </motion.button>
-            ))}
+            {(['kg', 'lbs'] as const).map((unit) => {
+              const isSelected = localPrefs.weightUnit === unit
+              return (
+                <motion.button
+                  key={unit}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setLocalPrefs(prev => ({ ...prev, weightUnit: unit }))}
+                  className={`py-4 rounded-[12px] font-semibold text-lg transition-all border ${
+                    isSelected
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-[#1c1c1f] text-[#9a9fa4] border-white/5 hover:border-blue-500/50'
+                  }`}
+                  style={isSelected ? { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' } : {}}
+                >
+                  {unit === 'kg' ? 'Kilograms (kg)' : 'Pounds (lbs)'}
+                </motion.button>
+              )
+            })}
           </div>
         </motion.div>
 
@@ -222,53 +210,49 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl p-5"
-          style={{ backgroundColor: '#141416', border: '1px solid #27272a' }}
+          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
           <div className="flex items-center gap-3 mb-4">
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: '#a855f720' }}
+              className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"
             >
-              <Palette size={20} style={{ color: '#c084fc' }} />
+              <Palette size={20} className="text-purple-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Theme</h2>
-              <p className="text-sm" style={{ color: '#71717a' }}>Customize your appearance</p>
+              <p className="text-sm text-[#9a9fa4]">Customize your appearance</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {(['dark', 'light'] as const).map((theme) => (
-              <motion.button
-                key={theme}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setLocalPrefs(prev => ({ ...prev, theme }))}
-                className="py-4 rounded-xl font-semibold text-lg transition-all relative overflow-hidden"
-                style={{
-                  backgroundColor: localPrefs.theme === theme 
-                    ? (theme === 'dark' ? '#1c1c1f' : '#f4f4f5') 
-                    : '#1c1c1f',
-                  color: localPrefs.theme === theme 
-                    ? (theme === 'dark' ? '#fafafa' : '#18181b')
-                    : '#71717a',
-                  border: '2px solid',
-                  borderColor: localPrefs.theme === theme ? '#a855f7' : '#27272a',
-                  boxShadow: localPrefs.theme === theme ? '0 0 20px rgba(168, 85, 247, 0.3)' : 'none'
-                }}
-              >
-                {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-                {theme === 'light' && (
-                  <span 
-                    className="absolute bottom-1 left-0 right-0 text-xs"
-                    style={{ color: '#a1a1aa' }}
-                  >
-                    Coming soon
-                  </span>
-                )}
-              </motion.button>
-            ))}
+            {(['dark', 'light'] as const).map((theme) => {
+              const isSelected = localPrefs.theme === theme
+              return (
+                <motion.button
+                  key={theme}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setLocalPrefs(prev => ({ ...prev, theme }))}
+                  className={`py-4 rounded-[12px] font-semibold text-lg transition-all relative overflow-hidden border ${
+                    isSelected 
+                      ? 'border-purple-500' 
+                      : 'border-white/5'
+                  } ${
+                    isSelected 
+                      ? (theme === 'dark' ? 'bg-[#1c1c1f] text-white' : 'bg-[#f4f4f5] text-[#18181b]')
+                      : 'bg-[#1c1c1f] text-[#9a9fa4]'
+                  }`}
+                  style={isSelected ? { boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)' } : {}}
+                >
+                  {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+                  {theme === 'light' && (
+                    <span className="absolute bottom-1 left-0 right-0 text-xs text-[#9a9fa4]">
+                      Coming soon
+                    </span>
+                  )}
+                </motion.button>
+              )
+            })}
           </div>
         </motion.div>
 
@@ -278,9 +262,8 @@ export default function Settings() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="text-center py-4"
-          style={{ color: '#52525b' }}
         >
-          <p className="text-sm">Settings are synced to your account</p>
+          <p className="text-sm text-[#9a9fa4]">Settings are synced to your account</p>
         </motion.div>
       </main>
     </div>

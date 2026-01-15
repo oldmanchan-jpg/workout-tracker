@@ -49,11 +49,14 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="bg-[#282a2c] rounded-[21px] p-4"
+          className="bg-[#141416] rounded-[21px] p-4 border border-white/5"
         >
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center">
+              <div 
+                className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
+                style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.15)' }}
+              >
                 <Dumbbell className="w-6 h-6 text-[#29e33c]" />
               </div>
               <div>
@@ -85,15 +88,16 @@ export default function Dashboard() {
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-[#282a2c] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-colors cursor-pointer"
+              className="w-full px-4 py-4 bg-[#141416] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-all cursor-pointer"
+              style={{ boxShadow: '0 0 15px rgba(41, 227, 60, 0.1)' }}
             >
               {templates.map(template => (
-                <option key={template.id} value={template.id} className="bg-[#282a2c]">
+                <option key={template.id} value={template.id} className="bg-[#141416]">
                   {template.name}
                 </option>
               ))}
             </select>
-            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9a9fa4] rotate-90 pointer-events-none" />
+            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
           </div>
         </motion.div>
 
@@ -103,7 +107,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-[#282a2c] rounded-[21px] overflow-hidden"
+            className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
           >
             {/* Template Header */}
             <div className="p-4 border-b border-white/5">
@@ -111,7 +115,10 @@ export default function Dashboard() {
                 <h3 className="text-white font-semibold text-xl">
                   {selectedTemplate.name}
                 </h3>
-                <span className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium">
+                <span 
+                  className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium"
+                  style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.2)' }}
+                >
                   {selectedTemplate.exercises.length} exercises
                 </span>
               </div>
@@ -137,9 +144,12 @@ export default function Dashboard() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="flex items-center gap-3 p-3 bg-black/30 rounded-[12px] hover:bg-black/50 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-[#1c1c1f] rounded-[12px] hover:bg-[#242426] transition-colors border border-white/5"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0">
+                  <div 
+                    className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0"
+                    style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.3)' }}
+                  >
                     {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -160,7 +170,8 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onStartWorkout}
-                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#29e33c]/30"
+                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-all"
+                style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.4)' }}
               >
                 <Play className="w-6 h-6" fill="black" />
                 Start Workout
@@ -174,9 +185,12 @@ export default function Dashboard() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex items-start gap-3 p-4 bg-[#282a2c] rounded-[16px] border border-[#29e33c]/20"
+          className="flex items-start gap-3 p-4 bg-[#141416] rounded-[16px] border border-[#29e33c]/20"
+          style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.05)' }}
         >
-          <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0">
+          <div 
+            className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0"
+          >
             <Target className="w-5 h-5 text-[#29e33c]" />
           </div>
           <div>

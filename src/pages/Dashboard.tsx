@@ -187,7 +187,7 @@ export default function Dashboard() {
             <p className="text-[38px] font-semibold leading-[1.05] tracking-tight">
               yourself safe and
             </p>
-            <p className="text-[38px] font-semibold leading-[1.05] tracking-tight text-hp-accent">
+            <p className="text-[38px] font-semibold leading-[1.05] tracking-tight text-[#29e33c]">
               Healthy
             </p>
           </section>

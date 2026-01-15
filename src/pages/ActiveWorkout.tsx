@@ -393,10 +393,18 @@ export default function ActiveWorkout() {
 
   // Active workout screen
   return (
-    <div className="min-h-screen bg-black pb-4">
-      {/* Fixed Header */}
-      <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-sm border-b border-white/5">
-        <div className="max-w-lg mx-auto px-4 py-3">
+    <div className="min-h-screen flex justify-center bg-[radial-gradient(80%_60%_at_20%_0%,rgba(41,227,60,0.18),transparent_55%),linear-gradient(#010101,#010101)]">
+      <div className="w-[430px] min-h-screen relative px-6 pt-10 pb-28 text-left text-white/90">
+        {import.meta.env.DEV && (
+          <img
+            src="/figma/Pulse-recording.png"
+            alt=""
+            className="pointer-events-none absolute inset-0 opacity-40"
+          />
+        )}
+
+        <div className="relative z-10 space-y-6">
+          {/* Top Bar */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
@@ -404,327 +412,201 @@ export default function ActiveWorkout() {
                   navigate('/')
                 }
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c1c1f] text-[#9a9fa4] hover:text-white hover:bg-[#282a2c] transition-all border border-white/5"
+              className="w-11 h-11 flex items-center justify-center rounded-full bg-hp-surface border border-white/10 text-white/70 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            
+
             <div className="text-center">
-              <h1 className="text-white font-semibold">{template.name}</h1>
-              <p className="text-[#9a9fa4] text-xs">{completedSets}/{totalSets} sets</p>
+              <h1 className="text-lg font-semibold text-white">{template.name}</h1>
+              <p className="text-xs text-white/60">{completedSets}/{totalSets} sets</p>
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleFinishWorkout}
-              className="px-4 py-2 bg-[#29e33c] text-black font-bold text-sm rounded-[10px] transition-all"
-              style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' }}
+              className="bg-hp-accent text-black rounded-full px-5 py-2 text-sm font-medium"
             >
               Finish
             </motion.button>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mt-3 h-1.5 bg-[#1c1c1f] rounded-full overflow-hidden">
-            <motion.div 
-              className="h-full bg-[#29e33c] rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.3 }}
-              style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.5)' }}
-            />
-          </div>
-        </div>
-      </div>
+          {/* Exercises */}
+          <div className="space-y-4">
+            {exercises.map((exercise, exerciseIndex) => {
+              const templateExercise = template.exercises[exerciseIndex]
+              const completedCount = exercise.sets.filter(s => s.status === 'completed').length
+              const totalSetCount = exercise.sets.length
+              const hasActiveSet = exercise.sets.some(s => s.status === 'in_progress')
 
-      <div className="max-w-lg mx-auto px-4 pt-4 space-y-3">
-        {/* Exercises */}
-        {exercises.map((exercise, exerciseIndex) => {
-          const templateExercise = template.exercises[exerciseIndex]
-          const allSetsCompleted = exercise.sets.every(s => s.status === 'completed')
-          const completedCount = exercise.sets.filter(s => s.status === 'completed').length
-          const totalSetCount = exercise.sets.length
-          const hasActiveSet = exercise.sets.some(s => s.status === 'in_progress')
-          
-          return (
-            <motion.div 
-              key={exerciseIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: exerciseIndex * 0.05 }}
-              className={`bg-[#141416] rounded-[16px] overflow-hidden border transition-all ${
-                allSetsCompleted 
-                  ? 'border-[#29e33c]/30' 
-                  : hasActiveSet
-                  ? 'border-[#29e33c]/20'
-                  : 'border-white/5'
-              }`}
-              style={hasActiveSet && !allSetsCompleted ? { boxShadow: '0 0 20px rgba(41, 227, 60, 0.1)' } : {}}
-            >
-              {/* Exercise Header */}
-              <button
-                onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                className={`w-full px-4 py-4 flex items-center justify-between transition-colors ${
-                  hasActiveSet && !allSetsCompleted ? 'bg-[#29e33c]/5' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                    allSetsCompleted 
-                      ? 'bg-[#29e33c] text-black' 
-                      : hasActiveSet
-                      ? 'bg-[#29e33c]/20 text-[#29e33c] border-2 border-[#29e33c]'
-                      : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/10'
-                  }`}
-                  style={allSetsCompleted ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.4)' } : {}}
-                  >
-                    {allSetsCompleted ? <Check className="w-5 h-5" /> : exerciseIndex + 1}
-                  </div>
-                  <div className="text-left">
-                    <h3 className={`font-semibold transition-colors ${
-                      allSetsCompleted 
-                        ? 'text-[#29e33c]' 
-                        : hasActiveSet 
-                        ? 'text-white' 
-                        : 'text-[#9a9fa4]'
-                    }`}>
-                      {exercise.name}
-                    </h3>
-                    <p className="text-[#9a9fa4] text-xs">
-                      {completedCount}/{totalSetCount} sets complete
-                    </p>
-                  </div>
-                </div>
+              return (
                 <motion.div
-                  animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
-                  transition={{ duration: 0.2 }}
+                  key={exerciseIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: exerciseIndex * 0.05 }}
+                  className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
                 >
-                  <ChevronDown className={`w-5 h-5 ${hasActiveSet ? 'text-[#29e33c]' : 'text-[#9a9fa4]'}`} />
-                </motion.div>
-              </button>
-
-              {/* Exercise Content */}
-              <AnimatePresence>
-                {!exercise.isCollapsed && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden overflow-x-hidden"
+                  <button
+                    onClick={() => toggleExerciseCollapse(exerciseIndex)}
+                    className="w-full flex items-center justify-between"
                   >
-                    <div className="px-4 pb-4 overflow-x-hidden">
-                      {/* Table Header */}
-                      <div className="flex items-center gap-1 text-[#9a9fa4] text-xs font-medium mb-2 px-1 border-b border-white/5 pb-2">
-                        <span className="w-8 text-center">SET</span>
-                        <span className="flex-1 text-center">KG</span>
-                        <span className="flex-1 text-center">REPS</span>
-                        <span className="w-10"></span>
-                      </div>
-
-                      {/* Sets */}
-                      {exercise.sets.map((setState, setIndex) => {
-                        const isCompleted = setState.status === 'completed'
-                        const isInProgress = setState.status === 'in_progress'
-
-                        return (
-                          <motion.div 
-                            key={setIndex}
-                            initial={isInProgress ? { scale: 0.98 } : {}}
-                            animate={isInProgress ? { scale: 1 } : {}}
-                            className={`flex items-center gap-1 py-2 px-1 rounded-[10px] transition-all ${
-                              isInProgress ? 'bg-[#29e33c]/10 border border-[#29e33c]/20' : ''
-                            }`}
-                          >
-                            <span className={`w-8 text-center font-bold ${
-                              isCompleted ? 'text-[#29e33c]' : isInProgress ? 'text-[#29e33c]' : 'text-[#9a9fa4]'
-                            }`}>
-                              {setIndex + 1}
-                            </span>
-                            
-                            {/* Weight Input */}
-                            <input
-                              type="number"
-                              inputMode="decimal"
-                              step="0.5"
-                              value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? exercise.currentInputs.weight : '')}
-                              onChange={(e) => {
-                                if (isInProgress) {
-                                  updateInput(exerciseIndex, 'weight', e.target.value)
-                                }
-                              }}
-                              disabled={!isInProgress}
-                              placeholder={templateExercise.weight?.toString() || '0'}
-                              className={`flex-1 min-w-0 px-2 py-2.5 rounded-[10px] text-center font-semibold transition-all ${
-                                isInProgress 
-                                  ? 'bg-[#29e33c] text-black placeholder-black/50' 
-                                  : isCompleted 
-                                  ? 'bg-[#29e33c]/20 text-[#29e33c]' 
-                                  : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/5'
-                              }`}
-                              style={isInProgress ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
-                            />
-
-                            {/* Reps Input */}
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? exercise.currentInputs.reps : '')}
-                              onChange={(e) => {
-                                if (isInProgress) {
-                                  updateInput(exerciseIndex, 'reps', e.target.value)
-                                }
-                              }}
-                              disabled={!isInProgress}
-                              placeholder={templateExercise.reps.toString()}
-                              className={`flex-1 min-w-0 px-2 py-2.5 rounded-[10px] text-center font-semibold transition-all ${
-                                isInProgress 
-                                  ? 'bg-[#29e33c] text-black placeholder-black/50' 
-                                  : isCompleted 
-                                  ? 'bg-[#29e33c]/20 text-[#29e33c]' 
-                                  : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/5'
-                              }`}
-                              style={isInProgress ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
-                            />
-
-                            {/* Checkmark */}
-                            {isCompleted ? (
-                              <div className="w-10 h-10 shrink-0 flex items-center justify-center">
-                                <div 
-                                  className="w-8 h-8 bg-[#29e33c] rounded-full flex items-center justify-center"
-                                  style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.4)' }}
-                                >
-                                  <Check className="w-4 h-4 text-black" strokeWidth={3} />
-                                </div>
-                              </div>
-                            ) : isInProgress ? (
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                className="w-10 h-10 shrink-0 flex items-center justify-center"
-                              >
-                                <div 
-                                  className="w-8 h-8 rounded-full border-2 border-[#29e33c] flex items-center justify-center bg-[#29e33c]/10 hover:bg-[#29e33c]/20 transition-colors"
-                                >
-                                  <Check className="w-4 h-4 text-[#29e33c]" />
-                                </div>
-                              </motion.button>
-                            ) : (
-                              <div className="w-10 h-10 shrink-0 flex items-center justify-center">
-                                <div className="w-8 h-8 rounded-full border border-white/10 bg-[#1c1c1f]" />
-                              </div>
-                            )}
-                          </motion.div>
-                        )
-                      })}
+                    <div className="text-left">
+                      <h3 className="text-base font-semibold text-white">{exercise.name}</h3>
+                      <p className="text-xs text-white/60">
+                        {completedCount}/{totalSetCount} sets complete
+                      </p>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )
-        })}
+                    <motion.div
+                      animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className={`w-5 h-5 ${hasActiveSet ? 'text-[#29e33c]' : 'text-white/60'}`} />
+                    </motion.div>
+                  </button>
 
-        {/* Rest Timer */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-[#141416] rounded-[16px] p-4 border border-white/5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white font-medium">Rest Timer</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={Math.floor(restTimerRemaining)}
-              onChange={(e) => setRestTimerRemaining(parseInt(e.target.value) || 0)}
-              className="w-16 px-2 py-1 bg-[#1c1c1f] border border-white/10 rounded-[8px] text-white text-center text-sm font-medium focus:outline-none focus:border-[#29e33c] transition-colors"
-            />
+                  <AnimatePresence>
+                    {!exercise.isCollapsed && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 space-y-3">
+                          {exercise.sets.map((setState, setIndex) => {
+                            const isCompleted = setState.status === 'completed'
+                            const isInProgress = setState.status === 'in_progress'
+
+                            return (
+                              <motion.div
+                                key={setIndex}
+                                initial={isInProgress ? { scale: 0.98 } : {}}
+                                animate={isInProgress ? { scale: 1 } : {}}
+                                className="flex items-center gap-3"
+                              >
+                                <span className="min-w-[40px] px-3 py-1 rounded-full text-xs font-semibold bg-black/20 text-white/70 border border-white/10 text-center">
+                                  {setIndex + 1}
+                                </span>
+
+                                <div className="flex-1 px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                  <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="0.5"
+                                    value={isCompleted && setState.data ? setState.data.weight : (isInProgress ? exercise.currentInputs.weight : '')}
+                                    onChange={(e) => {
+                                      if (isInProgress) {
+                                        updateInput(exerciseIndex, 'weight', e.target.value)
+                                      }
+                                    }}
+                                    disabled={!isInProgress}
+                                    placeholder={templateExercise.weight?.toString() || '0'}
+                                    className="w-full bg-transparent text-center text-sm font-semibold text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40"
+                                  />
+                                </div>
+
+                                <div className="flex-1 px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                  <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    value={isCompleted && setState.data ? setState.data.reps : (isInProgress ? exercise.currentInputs.reps : '')}
+                                    onChange={(e) => {
+                                      if (isInProgress) {
+                                        updateInput(exerciseIndex, 'reps', e.target.value)
+                                      }
+                                    }}
+                                    disabled={!isInProgress}
+                                    placeholder={templateExercise.reps.toString()}
+                                    className="w-full bg-transparent text-center text-sm font-semibold text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40"
+                                  />
+                                </div>
+
+                                {isCompleted ? (
+                                  <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-[#29e33c]">
+                                    <Check className="w-4 h-4 text-black" strokeWidth={3} />
+                                  </div>
+                                ) : isInProgress ? (
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
+                                    className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-[#29e33c] bg-black/20"
+                                  >
+                                    <Check className="w-4 h-4 text-[#29e33c]" />
+                                  </motion.button>
+                                ) : (
+                                  <div className="w-10 h-10 shrink-0 rounded-full border border-white/10 bg-black/20" />
+                                )}
+                              </motion.div>
+                            )
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
           </div>
-          
-          {/* Timer Display */}
-          <div 
-            className={`text-center py-6 rounded-[12px] font-mono text-5xl font-bold mb-4 transition-all border ${
-              restTimerRemaining === 0 
-                ? 'bg-[#29e33c] text-black border-[#29e33c]' 
-                : restTimerRemaining <= 10 
-                ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' 
-                : restTimerActive
-                ? 'bg-[#29e33c]/10 text-[#29e33c] border-[#29e33c]/30'
-                : 'bg-[#1c1c1f] text-white border-white/5'
-            }`}
-            style={restTimerActive && restTimerRemaining > 10 ? { boxShadow: '0 0 20px rgba(41, 227, 60, 0.2)' } : {}}
+
+          {/* Rest Timer */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
           >
-            {formatTime(restTimerRemaining)}
-          </div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-semibold text-white">Rest Timer</span>
+              <span className="text-xs text-white/60">{formatTime(defaultRestTime)}</span>
+            </div>
 
-          {/* Timer Controls */}
-          <div className="flex gap-3">
-            <AnimatePresence mode="wait">
-              {!restTimerActive ? (
-                <motion.button
-                  key="play"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={startRestTimer}
-                  className="flex-1 py-3 bg-[#29e33c] text-black rounded-[10px] flex items-center justify-center gap-2 font-bold transition-all"
-                  style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' }}
-                >
-                  <Play className="w-5 h-5" fill="black" />
-                  Start
-                </motion.button>
-              ) : (
-                <motion.button
-                  key="pause"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={pauseRestTimer}
-                  className="flex-1 py-3 bg-yellow-500 text-black rounded-[10px] flex items-center justify-center gap-2 font-bold transition-all"
-                  style={{ boxShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
-                >
-                  <Pause className="w-5 h-5" />
-                  Pause
-                </motion.button>
-              )}
-            </AnimatePresence>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={resetRestTimer}
-              className="py-3 px-4 bg-[#1c1c1f] text-[#9a9fa4] rounded-[10px] hover:text-white hover:bg-[#282a2c] transition-all border border-white/5"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </motion.button>
-          </div>
-        </motion.div>
+            <div className="text-center text-4xl font-semibold tracking-wide text-white mb-4">
+              {formatTime(restTimerRemaining)}
+            </div>
 
-        {/* Workout Notes */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-[#141416] rounded-[16px] p-4 border border-white/5"
-        >
-          <label className="block text-white font-medium mb-2">
-            Workout Notes
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="How did you feel today?"
-            className="w-full px-4 py-3 bg-[#1c1c1f] border border-white/10 rounded-[10px] text-white placeholder-[#9a9fa4] focus:outline-none focus:border-[#29e33c] resize-none transition-colors"
-            rows={3}
-          />
-        </motion.div>
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={restTimerActive ? pauseRestTimer : startRestTimer}
+                className="flex-1 py-3 bg-hp-accent text-black rounded-full text-sm font-medium"
+              >
+                {restTimerActive ? 'Pause' : 'Start'}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={resetRestTimer}
+                className="w-11 h-11 flex items-center justify-center rounded-full bg-black/20 border border-white/10 text-white/70 hover:text-white transition-colors"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </motion.button>
+            </div>
+          </motion.div>
+
+          {/* Workout Notes */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
+          >
+            <label className="block text-sm font-semibold text-white mb-2">
+              Workout Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="How did you feel today?"
+              className="w-full bg-black/20 border border-white/10 rounded-[16px] p-3 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40 resize-none"
+              rows={3}
+            />
+          </motion.div>
+        </div>
       </div>
     </div>
   )

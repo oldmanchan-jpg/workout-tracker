@@ -1,276 +1,206 @@
-import PixelOverlay from '@/components/dev/PixelOverlay'
-import { Avatar, BottomNav, Card, IconButton, Pill, StatTile } from '@/components/ui'
-
-type IconProps = {
-  className?: string
-}
-
-const iconClassName = 'h-4 w-4'
-
-function SearchIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? iconClassName}
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-3.5-3.5" />
-    </svg>
-  )
-}
-
-function BellIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? iconClassName}
-      aria-hidden="true"
-    >
-      <path d="M6 9a6 6 0 1 1 12 0c0 4 2 5 2 5H4s2-1 2-5" />
-      <path d="M9.5 19a2.5 2.5 0 0 0 5 0" />
-    </svg>
-  )
-}
-
-function HeartIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? 'h-5 w-5'}
-      aria-hidden="true"
-    >
-      <path d="M12 20s-6-4.2-8-7.4C2.6 10 3.5 6.6 6.6 5.5c2.2-.8 4.4.1 5.4 2 1-1.9 3.2-2.8 5.4-2 3.1 1.1 4 4.5 2.6 7.1C18 15.8 12 20 12 20z" />
-    </svg>
-  )
-}
-
-function ScaleIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? 'h-5 w-5'}
-      aria-hidden="true"
-    >
-      <path d="M5 19h14l-1.5-12.5a2 2 0 0 0-2-1.5H8.5a2 2 0 0 0-2 1.5L5 19z" />
-      <path d="M12 9.5v3.5" />
-      <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0" />
-    </svg>
-  )
-}
-
-function HeightIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? 'h-5 w-5'}
-      aria-hidden="true"
-    >
-      <path d="M6 4v16" />
-      <path d="M10 7h6" />
-      <path d="M10 11h6" />
-      <path d="M10 15h6" />
-      <path d="M10 19h6" />
-    </svg>
-  )
-}
-
-function AgeIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? 'h-5 w-5'}
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3 2" />
-    </svg>
-  )
-}
-
-function TrendIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? iconClassName}
-      aria-hidden="true"
-    >
-      <path d="M4 16l6-6 4 4 6-6" />
-      <path d="M16 8h4v4" />
-    </svg>
-  )
-}
-
-function ShareIcon({ className }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className ?? iconClassName}
-      aria-hidden="true"
-    >
-      <circle cx="6" cy="12" r="2" />
-      <circle cx="18" cy="6" r="2" />
-      <circle cx="18" cy="18" r="2" />
-      <path d="M8 12l8-5" />
-      <path d="M8 12l8 5" />
-    </svg>
-  )
-}
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import type { Template } from '@/types'
+import { Play, Dumbbell, ChevronRight, Clock, Flame, Target } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { workoutTemplates } from '@/data/workoutTemplates'
+import TopBar from '@/components/TopBar'
 
 export default function Dashboard() {
+  const [templates] = useState<Template[]>(workoutTemplates)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
+  const navigate = useNavigate()
+
+  const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
+
+  const onStartWorkout = () => {
+    if (!selectedTemplate) return
+    navigate('/workout', { state: { template: selectedTemplate } })
+  }
+
+  // Calculate estimated workout time (rough estimate: 3 min per set)
+  const estimatedTime = selectedTemplate 
+    ? selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets * 3, 0)
+    : 0
+
   return (
-    <div className="min-h-screen flex justify-center bg-[radial-gradient(80%_60%_at_20%_0%,rgba(41,227,60,0.20),transparent_55%),linear-gradient(#010101,#010101)]">
-      <div className="w-canvas min-h-screen relative px-6 pt-10 pb-28 text-white/90 text-left">
-        {import.meta.env.DEV && <PixelOverlay src="/figma/Home.png" />}
+    <div className="min-h-screen bg-black">
+      <TopBar />
+      
+      <main className="max-w-lg mx-auto px-4 pb-8 space-y-6">
+        {/* Welcome Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="pt-4"
+        >
+          <p className="text-[#9a9fa4] text-sm font-medium">Welcome back</p>
+          <h1 className="text-white text-2xl font-semibold mt-1">
+            Ready to <span className="text-[#29e33c]">Train</span>?
+          </h1>
+          <p className="text-[#9a9fa4] text-sm mt-2">
+            Select a workout and crush your goals
+          </p>
+        </motion.div>
 
-        <div className="relative z-10 space-y-6">
-          <header className="flex items-center justify-between">
+        {/* Quick Stats Row */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="bg-[#141416] rounded-[21px] p-4 border border-white/5"
+        >
+          <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <Avatar size={52} initials="AJ" />
-              <div className="leading-tight">
-                <p className="text-white/70 text-xs">Welcome Back!</p>
-                <p className="text-white/90 text-base font-semibold">Allen Jhon</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <IconButton aria-label="Search">
-                <SearchIcon />
-              </IconButton>
-              <IconButton aria-label="Notifications">
-                <BellIcon />
-              </IconButton>
-            </div>
-          </header>
-
-          <section className="space-y-1">
-            <p className="text-[38px] font-semibold leading-[1.05] tracking-tight">Always keep</p>
-            <p className="text-[38px] font-semibold leading-[1.05] tracking-tight">
-              yourself safe and
-            </p>
-            <p className="text-[38px] font-semibold leading-[1.05] tracking-tight text-[#29e33c]">
-              Healthy
-            </p>
-          </section>
-
-          <Card className="p-5">
-            <div className="grid grid-cols-3 gap-4">
-              <StatTile label="Weight" value="62 Kg" icon={<ScaleIcon />} />
-              <StatTile label="Height" value="5.6 ft" icon={<HeightIcon />} />
-              <StatTile label="Age" value="26" icon={<AgeIcon />} />
-            </div>
-          </Card>
-
-          <div className="flex items-baseline gap-2">
-            <p className="text-white/70 text-sm">Heart AVG bpm</p>
-            <p className="text-hp-accent text-2xl font-semibold">76</p>
-          </div>
-
-          <Card className="relative p-5">
-            <div className="flex items-start justify-between">
-              <p className="text-sm font-semibold">Heart&apos;s bpm</p>
-              <div className="flex items-center gap-3 text-white/40">
-                <TrendIcon />
-                <ShareIcon />
-              </div>
-            </div>
-            <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs text-white/90">
-              89
-            </div>
-            <svg viewBox="0 0 320 140" className="mt-6 h-32 w-full">
-              <line x1="0" y1="22" x2="320" y2="22" stroke="rgba(255,255,255,0.1)" />
-              <line x1="0" y1="70" x2="320" y2="70" stroke="rgba(255,255,255,0.1)" />
-              <line x1="0" y1="118" x2="320" y2="118" stroke="rgba(255,255,255,0.1)" />
-              <line
-                x1="170"
-                y1="0"
-                x2="170"
-                y2="140"
-                stroke="rgba(255,255,255,0.25)"
-                strokeDasharray="4 6"
-              />
-              <path
-                d="M0 100 C40 78 80 120 120 90 C160 55 200 18 240 58 C270 85 300 70 320 88"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-hp-accent"
-              />
-            </svg>
-            <div className="mt-2 flex justify-between text-xs text-white/50">
-              <span>Su</span>
-              <span>Mo</span>
-              <span>Tu</span>
-              <span>We</span>
-              <span>Th</span>
-              <span>Fr</span>
-              <span>Sa</span>
-            </div>
-          </Card>
-
-          <p className="text-white/90 text-sm font-semibold">Health Stats</p>
-
-          <Card className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-[52px] w-[52px] rounded-2xl border border-white/10 bg-black/25 flex items-center justify-center text-[#ff4d4f]">
-                <HeartIcon className="h-6 w-6" />
+              <div 
+                className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
+                style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.15)' }}
+              >
+                <Dumbbell className="w-6 h-6 text-[#29e33c]" />
               </div>
               <div>
-                <p className="text-white/50 text-sm">Heart Health</p>
-                <p className="text-white/90 text-xl font-semibold">55</p>
+                <p className="text-[#9a9fa4] text-xs">This Week</p>
+                <p className="text-white font-semibold text-lg">3 Workouts</p>
               </div>
             </div>
-            <Pill tone="accent" className="px-5 py-2 text-sm font-medium">
-              Measure
-            </Pill>
-          </Card>
-        </div>
+            <div className="text-right">
+              <p className="text-[#9a9fa4] text-xs">Volume</p>
+              <p className="text-[#29e33c] font-semibold text-lg">12,450 kg</p>
+            </div>
+          </div>
+        </motion.div>
 
-        <div className="absolute bottom-6 left-6 right-6">
-          <BottomNav />
-        </div>
-      </div>
+        {/* Template Selection */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-white font-semibold text-lg">Workout Template</h2>
+            <span className="text-[#9a9fa4] text-sm">{templates.length} available</span>
+          </div>
+
+          {/* Template Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              className="w-full px-4 py-4 bg-[#141416] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-all cursor-pointer"
+              style={{ boxShadow: '0 0 15px rgba(41, 227, 60, 0.1)' }}
+            >
+              {templates.map(template => (
+                <option key={template.id} value={template.id} className="bg-[#141416]">
+                  {template.name}
+                </option>
+              ))}
+            </select>
+            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
+          </div>
+        </motion.div>
+
+        {/* Selected Template Preview */}
+        {selectedTemplate && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
+          >
+            {/* Template Header */}
+            <div className="p-4 border-b border-white/5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold text-xl">
+                  {selectedTemplate.name}
+                </h3>
+                <span 
+                  className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium"
+                  style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.2)' }}
+                >
+                  {selectedTemplate.exercises.length} exercises
+                </span>
+              </div>
+              
+              {/* Meta Info */}
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+                  <Clock className="w-4 h-4" />
+                  <span>~{estimatedTime} min</span>
+                </div>
+                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+                  <Flame className="w-4 h-4" />
+                  <span>{selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets, 0)} sets</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Exercise List */}
+            <div className="p-4 space-y-2 max-h-[280px] overflow-y-auto">
+              {selectedTemplate.exercises.map((ex, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="flex items-center gap-3 p-3 bg-[#1c1c1f] rounded-[12px] hover:bg-[#242426] transition-colors border border-white/5"
+                >
+                  <div 
+                    className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0"
+                    style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.3)' }}
+                  >
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{ex.name}</p>
+                    <p className="text-[#9a9fa4] text-sm">
+                      {ex.sets} sets × {ex.reps} reps
+                      {ex.weight && <span className="text-[#29e33c]"> • {ex.weight}kg</span>}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#9a9fa4] flex-shrink-0" />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Start Button */}
+            <div className="p-4 pt-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onStartWorkout}
+                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-all"
+                style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.4)' }}
+              >
+                <Play className="w-6 h-6" fill="black" />
+                Start Workout
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Bottom Tip */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-start gap-3 p-4 bg-[#141416] rounded-[16px] border border-[#29e33c]/20"
+          style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.05)' }}
+        >
+          <div 
+            className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0"
+          >
+            <Target className="w-5 h-5 text-[#29e33c]" />
+          </div>
+          <div>
+            <p className="text-white font-medium text-sm">Track Your RPE</p>
+            <p className="text-[#9a9fa4] text-xs mt-1">
+              Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
+            </p>
+          </div>
+        </motion.div>
+      </main>
     </div>
   )
 }

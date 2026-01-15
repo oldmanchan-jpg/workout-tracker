@@ -12,7 +12,7 @@ export default function Pill({
 }: PillProps) {
   const toneClasses =
     tone === 'accent'
-      ? 'bg-hp-accent/15 text-hp-accent border border-hp-accent/40'
+      ? 'bg-hp-accent text-black border border-transparent font-medium hover:shadow-[0_0_18px_rgba(41,227,60,0.35)]'
       : 'bg-hp-surface2 text-hp-text2 border border-hp-border'
 
   const classes = [

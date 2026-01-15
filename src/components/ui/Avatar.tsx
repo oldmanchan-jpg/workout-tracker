@@ -15,7 +15,7 @@ export default function Avatar({
   ...props
 }: AvatarProps) {
   const wrapperClasses = [
-    'flex items-center justify-center overflow-hidden rounded-full border-2 border-hp-accent',
+    'flex items-center justify-center overflow-hidden rounded-full border-[3px] border-hp-accent',
     'bg-hp-surface2 shadow-glow-soft',
     className,
   ]

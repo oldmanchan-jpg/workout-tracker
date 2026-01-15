@@ -10,7 +10,7 @@ export default function PixelOverlay({ src }: PixelOverlayProps) {
 
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      <div className="pointer-events-auto absolute left-4 top-4 z-30 rounded-card bg-hp-surface2/90 p-3 text-xs text-hp-text border border-hp-border">
+      <div className="pointer-events-auto absolute left-3 top-3 z-30 rounded-card bg-hp-surface2/90 p-2 text-[10px] text-hp-text border border-white/10">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -28,7 +28,7 @@ export default function PixelOverlay({ src }: PixelOverlayProps) {
             step={0.05}
             value={opacity}
             onChange={(event) => setOpacity(Number.parseFloat(event.target.value))}
-            className="w-24"
+            className="w-20"
           />
           <span className="text-hp-text2">{opacity.toFixed(2)}</span>
         </div>

@@ -11,9 +11,9 @@ export default function IconButton({
   ...props
 }: IconButtonProps) {
   const classes = [
-    'h-10 w-10 rounded-full border border-hp-border bg-hp-surface2',
-    'flex items-center justify-center text-hp-text transition-colors',
-    'hover:border-hp-accent/50 hover:text-hp-accent',
+    'h-11 w-11 rounded-full border border-white/5 bg-white/10',
+    'flex items-center justify-center text-hp-text/80 transition-colors',
+    'hover:bg-white/15 hover:text-hp-text',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hp-accent/40',
     className,
   ]

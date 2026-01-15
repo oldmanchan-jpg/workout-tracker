@@ -83,8 +83,8 @@ export type BottomNavProps = {
 
 export default function BottomNav({ className }: BottomNavProps) {
   const classes = [
-    'w-full max-w-[360px] rounded-pill border border-hp-border bg-hp-surface',
-    'px-6 py-3 flex items-center justify-between',
+    'w-full h-[72px] rounded-pill border border-white/5 bg-hp-surface/90 backdrop-blur-md',
+    'px-8 flex items-center justify-between',
     'shadow-[0_16px_30px_rgba(0,0,0,0.35)]',
     className,
   ]
@@ -97,13 +97,13 @@ export default function BottomNav({ className }: BottomNavProps) {
         <HomeIcon />
         <span className="h-1 w-6 rounded-full bg-hp-accent" />
       </button>
-      <button type="button" aria-label="Activity" className="text-hp-text2">
+      <button type="button" aria-label="Activity" className="text-hp-text/30">
         <ActivityIcon />
       </button>
-      <button type="button" aria-label="Stats" className="text-hp-text2">
+      <button type="button" aria-label="Stats" className="text-hp-text/30">
         <ChartIcon />
       </button>
-      <button type="button" aria-label="Profile" className="text-hp-text2">
+      <button type="button" aria-label="Profile" className="text-hp-text/30">
         <UserIcon />
       </button>
     </nav>

@@ -1,32 +1,111 @@
-import { Activity, BarChart2, Home, User } from 'lucide-react'
+type IconProps = {
+  className?: string
+}
+
+const iconClassName = 'h-5 w-5'
+
+function HomeIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className ?? iconClassName}
+      aria-hidden="true"
+    >
+      <path d="M3 10.5L12 3l9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+    </svg>
+  )
+}
+
+function ActivityIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className ?? iconClassName}
+      aria-hidden="true"
+    >
+      <path d="M4 12h4l2.5-6 3.5 12 2.5-6H20" />
+    </svg>
+  )
+}
+
+function ChartIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className ?? iconClassName}
+      aria-hidden="true"
+    >
+      <path d="M4 20V6" />
+      <path d="M10 20V10" />
+      <path d="M16 20V4" />
+      <path d="M22 20H2" />
+    </svg>
+  )
+}
+
+function UserIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className ?? iconClassName}
+      aria-hidden="true"
+    >
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="8" r="4" />
+    </svg>
+  )
+}
 
 export type BottomNavProps = {
   className?: string
 }
 
 export default function BottomNav({ className }: BottomNavProps) {
+  const classes = [
+    'w-full max-w-[360px] rounded-pill border border-hp-border bg-hp-surface',
+    'px-6 py-3 flex items-center justify-between',
+    'shadow-[0_16px_30px_rgba(0,0,0,0.35)]',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div
-      className={[
-        'h-16 w-full rounded-pill bg-hp-surface border border-hp-border flex items-center justify-around px-6',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <button type="button" className="flex flex-col items-center gap-1 text-hp-accent">
-        <Home className="h-5 w-5" />
+    <nav className={classes}>
+      <button type="button" aria-label="Home" className="flex flex-col items-center gap-1 text-hp-accent">
+        <HomeIcon />
         <span className="h-1 w-6 rounded-full bg-hp-accent" />
       </button>
-      <button type="button" className="text-hp-text2">
-        <Activity className="h-5 w-5" />
+      <button type="button" aria-label="Activity" className="text-hp-text2">
+        <ActivityIcon />
       </button>
-      <button type="button" className="text-hp-text2">
-        <BarChart2 className="h-5 w-5" />
+      <button type="button" aria-label="Stats" className="text-hp-text2">
+        <ChartIcon />
       </button>
-      <button type="button" className="text-hp-text2">
-        <User className="h-5 w-5" />
+      <button type="button" aria-label="Profile" className="text-hp-text2">
+        <UserIcon />
       </button>
-    </div>
+    </nav>
   )
 }

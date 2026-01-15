@@ -1,13 +1,22 @@
 import type { ImgHTMLAttributes } from 'react'
 
-export type AvatarProps = ImgHTMLAttributes<HTMLImageElement> & {
+export type AvatarProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'size'> & {
   size?: number
+  initials?: string
+  className?: string
 }
 
-export default function Avatar({ size = 48, className, src, alt, ...props }: AvatarProps) {
+export default function Avatar({
+  size = 48,
+  initials = 'AJ',
+  className,
+  src,
+  alt,
+  ...props
+}: AvatarProps) {
   const wrapperClasses = [
-    'rounded-full border-2 border-hp-accent flex items-center justify-center overflow-hidden',
-    'bg-gradient-to-br from-hp-accent/60 to-hp-surface2',
+    'flex items-center justify-center overflow-hidden rounded-full border-2 border-hp-accent',
+    'bg-hp-surface2 shadow-glow-soft',
     className,
   ]
     .filter(Boolean)
@@ -18,7 +27,7 @@ export default function Avatar({ size = 48, className, src, alt, ...props }: Ava
       {src ? (
         <img src={src} alt={alt ?? 'Avatar'} className="h-full w-full object-cover" {...props} />
       ) : (
-        <span className="text-hp-bg text-xs font-semibold">HP</span>
+        <span className="text-hp-accent text-xs font-semibold">{initials}</span>
       )}
     </div>
   )

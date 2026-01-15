@@ -1,13 +1,15 @@
 import type { HTMLAttributes } from 'react'
 
-export type CardProps = HTMLAttributes<HTMLDivElement> & {
-  variant?: 'default' | 'raised'
-}
+export type CardProps = HTMLAttributes<HTMLDivElement>
 
-export default function Card({ className, variant = 'default', ...props }: CardProps) {
-  const baseClasses = 'bg-hp-surface rounded-card border border-hp-border'
-  const variantClasses = variant === 'raised' ? 'bg-hp-surface/90 shadow-glow-soft' : ''
-  const classes = [baseClasses, variantClasses, className].filter(Boolean).join(' ')
+export default function Card({ className, ...props }: CardProps) {
+  const classes = [
+    'rounded-card border border-hp-border bg-hp-surface',
+    'shadow-[0_18px_40px_rgba(0,0,0,0.35)]',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return <div className={classes} {...props} />
 }

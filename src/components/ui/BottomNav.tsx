@@ -79,11 +79,13 @@ function UserIcon({ className }: IconProps) {
 
 export type BottomNavProps = {
   className?: string
+  active?: 'home' | 'activity' | 'stats' | 'profile'
 }
 
-export default function BottomNav({ className }: BottomNavProps) {
+export default function BottomNav({ className, active = 'home' }: BottomNavProps) {
   const classes = [
-    'w-full h-[72px] rounded-pill border border-white/5 bg-hp-surface/90 backdrop-blur-md',
+    // NOTE: removed bg-hp-surface/90 (fails); use solid surface + blur + shadow
+    'w-full h-[72px] rounded-pill border border-white/5 bg-hp-surface backdrop-blur-md',
     'px-8 flex items-center justify-between',
     'shadow-[0_16px_30px_rgba(0,0,0,0.35)]',
     className,
@@ -91,20 +93,37 @@ export default function BottomNav({ className }: BottomNavProps) {
     .filter(Boolean)
     .join(' ')
 
+  const inactiveBtn = 'text-white/30 hover:text-white/60 transition-colors'
+  const activeBtn = 'flex flex-col items-center gap-1 text-hp-accent'
+
   return (
-    <nav className={classes}>
-      <button type="button" aria-label="Home" className="flex flex-col items-center gap-1 text-hp-accent">
+    <nav className={classes} aria-label="Bottom navigation">
+      <button type="button" aria-label="Home" className={active === 'home' ? activeBtn : inactiveBtn}>
         <HomeIcon />
-        <span className="h-1 w-6 rounded-full bg-hp-accent" />
+        {active === 'home' && <span className="h-1 w-6 rounded-full bg-hp-accent" />}
       </button>
-      <button type="button" aria-label="Activity" className="text-hp-text/30">
+
+      <button
+        type="button"
+        aria-label="Activity"
+        className={active === 'activity' ? activeBtn : inactiveBtn}
+      >
         <ActivityIcon />
+        {active === 'activity' && <span className="h-1 w-6 rounded-full bg-hp-accent" />}
       </button>
-      <button type="button" aria-label="Stats" className="text-hp-text/30">
+
+      <button type="button" aria-label="Stats" className={active === 'stats' ? activeBtn : inactiveBtn}>
         <ChartIcon />
+        {active === 'stats' && <span className="h-1 w-6 rounded-full bg-hp-accent" />}
       </button>
-      <button type="button" aria-label="Profile" className="text-hp-text/30">
+
+      <button
+        type="button"
+        aria-label="Profile"
+        className={active === 'profile' ? activeBtn : inactiveBtn}
+      >
         <UserIcon />
+        {active === 'profile' && <span className="h-1 w-6 rounded-full bg-hp-accent" />}
       </button>
     </nav>
   )

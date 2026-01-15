@@ -160,7 +160,7 @@ function ShareIcon({ className }: IconProps) {
 export default function Dashboard() {
   return (
     <div className="min-h-screen flex justify-center bg-[radial-gradient(80%_60%_at_20%_0%,rgba(41,227,60,0.20),transparent_55%),linear-gradient(#010101,#010101)]">
-      <div className="w-canvas min-h-screen relative px-6 pt-10 pb-28 text-hp-text text-left">
+      <div className="w-canvas min-h-screen relative px-6 pt-10 pb-28 text-white/90 text-left">
         {import.meta.env.DEV && <PixelOverlay src="/figma/Home.png" />}
 
         <div className="relative z-10 space-y-6">
@@ -168,8 +168,8 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <Avatar size={52} initials="AJ" />
               <div className="leading-tight">
-                <p className="text-hp-text2 text-xs">Welcome Back!</p>
-                <p className="text-hp-text text-base font-semibold">Allen Jhon</p>
+                <p className="text-white/70 text-xs">Welcome Back!</p>
+                <p className="text-white/90 text-base font-semibold">Allen Jhon</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -201,19 +201,19 @@ export default function Dashboard() {
           </Card>
 
           <div className="flex items-baseline gap-2">
-            <p className="text-hp-text2 text-sm">Heart AVG bpm</p>
+            <p className="text-white/70 text-sm">Heart AVG bpm</p>
             <p className="text-hp-accent text-2xl font-semibold">76</p>
           </div>
 
           <Card className="relative p-5">
             <div className="flex items-start justify-between">
               <p className="text-sm font-semibold">Heart&apos;s bpm</p>
-              <div className="flex items-center gap-3 text-hp-text/40">
+              <div className="flex items-center gap-3 text-white/40">
                 <TrendIcon />
                 <ShareIcon />
               </div>
             </div>
-            <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs text-hp-text">
+            <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs text-white/90">
               89
             </div>
             <svg viewBox="0 0 320 140" className="mt-6 h-32 w-full">
@@ -238,7 +238,7 @@ export default function Dashboard() {
                 className="text-hp-accent"
               />
             </svg>
-            <div className="mt-2 flex justify-between text-xs text-hp-text/50">
+            <div className="mt-2 flex justify-between text-xs text-white/50">
               <span>Su</span>
               <span>Mo</span>
               <span>Tu</span>
@@ -249,7 +249,7 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <p className="text-hp-text text-sm font-semibold">Health Stats</p>
+          <p className="text-white/90 text-sm font-semibold">Health Stats</p>
 
           <Card className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -257,8 +257,8 @@ export default function Dashboard() {
                 <HeartIcon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-hp-text/50 text-sm">Heart Health</p>
-                <p className="text-hp-text text-xl font-semibold">55</p>
+                <p className="text-white/50 text-sm">Heart Health</p>
+                <p className="text-white/90 text-xl font-semibold">55</p>
               </div>
             </div>
             <Pill tone="accent" className="px-5 py-2 text-sm font-medium">

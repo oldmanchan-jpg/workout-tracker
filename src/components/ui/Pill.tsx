@@ -12,8 +12,15 @@ export default function Pill({
 }: PillProps) {
   const toneClasses =
     tone === 'accent'
-      ? 'bg-hp-accent text-black border border-transparent font-medium hover:shadow-[0_0_18px_rgba(41,227,60,0.35)]'
-      : 'bg-hp-surface2 text-hp-text2 border border-hp-border'
+      ? [
+          'bg-hp-accent text-black border border-transparent font-medium',
+          'hover:shadow-[0_0_18px_rgba(41,227,60,0.35)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/40',
+        ].join(' ')
+      : [
+          'bg-hp-surface2 text-white/70 border border-white/5',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+        ].join(' ')
 
   const classes = [
     'inline-flex items-center justify-center rounded-pill px-4 py-2 text-xs font-semibold',

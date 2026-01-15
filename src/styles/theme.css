@@ -1,0 +1,152 @@
+:root {
+  color-scheme: dark;
+  
+  /* Design Tokens */
+  --bg: #141416;
+  --surface: #1c1c1f;
+  --text: rgba(255, 255, 255, 0.92);
+  --text2: rgba(255, 255, 255, 0.70);
+  --accent: #29e33c;
+  --glow-strong: rgba(41, 227, 60, 0.35);
+  --glow-soft: rgba(41, 227, 60, 0.18);
+  
+  /* Derived Tokens */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.35);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --transition: 180ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Button Styles */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition),
+    background-color var(--transition), border-color var(--transition),
+    color var(--transition);
+  user-select: none;
+}
+
+.ui-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--glow-soft);
+}
+
+.ui-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ui-button--primary {
+  background: var(--accent);
+  color: #0a120b;
+  border-color: rgba(41, 227, 60, 0.45);
+  box-shadow: 0 10px 22px rgba(41, 227, 60, 0.15);
+}
+
+.ui-button--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px var(--glow-soft);
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--text);
+}
+
+.ui-button--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.ui-button--outline {
+  background: transparent;
+  color: var(--accent);
+  border-color: rgba(41, 227, 60, 0.5);
+}
+
+.ui-button--outline:hover:not(:disabled) {
+  background: rgba(41, 227, 60, 0.12);
+  border-color: rgba(41, 227, 60, 0.7);
+  box-shadow: 0 0 0 1px rgba(41, 227, 60, 0.4) inset;
+}
+
+/* Card Styles */
+.ui-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow var(--transition), border-color var(--transition),
+    transform var(--transition);
+}
+
+.ui-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+/* Input Styles */
+.ui-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #17171a;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color var(--transition), box-shadow var(--transition),
+    background-color var(--transition);
+}
+
+.ui-input::placeholder {
+  color: var(--text2);
+}
+
+.ui-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow-soft);
+  background: #1a1a1e;
+}
+
+.ui-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

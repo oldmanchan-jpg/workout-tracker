@@ -1,206 +1,100 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import type { Template } from '@/types'
-import { Play, Dumbbell, ChevronRight, Clock, Flame, Target } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { workoutTemplates } from '@/data/workoutTemplates'
-import TopBar from '@/components/TopBar'
+import {
+  Bell,
+  CalendarDays,
+  HeartPulse,
+  Ruler,
+  Scale,
+  Search,
+} from 'lucide-react'
+import PixelOverlay from '@/components/dev/PixelOverlay'
+import { Avatar, BottomNav, Card, IconButton, Pill, StatTile } from '@/components/ui'
 
 export default function Dashboard() {
-  const [templates] = useState<Template[]>(workoutTemplates)
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
-  const navigate = useNavigate()
-
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
-
-  const onStartWorkout = () => {
-    if (!selectedTemplate) return
-    navigate('/workout', { state: { template: selectedTemplate } })
-  }
-
-  // Calculate estimated workout time (rough estimate: 3 min per set)
-  const estimatedTime = selectedTemplate 
-    ? selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets * 3, 0)
-    : 0
-
   return (
-    <div className="min-h-screen bg-black">
-      <TopBar />
-      
-      <main className="max-w-lg mx-auto px-4 pb-8 space-y-6">
-        {/* Welcome Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="pt-4"
-        >
-          <p className="text-[#9a9fa4] text-sm font-medium">Welcome back</p>
-          <h1 className="text-white text-2xl font-semibold mt-1">
-            Ready to <span className="text-[#29e33c]">Train</span>?
+    <div className="min-h-screen bg-hp-bg flex justify-center">
+      <div className="relative w-canvas min-h-screen px-6 pt-8 pb-28 text-hp-text">
+        {import.meta.env.DEV && <PixelOverlay src="/figma/Home.png" />}
+
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar size={48} />
+            <div>
+              <p className="text-hp-text2 text-xs">Welcome back</p>
+              <p className="text-hp-text text-sm font-semibold">Alicia</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <IconButton aria-label="Search">
+              <Search className="h-5 w-5" />
+            </IconButton>
+            <IconButton aria-label="Notifications">
+              <Bell className="h-5 w-5" />
+            </IconButton>
+          </div>
+        </header>
+
+        <section className="mt-6">
+          <h1 className="text-3xl font-semibold leading-tight">
+            Track your <span className="text-hp-accent">Healthy</span>
+            <br />
+            lifestyle
           </h1>
-          <p className="text-[#9a9fa4] text-sm mt-2">
-            Select a workout and crush your goals
-          </p>
-        </motion.div>
+        </section>
 
-        {/* Quick Stats Row */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="bg-[#141416] rounded-[21px] p-4 border border-white/5"
-        >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
-                style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.15)' }}
-              >
-                <Dumbbell className="w-6 h-6 text-[#29e33c]" />
-              </div>
-              <div>
-                <p className="text-[#9a9fa4] text-xs">This Week</p>
-                <p className="text-white font-semibold text-lg">3 Workouts</p>
-              </div>
+        <Card className="mt-6 p-4">
+          <div className="grid grid-cols-3 gap-3">
+            <StatTile icon={<Scale className="h-4 w-4" />} value="74 kg" label="Weight" />
+            <StatTile icon={<Ruler className="h-4 w-4" />} value="172 cm" label="Height" />
+            <StatTile icon={<CalendarDays className="h-4 w-4" />} value="29 yr" label="Age" />
+          </div>
+        </Card>
+
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-hp-text2 text-sm">Heart AVG bpm</p>
+          <p className="text-hp-accent text-2xl font-semibold">76</p>
+        </div>
+
+        <Card className="mt-3 p-4">
+          <svg viewBox="0 0 300 120" className="h-28 w-full">
+            <polyline
+              points="0,92 30,78 60,84 90,58 120,64 150,46 180,60 210,52 240,72 270,64 300,80"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-hp-accent"
+            />
+            <circle cx="150" cy="46" r="4" className="text-hp-accent" fill="currentColor" />
+          </svg>
+          <div className="mt-3 flex justify-between text-xs text-hp-text2">
+            <span>Su</span>
+            <span>Mo</span>
+            <span>Tu</span>
+            <span>We</span>
+            <span>Th</span>
+            <span>Fr</span>
+            <span>Sa</span>
+          </div>
+        </Card>
+
+        <p className="mt-6 text-hp-text2 text-sm font-medium">Health Stats</p>
+
+        <Card className="mt-3 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl border border-hp-border bg-hp-surface2 flex items-center justify-center text-hp-accent">
+              <HeartPulse className="h-6 w-6" />
             </div>
-            <div className="text-right">
-              <p className="text-[#9a9fa4] text-xs">Volume</p>
-              <p className="text-[#29e33c] font-semibold text-lg">12,450 kg</p>
+            <div>
+              <p className="text-hp-text text-sm font-semibold">Heart Health</p>
+              <p className="text-hp-accent text-xl font-semibold">55</p>
             </div>
           </div>
-        </motion.div>
+          <Pill tone="accent">Measure</Pill>
+        </Card>
 
-        {/* Template Selection */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-white font-semibold text-lg">Workout Template</h2>
-            <span className="text-[#9a9fa4] text-sm">{templates.length} available</span>
-          </div>
-
-          {/* Template Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedTemplateId}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-[#141416] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-all cursor-pointer"
-              style={{ boxShadow: '0 0 15px rgba(41, 227, 60, 0.1)' }}
-            >
-              {templates.map(template => (
-                <option key={template.id} value={template.id} className="bg-[#141416]">
-                  {template.name}
-                </option>
-              ))}
-            </select>
-            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
-          </div>
-        </motion.div>
-
-        {/* Selected Template Preview */}
-        {selectedTemplate && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
-          >
-            {/* Template Header */}
-            <div className="p-4 border-b border-white/5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-white font-semibold text-xl">
-                  {selectedTemplate.name}
-                </h3>
-                <span 
-                  className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium"
-                  style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.2)' }}
-                >
-                  {selectedTemplate.exercises.length} exercises
-                </span>
-              </div>
-              
-              {/* Meta Info */}
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
-                  <Clock className="w-4 h-4" />
-                  <span>~{estimatedTime} min</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
-                  <Flame className="w-4 h-4" />
-                  <span>{selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets, 0)} sets</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Exercise List */}
-            <div className="p-4 space-y-2 max-h-[280px] overflow-y-auto">
-              {selectedTemplate.exercises.map((ex, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="flex items-center gap-3 p-3 bg-[#1c1c1f] rounded-[12px] hover:bg-[#242426] transition-colors border border-white/5"
-                >
-                  <div 
-                    className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0"
-                    style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.3)' }}
-                  >
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{ex.name}</p>
-                    <p className="text-[#9a9fa4] text-sm">
-                      {ex.sets} sets × {ex.reps} reps
-                      {ex.weight && <span className="text-[#29e33c]"> • {ex.weight}kg</span>}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-[#9a9fa4] flex-shrink-0" />
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Start Button */}
-            <div className="p-4 pt-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onStartWorkout}
-                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-all"
-                style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.4)' }}
-              >
-                <Play className="w-6 h-6" fill="black" />
-                Start Workout
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Bottom Tip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex items-start gap-3 p-4 bg-[#141416] rounded-[16px] border border-[#29e33c]/20"
-          style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.05)' }}
-        >
-          <div 
-            className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0"
-          >
-            <Target className="w-5 h-5 text-[#29e33c]" />
-          </div>
-          <div>
-            <p className="text-white font-medium text-sm">Track Your RPE</p>
-            <p className="text-[#9a9fa4] text-xs mt-1">
-              Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
-            </p>
-          </div>
-        </motion.div>
-      </main>
+        <div className="absolute bottom-6 left-6 right-6">
+          <BottomNav />
+        </div>
+      </div>
     </div>
   )
 }

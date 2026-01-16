@@ -77,8 +77,8 @@ export default function TopBar() {
                 onClick={() => navigate(t.path)}
                 className={
                   active
-                    ? 'flex flex-col items-center gap-1 text-hp-accent'
-                    : 'flex flex-col items-center gap-1 text-hp-muted hover:text-hp-primary transition-colors'
+                    ? 'flex flex-col items-center gap-1 text-hp-accent bg-transparent'
+                    : 'flex flex-col items-center gap-1 text-hp-muted hover:text-hp-primary transition-colors bg-transparent'
                 }
                 aria-label={t.label}
               >

@@ -575,6 +575,17 @@ body[class*="bg-"],
   background-color: inherit !important;
 }
 
+/* Ensure select elements use dark theme */
+select {
+  background-color: transparent !important;
+  color: var(--color-text-primary, #AEC6BA) !important;
+}
+
+select option {
+  background-color: #15181d !important;
+  color: #AEC6BA !important;
+}
+
 /* Button Components */
 .btn {
   display: inline-flex;

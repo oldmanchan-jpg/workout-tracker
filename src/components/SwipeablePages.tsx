@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import BottomNav from './BottomNav'
 
 // Minimal swipe wrapper for mobile: swiping left/right switches between Dashboard and Progress.
 // If your routes differ, this still compiles and behaves as a normal Outlet wrapper.
@@ -46,6 +47,7 @@ export default function SwipeablePages(props: any) {
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {props?.children ? props.children : <Outlet />}
+      <BottomNav />
     </div>
   )
 }

@@ -53,14 +53,14 @@ export default function BottomNav() {
                   return (
                     <>
                       <div className="relative flex items-center justify-center">
+                        {active && (
+                          <div className="absolute inset-0 w-10 h-10 -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#29e33c]/15 blur-sm" />
+                        )}
                         <Icon
                           size={24}
-                          strokeWidth={1.5}
-                          className={active ? 'text-[#29e33c]' : 'text-gray-400'}
+                          strokeWidth={active ? 2 : 1.5}
+                          className={active ? 'text-[#29e33c] drop-shadow-[0_0_8px_rgba(41,227,60,0.5)]' : 'text-gray-500'}
                         />
-                        {active && (
-                          <span className="absolute -bottom-1 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#29e33c]" />
-                        )}
                       </div>
                       <span className={active ? 'text-[10px] font-medium leading-none text-[#29e33c]' : 'text-[10px] font-medium leading-none text-white/60'}>
                         {tab.label}

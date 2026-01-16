@@ -254,6 +254,7 @@ export default function Settings() {
               )
             })}
           </div>
+          </Card>
         </motion.div>
 
         {/* Theme Section */}
@@ -309,6 +310,7 @@ export default function Settings() {
               )
             })}
           </div>
+          </Card>
         </motion.div>
 
         {/* Info Footer */}

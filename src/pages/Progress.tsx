@@ -320,6 +320,7 @@ export default function Progress() {
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Avg/Session</p>
             </div>
           </div>
+          </Card>
         </motion.div>
 
         {/* This Week Card */}
@@ -381,6 +382,7 @@ export default function Progress() {
               <p className="text-[#9a9fa4] text-xs mt-1">vs last week</p>
             </div>
           </div>
+          </Card>
         </motion.div>
 
         {/* Recent Workouts */}

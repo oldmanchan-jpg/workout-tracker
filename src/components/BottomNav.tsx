@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { Home, TrendingUp, Dumbbell, Settings, Shield } from 'lucide-react'
+import { Home, TrendingUp, Dumbbell, Settings, ShieldCheck } from 'lucide-react'
 import { useProfile } from '../hooks/useProfile'
 
 export default function BottomNav() {
@@ -11,7 +11,7 @@ export default function BottomNav() {
     { path: '/progress', label: 'Progress', icon: TrendingUp },
     { path: '/workout', label: 'Workout', icon: Dumbbell },
     { path: '/settings', label: 'Settings', icon: Settings },
-    ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Shield }] : []),
+    ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ]
 
   const isDashboardAlias = (tabPath: string) =>
@@ -54,8 +54,9 @@ export default function BottomNav() {
                     <>
                       <div className="relative flex items-center justify-center">
                         <Icon
-                          className={`w-6 h-6 ${active ? 'text-[#29e33c]' : 'text-white/70'}`}
+                          size={24}
                           strokeWidth={1.5}
+                          className={active ? 'text-[#29e33c]' : 'text-gray-400'}
                         />
                         {active && (
                           <span className="absolute -bottom-1 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#29e33c]" />

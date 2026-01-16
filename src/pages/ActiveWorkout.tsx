@@ -437,7 +437,7 @@ export default function ActiveWorkout() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: exerciseIndex * 0.05 }}
-                  className="hp-card p-4"
+                  className="hp-card p-4 bg-black/20 border-white/10"
                 >
                   <button
                     onClick={() => toggleExerciseCollapse(exerciseIndex)}
@@ -482,7 +482,7 @@ export default function ActiveWorkout() {
                                   {setIndex + 1}
                                 </span>
 
-                                <div className="hp-pill h-[44px] px-3 flex items-center">
+                                <div className="hp-pill h-[44px] px-3 flex items-center bg-black/20 border-white/10">
                                   <input
                                     type="number"
                                     inputMode="decimal"
@@ -495,11 +495,12 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.weight?.toString() || '0'}
-                                    className="w-full bg-transparent text-center text-sm font-semibold hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
+                                    className="w-full bg-transparent text-center text-sm font-semibold text-white/90 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
+                                    style={{ backgroundColor: 'transparent' }}
                                   />
                                 </div>
 
-                                <div className="hp-pill h-[44px] px-3 flex items-center">
+                                <div className="hp-pill h-[44px] px-3 flex items-center bg-black/20 border-white/10">
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -511,7 +512,8 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.reps.toString()}
-                                    className="w-full bg-transparent text-center text-sm font-semibold hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
+                                    className="w-full bg-transparent text-center text-sm font-semibold text-white/90 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
+                                    style={{ backgroundColor: 'transparent' }}
                                   />
                                 </div>
 
@@ -550,7 +552,7 @@ export default function ActiveWorkout() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="hp-card p-5"
+            className="hp-card p-5 bg-black/20 border-white/10"
           >
             <div className="flex items-center justify-between mb-4">
               <span className="hp-title text-sm font-semibold">Rest Timer</span>
@@ -566,7 +568,7 @@ export default function ActiveWorkout() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={restTimerActive ? pauseRestTimer : startRestTimer}
-                className="flex-1 h-14 bg-[#29e33c] text-black rounded-full text-sm font-semibold hp-glow-soft"
+                className="flex-1 h-14 bg-[#29e33c] text-black rounded-full text-sm font-semibold hp-glow-soft border border-[#29e33c]/30"
               >
                 {restTimerActive ? 'Pause' : 'Start'}
               </motion.button>
@@ -586,7 +588,7 @@ export default function ActiveWorkout() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="hp-card p-4"
+            className="hp-card p-4 bg-black/20 border-white/10"
           >
             <label className="block hp-title text-sm font-semibold mb-2">
               Workout Notes
@@ -595,8 +597,9 @@ export default function ActiveWorkout() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="How did you feel today?"
-              className="w-full hp-pill p-3 text-sm hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)] resize-none min-h-[80px]"
+              className="w-full hp-pill p-3 text-sm hp-title bg-black/20 border-white/10 text-white/90 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)] resize-none min-h-[80px]"
               rows={3}
+              style={{ backgroundColor: 'transparent' }}
             />
           </motion.div>
         </div>

@@ -75,28 +75,8 @@ class ErrorBoundary extends Component<
   }
 }
 
-function AuthWrapper() {
-  const { user, loading } = useAuth()
+function AuthedApp() {
   const { profile, loading: profileLoading, isAdmin } = useProfile()
-  const [showSignUp, setShowSignUp] = useState(false)
-
-  // Show loading screen while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#010101] text-white/70">
-        Loading…
-      </div>
-    )
-  }
-
-  // If not logged in, show auth screens
-  if (!user) {
-    return showSignUp ? (
-      <SignUp onSwitchToLogin={() => setShowSignUp(false)} />
-    ) : (
-      <Login onSwitchToSignUp={() => setShowSignUp(true)} />
-    )
-  }
 
   // Check if profile is inactive (and user is not admin)
   if (!profileLoading && profile && !profile.is_active && !isAdmin) {
@@ -118,6 +98,32 @@ function AuthWrapper() {
       </SwipeablePages>
     </Router>
   )
+}
+
+function AuthWrapper() {
+  const { user, loading } = useAuth()
+  const [showSignUp, setShowSignUp] = useState(false)
+
+  // Show loading screen while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#010101] text-white/70">
+        Loading…
+      </div>
+    )
+  }
+
+  // If not logged in, show auth screens
+  if (!user) {
+    return showSignUp ? (
+      <SignUp onSwitchToLogin={() => setShowSignUp(false)} />
+    ) : (
+      <Login onSwitchToSignUp={() => setShowSignUp(true)} />
+    )
+  }
+
+  // If logged in, render AuthedApp which handles profile logic
+  return <AuthedApp />
 }
 
 function App() {

@@ -6,10 +6,10 @@ import { supabase } from '@/lib/supabase'
 import { useProfile } from '@/hooks/useProfile'
 
 const tabs = [
-  { path: '/dashboard', label: 'Dashboard', icon: Dumbbell },
-  { path: '/progress', label: 'Progress', icon: TrendingUp },
+  { path: '/dashboard', label: 'Dashboard', icon: Dumbbell, adminOnly: false },
+  { path: '/progress', label: 'Progress', icon: TrendingUp, adminOnly: false },
   { path: '/admin', label: 'Admin', icon: Shield, adminOnly: true },
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/settings', label: 'Settings', icon: Settings, adminOnly: false },
 ] as const
 
 export default function TopBar() {

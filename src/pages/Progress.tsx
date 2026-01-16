@@ -159,7 +159,7 @@ export default function Progress() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-4"
+          className="pt-4 section-gap"
         >
           <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Today</p>
           <h1 className="text-2xl font-semibold" style={{ color: 'var(--text)' }}>
@@ -214,6 +214,7 @@ export default function Progress() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="section-gap"
         >
           <Card variant="elevated" className="overflow-hidden p-0">
           {/* Chart Area with Gradient */}
@@ -328,6 +329,7 @@ export default function Progress() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="section-gap"
         >
           <Card className="p-4">
           <div className="flex items-center gap-2 mb-4">
@@ -390,6 +392,7 @@ export default function Progress() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="section-gap"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold" style={{ color: 'var(--text)' }}>Recent Workouts</h3>

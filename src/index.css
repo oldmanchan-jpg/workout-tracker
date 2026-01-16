@@ -791,6 +791,34 @@ select option {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Section spacing */
+.section-gap {
+  margin-bottom: 24px;
+}
+
+/* Card polish */
+.card-elevated {
+  background: rgba(20, 22, 26, 0.8);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Stat number styling */
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* Muted label styling */
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Positioning */
 .relative { position: relative; }
 .absolute { position: absolute; }

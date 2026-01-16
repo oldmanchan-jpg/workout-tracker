@@ -35,6 +35,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="section-gap"
         >
           <Card variant="prominent" className="p-6">
             <p className="text-hp-muted text-sm uppercase tracking-wide mb-2">Welcome back</p>
@@ -52,6 +53,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
+          className="section-gap"
         >
           <Card className="p-5">
             <p className="text-hp-muted text-xs uppercase tracking-wide mb-4">This Week</p>
@@ -73,6 +75,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
+          className="section-gap"
         >
           <Card className="p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -119,6 +122,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
+            className="section-gap"
           >
             <Card className="p-5 space-y-3">
             <div className="flex items-center justify-between mb-2">
@@ -172,6 +176,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="section-gap"
           >
             <Button
               onClick={onStartWorkout}
@@ -188,6 +193,7 @@ export default function Dashboard() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
+          className="section-gap"
         >
           <Card variant="flat" className="p-4 flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0">

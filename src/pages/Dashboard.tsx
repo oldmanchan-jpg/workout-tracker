@@ -163,9 +163,9 @@ export default function Dashboard() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onStartWorkout}
-              className="w-full h-[56px] bg-[#29e33c] hover:bg-[#24c934] text-black font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow"
+              className="w-full h-[56px] bg-black/20 hover:bg-white/8 border border-[#29e33c]/20 text-white/90 font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow-soft"
             >
-              <Play className="w-6 h-6" fill="black" />
+              <Play className="w-6 h-6 text-[#29e33c]" fill="#29e33c" />
               Start Workout
             </motion.button>
           </motion.div>

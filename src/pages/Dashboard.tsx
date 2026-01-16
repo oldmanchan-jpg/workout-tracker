@@ -29,7 +29,7 @@ export default function Dashboard() {
     <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
       <TopBar />
       
-      <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">
+      <main className="mx-auto w-full max-w-[420px] px-4 pt-4 space-y-4">
         {/* Welcome Header Card */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}

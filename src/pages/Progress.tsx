@@ -117,7 +117,7 @@ export default function Progress() {
     return (
       <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
         <TopBar />
-        <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">
+        <main className="mx-auto w-full max-w-[420px] px-4 pt-4 space-y-4">
           {/* Skeleton */}
           <div className="animate-pulse space-y-6">
             <div className="h-8 w-32 rounded-lg" style={{ backgroundColor: 'var(--bg-elevated)' }} />
@@ -137,7 +137,7 @@ export default function Progress() {
     return (
       <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
         <TopBar />
-        <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4">
+        <main className="mx-auto w-full max-w-[420px] px-4 pt-4">
           <Card className="p-8 text-center">
             <Activity className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent-danger)' }} />
             <p className="text-lg mb-4" style={{ color: 'var(--accent-danger)' }}>{error}</p>
@@ -154,7 +154,7 @@ export default function Progress() {
     <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
       <TopBar />
 
-      <main className="mx-auto w-full max-w-[420px] px-4 pb-28 space-y-4">
+      <main className="mx-auto w-full max-w-[420px] px-4 space-y-4">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}

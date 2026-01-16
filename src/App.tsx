@@ -28,42 +28,25 @@ class ErrorBoundary extends Component<
   render() {
     if (this.state.error) {
       const error = this.state.error
-      const errorInfo = this.state.errorInfo
       return (
         <div className="min-h-screen bg-[#010101] text-white/70 p-8 overflow-auto">
           <h1 className="text-2xl font-bold mb-4 text-white">App crashed</h1>
           
           <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold mb-2 text-white">String(error):</h2>
-              <pre className="text-xs text-white/80 overflow-auto max-w-full bg-black/30 p-4 rounded border border-white/10">
-                {String(error)}
-              </pre>
-            </div>
-
-            {(error as any)?.message && (
+            {error.message && (
               <div>
                 <h2 className="text-lg font-semibold mb-2 text-white">error.message:</h2>
                 <pre className="text-xs text-white/80 overflow-auto max-w-full bg-black/30 p-4 rounded border border-white/10">
-                  {(error as any).message}
+                  {error.message}
                 </pre>
               </div>
             )}
 
-            {(error as any)?.stack && (
+            {error.stack && (
               <div>
                 <h2 className="text-lg font-semibold mb-2 text-white">error.stack:</h2>
                 <pre className="text-xs text-white/80 overflow-auto max-w-full max-h-96 bg-black/30 p-4 rounded border border-white/10">
-                  {(error as any).stack}
-                </pre>
-              </div>
-            )}
-
-            {errorInfo?.componentStack && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2 text-white">componentStack:</h2>
-                <pre className="text-xs text-white/80 overflow-auto max-w-full max-h-96 bg-black/30 p-4 rounded border border-white/10">
-                  {errorInfo.componentStack}
+                  {error.stack}
                 </pre>
               </div>
             )}
@@ -128,11 +111,16 @@ function AuthWrapper() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <AuthWrapper />
-      </AuthProvider>
-    </ErrorBoundary>
+    <>
+      <ErrorBoundary>
+        <AuthProvider>
+          <AuthWrapper />
+        </AuthProvider>
+      </ErrorBoundary>
+      <div className="fixed bottom-2 left-2 text-xs text-white/30 pointer-events-none z-50">
+        Mounted OK
+      </div>
+    </>
   )
 }
 

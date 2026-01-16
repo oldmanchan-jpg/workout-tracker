@@ -79,10 +79,11 @@ export default function Dashboard() {
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-[#15181d] border border-white/6 rounded-2xl text-hp-primary font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c]/30 transition-all cursor-pointer hp-glow-soft"
+              className="w-full px-4 py-4 bg-transparent border border-white/6 rounded-2xl text-hp-primary font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c]/30 transition-all cursor-pointer hp-glow-soft"
+              style={{ backgroundColor: 'transparent' }}
             >
               {templates.map(template => (
-                <option key={template.id} value={template.id} className="bg-[#15181d]">
+                <option key={template.id} value={template.id} style={{ backgroundColor: '#15181d', color: '#AEC6BA' }}>
                   {template.name}
                 </option>
               ))}

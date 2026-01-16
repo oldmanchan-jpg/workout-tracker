@@ -79,11 +79,10 @@ export default function Dashboard() {
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-transparent border border-white/6 rounded-2xl text-hp-primary font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c]/30 transition-all cursor-pointer hp-glow-soft"
-              style={{ backgroundColor: 'transparent' }}
+              className="hp-select w-full px-4 py-4 rounded-2xl font-medium text-base appearance-none transition-all cursor-pointer hp-glow-soft"
             >
               {templates.map(template => (
-                <option key={template.id} value={template.id} style={{ backgroundColor: '#15181d', color: '#AEC6BA' }}>
+                <option key={template.id} value={template.id}>
                   {template.name}
                 </option>
               ))}
@@ -161,9 +160,9 @@ export default function Dashboard() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onStartWorkout}
-              className="w-full h-[56px] bg-[#29e33c] hover:bg-[#24c934] text-black font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow"
+              className="hp-cta w-full h-[56px] font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow-soft"
             >
-              <Play className="w-6 h-6" fill="black" />
+              <Play className="w-6 h-6 text-[#29e33c]" fill="#29e33c" />
               Start Workout
             </motion.button>
           </motion.div>

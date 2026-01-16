@@ -1,39 +1,58 @@
 :root {
   color-scheme: dark;
   
-  /* Design Tokens */
+  /* HealthPulse Dark Theme Tokens */
   --bg: #141416;
   --surface: #1c1c1f;
   --text: rgba(255, 255, 255, 0.92);
-  --text2: rgba(255, 255, 255, 0.70);
+  --muted: rgba(255, 255, 255, 0.70);
+  --border: rgba(255, 255, 255, 0.10);
   --accent: #29e33c;
-  --glow-strong: rgba(41, 227, 60, 0.35);
-  --glow-soft: rgba(41, 227, 60, 0.18);
-  
-  /* Derived Tokens */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-  --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.35);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --transition: 180ms ease;
+  --glow: rgba(41, 227, 60, 0.18);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global form controls - dark theme by default */
+button,
+select,
+input,
+textarea {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--glow);
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--text);
 }
 
 /* Button Styles */

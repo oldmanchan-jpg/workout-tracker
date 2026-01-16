@@ -3,6 +3,9 @@
    Professional Typography with Google Fonts
    ======================================== */
 
+/* Import HealthPulse Dark Theme */
+@import './styles/theme.css';
+
 /* CSS Reset & Base Styles */
 * {
   margin: 0;
@@ -23,7 +26,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%);
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 body {
@@ -31,9 +35,8 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
-              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%);
+  background-color: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
@@ -42,20 +45,10 @@ body {
   padding: 0;
 }
 
-/* HealthPulse Background Override */
-body.bg-gray-50,
-body[class*="bg-"],
-#root,
-.app-container,
-[class*="app-container"],
-[class*="dashboard"],
-[class*="main"] {
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
-              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%) !important;
-}
-
 #root {
   min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 /* ========================================
@@ -139,7 +132,7 @@ body[class*="bg-"],
 .bg-primary-light { background-color: var(--color-primary-light); }
 .bg-secondary { background-color: var(--color-secondary); }
 .bg-secondary-light { background-color: var(--color-secondary-light); }
-.bg-white { background-color: var(--color-white); }
+.bg-white { background-color: var(--surface); }
 .bg-dark { background-color: var(--color-bg-dark); }
 .bg-light { background-color: var(--color-bg-light); }
 .bg-primary-dark { background-color: var(--color-bg-primary); }
@@ -480,7 +473,7 @@ body[class*="bg-"],
 }
 
 .hover\:bg-white:hover {
-  background-color: var(--color-white) !important;
+  background-color: var(--surface) !important;
 }
 
 .hover\:text-dark:hover {
@@ -585,15 +578,21 @@ body[class*="bg-"],
   background-color: inherit !important;
 }
 
-/* Ensure select elements use dark theme */
+/* Form controls use dark theme from theme.css - ensure consistency */
 select {
-  background-color: transparent !important;
-  color: var(--color-text-primary, #AEC6BA) !important;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+select:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
 }
 
 select option {
-  background-color: #15181d !important;
-  color: #AEC6BA !important;
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
 }
 
 /* Button Components */
@@ -668,22 +667,22 @@ select option {
   width: 100%;
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 2px solid var(--color-border-light);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
-  background-color: var(--color-white);
+  background-color: var(--surface);
   transition: all 0.2s ease;
-  color: var(--color-text-primary);
+  color: var(--text);
   font-family: 'Inter', sans-serif;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-shadow-purple);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--glow);
 }
 
 .input:hover {
-  border-color: var(--color-border-medium);
+  border-color: var(--border);
 }
 
 .input:disabled {
@@ -940,4 +939,33 @@ select option {
 /* HealthPulse Divider */
 .hp-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* HealthPulse Select - Dark background for dropdown */
+.hp-select {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.hp-select:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
+}
+
+.hp-select option {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+/* HealthPulse CTA - Dark background for Start Workout button */
+.hp-cta {
+  background: var(--surface) !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--text) !important;
+}
+
+.hp-cta:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
 }

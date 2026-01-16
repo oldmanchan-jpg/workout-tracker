@@ -58,7 +58,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
       <div 
         className="sticky top-0 z-10 backdrop-blur-sm"

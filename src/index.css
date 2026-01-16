@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    WORKOUT APP DESIGN SYSTEM
    Professional Typography with Google Fonts
    ======================================== */
@@ -105,6 +105,11 @@ body {
 /* ========================================
    UTILITY CLASSES
    ======================================== */
+
+/* Page Container - Bottom padding for navigation */
+.page-container {
+  padding-bottom: 100px; /* space for bottom nav */
+}
 
 /* Background Colors - Using canonical tokens from theme.css */
 .bg-primary { background-color: var(--accent); }

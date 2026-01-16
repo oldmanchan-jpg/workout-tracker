@@ -42,7 +42,7 @@ export default function ActiveWorkout() {
   // Show fallback UI when no active workout exists
   if (!template) {
     return (
-      <div className="min-h-screen hp-bg p-4">
+      <div className="min-h-screen hp-bg page-container p-4">
         <div className="mx-auto w-full max-w-[420px] flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
           <div className="hp-card p-8 text-center">
             <h1 className="hp-title text-2xl font-bold mb-4">No Active Workout</h1>
@@ -319,7 +319,7 @@ export default function ActiveWorkout() {
     const { totalVolume, totalReps } = calculateTotals(exerciseLogs)
 
     return (
-      <div className="min-h-screen hp-bg p-4">
+      <div className="min-h-screen hp-bg page-container p-4">
         <div className="mx-auto w-full max-w-[420px]">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
@@ -408,7 +408,7 @@ export default function ActiveWorkout() {
 
   // Active workout screen
   return (
-    <div className="min-h-screen hp-bg">
+    <div className="min-h-screen hp-bg page-container">
       <div className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4">
         <div className="space-y-4">
           {/* Header */}

@@ -26,7 +26,7 @@ export default function Dashboard() {
     : 0
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
       <TopBar />
       
       <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">

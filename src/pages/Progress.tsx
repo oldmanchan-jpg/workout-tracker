@@ -115,7 +115,7 @@ export default function Progress() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
         <TopBar />
         <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">
           {/* Skeleton */}
@@ -135,7 +135,7 @@ export default function Progress() {
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
         <TopBar />
         <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4">
           <Card className="p-8 text-center">
@@ -151,7 +151,7 @@ export default function Progress() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen page-container" style={{ backgroundColor: 'var(--bg)' }}>
       <TopBar />
 
       <main className="mx-auto w-full max-w-[420px] px-4 pb-28 space-y-4">

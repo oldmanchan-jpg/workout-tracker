@@ -2,6 +2,8 @@
 
 **Last Updated:** January 14, 2026
 
+> **Design Source of Truth:** Primary accent: #22d3ee (cyan). Green (#29e33c) is used for success states. See DESIGN_SYSTEM.md for full color palette.
+
 ---
 
 ## ✅ COMPLETED: UI Polish & Animation Sprint
@@ -30,7 +32,7 @@
 - ✅ **Gradients** — Background gradients on all cards and buttons
 - ✅ **Shadow depth** — Layered shadows with colored glows
 - ✅ **Typography hierarchy** — Consistent font weights and sizes
-- ✅ **Color refinement** — Orange accents throughout
+- ✅ **Color refinement** — Cyan accents throughout (#22d3ee)
 - ✅ **Border treatments** — Animated border color transitions
 
 ### Phase 4: Micro-Interactions ✅

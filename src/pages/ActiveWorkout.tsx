@@ -485,13 +485,13 @@ export default function ActiveWorkout() {
                                 key={setIndex}
                                 initial={isInProgress ? { scale: 0.98 } : {}}
                                 animate={isInProgress ? { scale: 1 } : {}}
-                                className="flex items-center gap-3"
+                                className="grid grid-cols-[auto_1fr_1fr_56px] items-center gap-3"
                               >
                                 <span className="min-w-[40px] px-3 py-1 rounded-full text-xs font-semibold bg-black/20 text-white/70 border border-white/10 text-center">
                                   {setIndex + 1}
                                 </span>
 
-                                <div className="flex-1 px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                <div className="px-3 py-2 rounded-full bg-black/20 border border-white/10">
                                   <input
                                     type="number"
                                     inputMode="decimal"
@@ -508,7 +508,7 @@ export default function ActiveWorkout() {
                                   />
                                 </div>
 
-                                <div className="flex-1 px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                <div className="px-3 py-2 rounded-full bg-black/20 border border-white/10">
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -524,22 +524,24 @@ export default function ActiveWorkout() {
                                   />
                                 </div>
 
-                                {isCompleted ? (
-                                  <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-[#29e33c]">
-                                    <Check className="w-4 h-4 text-black" strokeWidth={3} />
-                                  </div>
-                                ) : isInProgress ? (
-                                  <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                    className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-[#29e33c] bg-black/20"
-                                  >
-                                    <Check className="w-4 h-4 text-[#29e33c]" />
-                                  </motion.button>
-                                ) : (
-                                  <div className="w-10 h-10 shrink-0 rounded-full border border-white/10 bg-black/20" />
-                                )}
+                                <div className="w-[56px] flex items-center justify-center">
+                                  {isCompleted ? (
+                                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#29e33c]">
+                                      <Check className="w-5 h-5 text-black" strokeWidth={3} />
+                                    </div>
+                                  ) : isInProgress ? (
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
+                                      className="w-11 h-11 flex items-center justify-center rounded-full border border-[#29e33c] bg-black/20"
+                                    >
+                                      <Check className="w-5 h-5 text-[#29e33c]" />
+                                    </motion.button>
+                                  ) : (
+                                    <div className="w-11 h-11 rounded-full border border-white/10 bg-black/20" />
+                                  )}
+                                </div>
                               </motion.div>
                             )
                           })}

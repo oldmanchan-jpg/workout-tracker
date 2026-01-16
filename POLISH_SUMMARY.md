@@ -4,6 +4,8 @@
 **Status:** ✅ COMPLETED  
 **Result:** MVP → Professional-Grade App
 
+> **Design Source of Truth:** Primary accent: #22d3ee (cyan). Green (#29e33c) is used for success states. See DESIGN_SYSTEM.md for full color palette.
+
 ---
 
 ## 🎯 What We Did
@@ -26,7 +28,7 @@ You mentioned that the core functions work well (menu collapse, page swipes, wor
 ### 2. **Dashboard** 🎯
 - **Dumbbell icon wiggles** every few seconds to grab attention
 - **Exercise cards appear** one by one with a stagger effect
-- **Start Workout button** glows orange when you hover
+- **Start Workout button** glows cyan when you hover
 - **Template cards** lift and scale on hover
 - **Everything fades in** smoothly when the page loads
 
@@ -45,7 +47,7 @@ You mentioned that the core functions work well (menu collapse, page swipes, wor
 - **Stats cards slide in** from left and right
 - **Summary items appear** one by one
 - **Everything glows and lifts** on hover
-- **Orange gradient button** to go back to dashboard
+- **Cyan gradient button** to go back to dashboard
 
 ---
 
@@ -70,17 +72,17 @@ You mentioned that the core functions work well (menu collapse, page swipes, wor
 
 ### Gradients Everywhere:
 - Cards: `from-gray-800 to-gray-900`
-- Buttons: `from-orange-500 to-orange-600`
+- Buttons: `from-cyan-400 to-cyan-500` (cyan primary #22d3ee)
 - Backgrounds: `from-white to-gray-50`
 
 ### Shadows & Depth:
 - Regular cards: `shadow-xl`
-- Buttons: `shadow-lg shadow-orange-500/30`
+- Buttons: `shadow-lg shadow-cyan-500/30`
 - Hover: Shadows expand and intensify
 
 ### Colors:
-- Primary: Orange (#F97316)
-- Success: Green (#22C55E)
+- Primary: Cyan (#22d3ee)
+- Success: Green (#29e33c)
 - Warning: Yellow (#EAB308)
 - Danger: Red (#EF4444)
 
@@ -100,7 +102,7 @@ You mentioned that the core functions work well (menu collapse, page swipes, wor
 1. Watch everything **fade in** when you land
 2. See the **dumbbell icon wiggle**
 3. **Hover over exercise cards** - they should lift
-4. **Hover over Start Workout** - orange glow appears
+4. **Hover over Start Workout** - cyan glow appears
 5. Change templates - smooth scale effect
 
 ### 3. **ActiveWorkout**

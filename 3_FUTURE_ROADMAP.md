@@ -1,6 +1,8 @@
 # 🗺️ Future Roadmap
 
-**Last Updated:** January 14, 2026
+**Last Updated:** January 16, 2026
+
+**Note:** See `HANDOVER_2026-01-16.md` for current priorities and next steps.
 
 > **Design Source of Truth:** Primary accent: #22d3ee (cyan). Green (#29e33c) is used for success states. See DESIGN_SYSTEM.md for full color palette.
 

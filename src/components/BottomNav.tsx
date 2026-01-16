@@ -14,78 +14,64 @@ export default function BottomNav() {
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Shield }] : []),
   ]
 
+  const isDashboardAlias = (tabPath: string) =>
+    tabPath === '/dashboard' && location.pathname === '/'
+
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] z-50 px-4 pb-4 safe-area-bottom"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[420px] px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
       aria-label="Bottom navigation"
     >
-      <div
-        className="rounded-[24px] px-2 py-2 flex items-center justify-around"
-        style={{
-          background: 'rgba(20, 22, 26, 0.72)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-        }}
-      >
-        {tabs.map((tab) => {
-          const Icon = tab.icon
-          
-          return (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              end={tab.path !== '/dashboard'}
-              className={({ isActive }) => {
-                // Handle '/' as dashboard
-                const active = isActive || (tab.path === '/dashboard' && location.pathname === '/')
-                return `flex flex-col items-center justify-center gap-1 min-h-[44px] px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 hover:scale-105 ${
-                  active ? 'text-[#29e33c]' : 'text-white/65 hover:text-white/80'
-                }`
-              }}
-            >
-              {({ isActive }) => {
-                // Handle '/' as dashboard
-                const active = isActive || (tab.path === '/dashboard' && location.pathname === '/')
-                return (
-                  <>
-                    <div
-                      className="relative flex items-center justify-center"
-                      style={{
-                        filter: active
-                          ? 'drop-shadow(0 0 8px rgba(41, 227, 60, 0.6)) drop-shadow(0 0 4px rgba(41, 227, 60, 0.4))'
-                          : 'none',
-                      }}
-                    >
-                      <Icon
-                        size={22}
-                        strokeWidth={active ? 2.5 : 2}
-                        className={active ? 'text-[#29e33c]' : 'text-white/65'}
-                      />
-                      {active && (
-                        <div
-                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                          style={{
-                            background: '#29e33c',
-                            boxShadow: '0 0 6px rgba(41, 227, 60, 0.8)',
-                          }}
+      {/* Glass pill wrapper */}
+      <div className="rounded-[24px] bg-[rgba(20,22,26,0.72)] backdrop-blur-xl border border-white/10 shadow-[0_10px_35px_rgba(0,0,0,0.55)] px-2 py-2">
+        {/* Hard guarantee: always horizontal even if Admin appears/disappears */}
+        <div className="grid grid-flow-col auto-cols-fr items-center">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+
+            return (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                end={tab.path !== '/dashboard'}
+                className={({ isActive }) => {
+                  const active = isActive || isDashboardAlias(tab.path)
+
+                  // Explicitly kill underline/visited-purple and enforce app-like look
+                  return [
+                    'no-underline',
+                    'visited:no-underline',
+                    active ? 'text-[#29e33c] visited:text-[#29e33c]' : 'text-white/70 visited:text-white/70 hover:text-white/85',
+                    'flex flex-col items-center justify-center gap-1 min-h-[44px] py-2',
+                    'select-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/50 focus-visible:ring-offset-0',
+                  ].join(' ')
+                }}
+              >
+                {({ isActive }) => {
+                  const active = isActive || isDashboardAlias(tab.path)
+                  return (
+                    <>
+                      <div className="relative flex items-center justify-center">
+                        <Icon
+                          size={22}
+                          strokeWidth={active ? 2.5 : 2}
+                          className={active ? 'text-[#29e33c]' : 'text-white/70'}
                         />
-                      )}
-                    </div>
-                    <span
-                      className={`text-[10px] font-medium transition-colors ${
-                        active ? 'text-[#29e33c]' : 'text-white/55'
-                      }`}
-                    >
-                      {tab.label}
-                    </span>
-                  </>
-                )
-              }}
-            </NavLink>
-          )
-        })}
+                        {active && (
+                          <span className="absolute -bottom-1 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#29e33c]" />
+                        )}
+                      </div>
+                      <span className={active ? 'text-[10px] font-medium leading-none text-[#29e33c]' : 'text-[10px] font-medium leading-none text-white/60'}>
+                        {tab.label}
+                      </span>
+                    </>
+                  )
+                }}
+              </NavLink>
+            )
+          })}
+        </div>
       </div>
     </nav>
   )

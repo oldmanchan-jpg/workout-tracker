@@ -393,7 +393,7 @@ export default function ActiveWorkout() {
   // Active workout screen
   return (
     <div className="min-h-screen hp-bg">
-      <div className="mx-auto w-full max-w-[420px] px-4 pb-24 pt-4">
+      <div className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4">
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-2">

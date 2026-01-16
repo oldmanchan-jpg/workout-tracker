@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    WORKOUT APP DESIGN SYSTEM
    Professional Typography with Google Fonts
    ======================================== */
@@ -6,6 +6,22 @@
 /* Import HealthPulse Dark Theme */
 @import './styles/theme.css';
 
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Global link styling - prevent underlines and purple visited states */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  a:visited {
+    color: inherit;
+  }
+}
 /* CSS Reset & Base Styles */
 * {
   margin: 0;
@@ -80,7 +96,7 @@ body {
    DESIGN TOKENS
    ======================================== */
 /* 
-   ⚠️ IMPORTANT: All design tokens are defined in src/styles/theme.css
+   âš ï¸ IMPORTANT: All design tokens are defined in src/styles/theme.css
    This is the single source of truth. Do NOT define new tokens here.
    
    See docs/DESIGN_TOKENS.md for usage guidelines.
@@ -951,3 +967,4 @@ select option {
   outline: none !important;
   box-shadow: 0 0 0 4px var(--glow) !important;
 }
+

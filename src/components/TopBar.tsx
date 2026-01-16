@@ -1,26 +1,12 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Dumbbell, TrendingUp, Shield, Settings, LogOut } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Dumbbell, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
-import { useProfile } from '@/hooks/useProfile'
-
-const tabs = [
-  { path: '/dashboard', label: 'Dashboard', icon: Dumbbell, adminOnly: false },
-  { path: '/progress', label: 'Progress', icon: TrendingUp, adminOnly: false },
-  { path: '/admin', label: 'Admin', icon: Shield, adminOnly: true },
-  { path: '/settings', label: 'Settings', icon: Settings, adminOnly: false },
-] as const
 
 export default function TopBar() {
-  const location = useLocation()
   const navigate = useNavigate()
-  const { isAdmin } = useProfile?.() ?? ({ isAdmin: false } as any)
   const [signingOut, setSigningOut] = useState(false)
-
-  const currentPath = location.pathname
-
-  const visibleTabs = tabs.filter(t => !t.adminOnly || isAdmin)
 
   const onSignOut = async () => {
     try {
@@ -30,12 +16,6 @@ export default function TopBar() {
     } finally {
       setSigningOut(false)
     }
-  }
-
-  // If app uses '/' as dashboard, treat it as dashboard for active styling
-  const isActive = (path: string) => {
-    if (path === '/dashboard' && currentPath === '/') return true
-    return currentPath === path
   }
 
   return (
@@ -65,30 +45,6 @@ export default function TopBar() {
         </motion.button>
       </div>
 
-      <div className="max-w-[420px] mx-auto px-4 pb-3">
-        <div className="w-full h-[58px] rounded-full bg-white/5 border border-white/6 px-6 flex items-center justify-between">
-          {visibleTabs.map(t => {
-            const Icon = t.icon
-            const active = isActive(t.path)
-            return (
-              <button
-                key={t.path}
-                type="button"
-                onClick={() => navigate(t.path)}
-                className={
-                  active
-                    ? 'flex flex-col items-center gap-1 text-hp-accent bg-transparent'
-                    : 'flex flex-col items-center gap-1 text-hp-muted hover:text-hp-primary transition-colors bg-transparent'
-                }
-                aria-label={t.label}
-              >
-                <Icon className="w-5 h-5" />
-                {active ? <span className="h-1 w-6 rounded-full bg-hp-accent hp-glow-soft" /> : <span className="h-1 w-6" />}
-              </button>
-            )
-          })}
-        </div>
-      </div>
     </div>
   )
 }

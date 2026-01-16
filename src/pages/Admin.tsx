@@ -89,7 +89,7 @@ export default function Admin() {
     <div className="min-h-screen bg-black">
       <TopBar />
       
-      <main className="max-w-lg mx-auto px-4 pb-24 space-y-6">
+      <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}

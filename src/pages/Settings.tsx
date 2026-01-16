@@ -181,7 +181,7 @@ export default function Settings() {
             <input
               type="number"
               inputMode="numeric"
-              placeholder="seconds"
+              placeholder="90"
               value={customTimer}
               onChange={(e) => handleCustomTimer(e.target.value)}
               className="ui-input flex-1 h-12 px-4 rounded-lg text-center font-semibold"
@@ -224,28 +224,29 @@ export default function Settings() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setLocalPrefs(prev => ({ ...prev, weightUnit: unit }))}
-                  className="py-4 rounded-xl font-semibold text-lg transition-all border"
+                  className={`py-4 rounded-xl font-semibold text-lg transition-all border ${
+                    isSelected 
+                      ? 'border-[#29e33c] bg-[#29e33c]/10' 
+                      : 'border-white/10'
+                  }`}
                   style={isSelected 
                     ? { 
-                        backgroundColor: '#3b82f6',
                         color: 'var(--text)',
-                        borderColor: '#3b82f6',
-                        boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)'
+                        boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)'
                       }
                     : {
                         backgroundColor: 'var(--bg-surface)',
-                        color: 'var(--text-muted)',
-                        borderColor: 'var(--border-subtle)'
+                        color: 'var(--text-muted)'
                       }
                   }
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)'
+                      e.currentTarget.style.borderColor = 'rgba(41, 227, 60, 0.5)'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
                     }
                   }}
                 >
@@ -285,20 +286,32 @@ export default function Settings() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setLocalPrefs(prev => ({ ...prev, theme }))}
-                  className="py-4 rounded-xl font-semibold text-lg transition-all relative overflow-hidden border"
+                  className={`py-4 rounded-xl font-semibold text-lg transition-all relative overflow-hidden border ${
+                    isSelected 
+                      ? 'border-[#29e33c] bg-[#29e33c]/10' 
+                      : 'border-white/10'
+                  }`}
                   style={isSelected 
                     ? { 
-                        borderColor: '#a855f7',
                         backgroundColor: theme === 'dark' ? 'var(--bg-surface)' : '#f4f4f5',
                         color: theme === 'dark' ? 'var(--text)' : '#18181b',
-                        boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)'
+                        boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)'
                       }
                     : {
                         backgroundColor: 'var(--bg-surface)',
-                        color: 'var(--text-muted)',
-                        borderColor: 'var(--border-subtle)'
+                        color: 'var(--text-muted)'
                       }
                   }
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'rgba(41, 227, 60, 0.5)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }}
                 >
                   {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
                   {theme === 'light' && (

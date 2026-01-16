@@ -58,7 +58,7 @@ export default function TopBar() {
           whileTap={{ scale: 0.97 }}
           onClick={onSignOut}
           disabled={signingOut}
-          className="h-9 px-3 rounded-full bg-white/5 border border-white/6 text-hp-muted hover:text-hp-primary transition-colors flex items-center gap-2 disabled:opacity-60"
+          className="h-9 px-3 rounded-full bg-white/5 text-hp-muted hover:text-hp-primary transition-colors flex items-center gap-2 disabled:opacity-60"
         >
           <LogOut className="w-4 h-4" />
           <span className="text-xs font-medium">Logout</span>
@@ -66,7 +66,7 @@ export default function TopBar() {
       </div>
 
       <div className="max-w-[420px] mx-auto px-4 pb-3">
-        <div className="w-full h-[58px] rounded-full bg-white/5 border border-white/6 px-6 flex items-center justify-between">
+        <div className="w-full h-[58px] rounded-full bg-white/5 px-6 flex items-center justify-between">
           {visibleTabs.map(t => {
             const Icon = t.icon
             const active = isActive(t.path)

@@ -24,10 +24,8 @@ export default function Dashboard() {
     : 0
 
   return (
-    <div className="min-h-screen">
+    <div className="space-y-4">
       <TopBar />
-      
-      <main className="mx-auto w-full max-w-[420px] px-4 pb-24 pt-4 space-y-4">
         {/* Welcome Header Card */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -93,7 +91,7 @@ export default function Dashboard() {
           </div>
           
           {selectedTemplate && (
-            <div className="pt-3 border-t border-white/6">
+            <div className="pt-3">
               <div className="flex gap-4 text-hp-muted text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -187,7 +185,6 @@ export default function Dashboard() {
             </p>
           </div>
         </motion.div>
-      </main>
     </div>
   )
 }

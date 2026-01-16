@@ -39,9 +39,25 @@ export default function ActiveWorkout() {
   const location = useLocation()
   const template = location.state?.template as Template | undefined
 
+  // Show fallback UI when no active workout exists
   if (!template) {
-    navigate('/')
-    return null
+    return (
+      <div className="min-h-screen hp-bg p-4">
+        <div className="mx-auto w-full max-w-[420px] flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="hp-card p-8 text-center">
+            <h1 className="hp-title text-2xl font-bold mb-4">No Active Workout</h1>
+            <p className="hp-muted mb-6">Start a workout from the Dashboard</p>
+            <button
+              onClick={() => navigate('/')}
+              className="w-full py-4 bg-[#29e33c] text-black font-bold text-lg rounded-full hp-glow-soft"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    )
   }
 
   // Initialize all exercises - COLLAPSED BY DEFAULT except first one

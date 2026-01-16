@@ -108,7 +108,8 @@ body {
 
 /* Page Container - Bottom padding for navigation */
 .page-container {
-  padding-bottom: 120px;
+  padding-bottom: 140px;
+  min-height: 100vh;
 }
 
 /* Background Colors - Using canonical tokens from theme.css */

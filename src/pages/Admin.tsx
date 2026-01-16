@@ -62,7 +62,7 @@ export default function Admin() {
 
   if (profileLoading || loading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen page-container bg-black">
         <TopBar />
         <main className="max-w-lg mx-auto px-4 py-6">
           <div className="animate-pulse space-y-6">
@@ -86,7 +86,7 @@ export default function Admin() {
   const inactiveClients = clients.length - activeClients
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen page-container bg-black">
       <TopBar />
       
       <main className="mx-auto w-full max-w-[420px] px-4 pb-28 pt-4 space-y-4">

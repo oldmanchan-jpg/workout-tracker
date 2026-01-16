@@ -19,7 +19,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[420px] px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+      className="fixed bottom-0 left-0 right-0 z-50 h-20 w-full max-w-[420px] mx-auto px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
       aria-label="Bottom navigation"
     >
       {/* Glass pill wrapper */}

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Timer, Scale, Palette, Check, Loader2 } from 'lucide-react'
 import { useSettings, type UserPreferences } from '../hooks/useSettings'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 
 const REST_TIMER_PRESETS = [30, 60, 90, 120, 180]
 
@@ -49,39 +51,49 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#29e33c]" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-black/95 backdrop-blur-sm border-b border-white/5">
+      <div 
+        className="sticky top-0 z-10 backdrop-blur-sm"
+        style={{ 
+          backgroundColor: 'rgba(10, 10, 11, 0.95)',
+          borderBottom: '1px solid var(--border-subtle)'
+        }}
+      >
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1c1c1f] text-[#9a9fa4] hover:text-white transition-colors border border-white/5"
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-colors"
+            style={{
+              backgroundColor: 'var(--bg-surface)',
+              color: 'var(--text-muted)',
+              border: '1px solid var(--border-subtle)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-muted)'
+            }}
           >
             <ArrowLeft size={20} />
           </motion.button>
           
-          <h1 className="text-xl font-bold text-white">Settings</h1>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>Settings</h1>
           
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={handleSave}
             disabled={!hasChanges || saving}
-            className={`px-4 py-2 rounded-[10px] font-semibold transition-all disabled:opacity-50 ${
-              hasChanges 
-                ? 'bg-[#29e33c] text-black' 
-                : 'bg-[#1c1c1f] text-[#9a9fa4] border border-white/5'
-            }`}
-            style={hasChanges ? { boxShadow: '0 0 20px rgba(41, 227, 60, 0.3)' } : {}}
+            className="px-4 py-2 rounded-lg"
           >
             {saving ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -97,7 +109,7 @@ export default function Settings() {
             ) : (
               'Save'
             )}
-          </motion.button>
+          </Button>
         </div>
       </div>
 
@@ -107,17 +119,18 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
+          <Card className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div 
-              className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(41, 227, 60, 0.2)' }}
             >
-              <Timer size={20} className="text-[#29e33c]" />
+              <Timer size={20} style={{ color: 'var(--accent)' }} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Default Rest Timer</h2>
-              <p className="text-sm text-[#9a9fa4]">Set your preferred rest duration</p>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Default Rest Timer</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Set your preferred rest duration</p>
             </div>
           </div>
 
@@ -131,12 +144,30 @@ export default function Settings() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleTimerPreset(seconds)}
-                  className={`py-3 rounded-[10px] font-semibold text-sm transition-all border ${
-                    isSelected
-                      ? 'bg-[#29e33c] text-black border-[#29e33c]'
-                      : 'bg-[#1c1c1f] text-[#9a9fa4] border-white/5 hover:border-[#29e33c]/50'
-                  }`}
-                  style={isSelected ? { boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)' } : {}}
+                  className="py-3 rounded-lg font-semibold text-sm transition-all border"
+                  style={isSelected 
+                    ? { 
+                        backgroundColor: 'var(--accent)',
+                        color: 'var(--bg)',
+                        borderColor: 'var(--accent)',
+                        boxShadow: '0 0 15px rgba(41, 227, 60, 0.3)'
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-surface)',
+                        color: 'var(--text-muted)',
+                        borderColor: 'var(--border-subtle)'
+                      }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'rgba(41, 227, 60, 0.5)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
                 >
                   {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
                 </motion.button>
@@ -146,21 +177,23 @@ export default function Settings() {
 
           {/* Custom input */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#9a9fa4]">Custom:</span>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Custom:</span>
             <input
               type="number"
               inputMode="numeric"
               placeholder="seconds"
               value={customTimer}
               onChange={(e) => handleCustomTimer(e.target.value)}
-              className={`flex-1 h-12 px-4 rounded-[10px] text-center font-semibold outline-none transition-all bg-[#1c1c1f] text-white border ${
-                customTimer ? 'border-[#29e33c]' : 'border-white/5'
-              } focus:border-[#29e33c]`}
+              className="ui-input flex-1 h-12 px-4 rounded-lg text-center font-semibold"
+              style={{
+                borderColor: customTimer ? 'var(--accent)' : 'var(--border-subtle)'
+              }}
               min={1}
               max={600}
             />
-            <span className="text-sm text-[#9a9fa4]">sec</span>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>sec</span>
           </div>
+          </Card>
         </motion.div>
 
         {/* Weight Unit Section */}
@@ -168,8 +201,8 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
+          <Card className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"
@@ -177,8 +210,8 @@ export default function Settings() {
               <Scale size={20} className="text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Weight Unit</h2>
-              <p className="text-sm text-[#9a9fa4]">Choose your preferred unit</p>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Weight Unit</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Choose your preferred unit</p>
             </div>
           </div>
 
@@ -191,12 +224,30 @@ export default function Settings() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setLocalPrefs(prev => ({ ...prev, weightUnit: unit }))}
-                  className={`py-4 rounded-[12px] font-semibold text-lg transition-all border ${
-                    isSelected
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-[#1c1c1f] text-[#9a9fa4] border-white/5 hover:border-blue-500/50'
-                  }`}
-                  style={isSelected ? { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' } : {}}
+                  className="py-4 rounded-xl font-semibold text-lg transition-all border"
+                  style={isSelected 
+                    ? { 
+                        backgroundColor: '#3b82f6',
+                        color: 'var(--text)',
+                        borderColor: '#3b82f6',
+                        boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)'
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-surface)',
+                        color: 'var(--text-muted)',
+                        borderColor: 'var(--border-subtle)'
+                      }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                    }
+                  }}
                 >
                   {unit === 'kg' ? 'Kilograms (kg)' : 'Pounds (lbs)'}
                 </motion.button>
@@ -210,8 +261,8 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-[#141416] rounded-[21px] p-5 border border-white/5"
         >
+          <Card className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"
@@ -219,8 +270,8 @@ export default function Settings() {
               <Palette size={20} className="text-purple-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Theme</h2>
-              <p className="text-sm text-[#9a9fa4]">Customize your appearance</p>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Theme</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Customize your appearance</p>
             </div>
           </div>
 
@@ -233,20 +284,24 @@ export default function Settings() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setLocalPrefs(prev => ({ ...prev, theme }))}
-                  className={`py-4 rounded-[12px] font-semibold text-lg transition-all relative overflow-hidden border ${
-                    isSelected 
-                      ? 'border-purple-500' 
-                      : 'border-white/5'
-                  } ${
-                    isSelected 
-                      ? (theme === 'dark' ? 'bg-[#1c1c1f] text-white' : 'bg-[#f4f4f5] text-[#18181b]')
-                      : 'bg-[#1c1c1f] text-[#9a9fa4]'
-                  }`}
-                  style={isSelected ? { boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)' } : {}}
+                  className="py-4 rounded-xl font-semibold text-lg transition-all relative overflow-hidden border"
+                  style={isSelected 
+                    ? { 
+                        borderColor: '#a855f7',
+                        backgroundColor: theme === 'dark' ? 'var(--bg-surface)' : '#f4f4f5',
+                        color: theme === 'dark' ? 'var(--text)' : '#18181b',
+                        boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)'
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-surface)',
+                        color: 'var(--text-muted)',
+                        borderColor: 'var(--border-subtle)'
+                      }
+                  }
                 >
                   {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
                   {theme === 'light' && (
-                    <span className="absolute bottom-1 left-0 right-0 text-xs text-[#9a9fa4]">
+                    <span className="absolute bottom-1 left-0 right-0 text-xs" style={{ color: 'var(--text-muted)' }}>
                       Coming soon
                     </span>
                   )}
@@ -263,7 +318,7 @@ export default function Settings() {
           transition={{ delay: 0.4 }}
           className="text-center py-4"
         >
-          <p className="text-sm text-[#9a9fa4]">Settings are synced to your account</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Settings are synced to your account</p>
         </motion.div>
       </main>
     </div>

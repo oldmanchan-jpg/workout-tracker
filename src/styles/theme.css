@@ -1,34 +1,129 @@
 :root {
   color-scheme: dark;
   
-  /* Design Tokens */
-  --bg: #141416;
-  --surface: #1c1c1f;
-  --text: rgba(255, 255, 255, 0.92);
-  --text2: rgba(255, 255, 255, 0.70);
-  --accent: #29e33c;
-  --glow-strong: rgba(41, 227, 60, 0.35);
-  --glow-soft: rgba(41, 227, 60, 0.18);
+  /* ========================================
+     HEALTHPULSE DESIGN TOKENS
+     Single Source of Truth for All Styling
+     ======================================== */
   
-  /* Derived Tokens */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-  --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.35);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --transition: 180ms ease;
+  /* Background System */
+  --bg: #0a0a0b;                    /* Near black - main background */
+  --bg-elevated: #141416;           /* Cards, elevated surfaces */
+  --bg-surface: #1c1c1f;           /* Interactive surfaces */
+  --bg-hover: #242428;             /* Hover states */
+  
+  /* Surface (alias for compatibility) */
+  --surface: var(--bg-surface);
+  
+  /* Text Hierarchy */
+  --text: rgba(255, 255, 255, 0.92);  /* Primary text - headings */
+  --text-secondary: rgba(255, 255, 255, 0.70);  /* Secondary text - labels */
+  --text-muted: rgba(255, 255, 255, 0.50);  /* Muted text - placeholders */
+  --text-accent: #29e33c;          /* Accent text - highlights */
+  
+  /* Text (alias for compatibility) */
+  --muted: var(--text-secondary);
+  --text2: var(--text-secondary);
+  
+  /* Accent Colors */
+  --accent: #29e33c;                /* Green - primary accent */
+  --accent-hover: #22c55e;          /* Darker green - hover states */
+  --accent-success: #4ade80;        /* Success states */
+  --accent-warning: #fbbf24;        /* Warnings, timer alerts */
+  --accent-danger: #f87171;         /* Errors, timer critical */
+  
+  /* Border & Dividers */
+  --border: rgba(255, 255, 255, 0.10);  /* Default borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);  /* Subtle borders */
+  --border-strong: rgba(255, 255, 255, 0.15);  /* Strong borders */
+  --border-focus: #29e33c;          /* Focus rings */
+  
+  /* Glow Effects */
+  --glow: rgba(41, 227, 60, 0.18);  /* Default glow */
+  --glow-soft: rgba(41, 227, 60, 0.12);  /* Soft glow */
+  --glow-strong: rgba(41, 227, 60, 0.35);  /* Strong glow */
+  
+  /* Spacing Scale */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 0.5rem;   /* 8px */
+  --radius: 0.75rem;     /* 12px */
+  --radius-md: 1rem;     /* 16px */
+  --radius-lg: 1.5rem;    /* 24px */
+  --radius-xl: 2rem;     /* 32px */
+  --radius-full: 9999px; /* Full circle */
+  
+  /* Elevation System (for depth hierarchy) */
+  --elevation-0: none;  /* Flat */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);  /* Subtle lift */
+  --elevation-2: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);  /* Card default */
+  --elevation-3: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);  /* Elevated card */
+  --elevation-4: 0 20px 25px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.3);  /* Modal/overlay */
+  
+  /* Shadows (legacy - use elevation system) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow: var(--elevation-2);
+  --shadow-md: var(--elevation-3);
+  --shadow-lg: var(--elevation-4);
+  --shadow-soft: var(--elevation-1);
+  --shadow-glow: 0 0 20px rgba(41, 227, 60, 0.35), 0 0 40px rgba(41, 227, 60, 0.14);
+  
+  /* Typography Scale */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Transitions */
+  --transition: 0.2s ease;
+  --transition-fast: 0.15s ease;
+  --transition-slow: 0.3s ease;
+  
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -36,20 +131,43 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global form controls - dark theme by default */
+button,
+select,
+input,
+textarea {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--glow);
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
 /* Button Styles */
 .ui-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-height: 44px;
-  padding: 0.7rem 1.2rem;
-  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius);
   border: 1px solid transparent;
   background: transparent;
   color: var(--text);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
   line-height: 1;
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition),
@@ -71,14 +189,15 @@ body {
 
 .ui-button--primary {
   background: var(--accent);
-  color: #0a120b;
+  color: var(--bg);
   border-color: rgba(41, 227, 60, 0.45);
-  box-shadow: 0 10px 22px rgba(41, 227, 60, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .ui-button--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px var(--glow-soft);
+  box-shadow: var(--shadow-glow);
 }
 
 .ui-button--ghost {
@@ -87,63 +206,78 @@ body {
 }
 
 .ui-button--ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-hover);
   color: var(--text);
 }
 
 .ui-button--outline {
   background: transparent;
   color: var(--accent);
-  border-color: rgba(41, 227, 60, 0.5);
+  border-color: var(--border-focus);
 }
 
 .ui-button--outline:hover:not(:disabled) {
-  background: rgba(41, 227, 60, 0.12);
-  border-color: rgba(41, 227, 60, 0.7);
-  box-shadow: 0 0 0 1px rgba(41, 227, 60, 0.4) inset;
+  background: var(--glow-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--glow-soft) inset;
 }
 
-/* Card Styles */
+/* Card Styles - Professional elevation system */
 .ui-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-soft);
-  transition: box-shadow var(--transition), border-color var(--transition),
-    transform var(--transition);
+  background: var(--bg-elevated);
+  border: 1px solid transparent;  /* No border by default - use elevation for depth */
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--elevation-2);
+  transition: box-shadow var(--transition), transform var(--transition),
+    background-color var(--transition);
 }
 
 .ui-card:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-1px);
+  background: var(--bg-surface);
+}
+
+/* Card variants for hierarchy */
+.ui-card--flat {
+  box-shadow: var(--elevation-0);
+  border: 1px solid var(--border-subtle);
+}
+
+.ui-card--elevated {
+  box-shadow: var(--elevation-3);
+}
+
+.ui-card--prominent {
+  box-shadow: var(--elevation-4);
+  background: var(--bg-surface);
 }
 
 /* Input Styles */
 .ui-input {
   width: 100%;
   min-height: 44px;
-  padding: 0.7rem 0.9rem;
-  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: #17171a;
+  background: var(--bg-surface);
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-family: inherit;
   transition: border-color var(--transition), box-shadow var(--transition),
     background-color var(--transition);
 }
 
 .ui-input::placeholder {
-  color: var(--text2);
+  color: var(--text-muted);
 }
 
 .ui-input:focus-visible {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--glow-soft);
-  background: #1a1a1e;
+  background: var(--bg-hover);
 }
 
 .ui-input:disabled {

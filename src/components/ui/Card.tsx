@@ -1,11 +1,24 @@
 import type { HTMLAttributes } from 'react'
 
-export type CardProps = HTMLAttributes<HTMLDivElement>
+export type CardProps = HTMLAttributes<HTMLDivElement> & {
+  variant?: 'default' | 'flat' | 'elevated' | 'prominent'
+}
 
-export default function Card({ className, ...props }: CardProps) {
+const variantClasses: Record<NonNullable<CardProps['variant']>, string> = {
+  default: '',
+  flat: 'ui-card--flat',
+  elevated: 'ui-card--elevated',
+  prominent: 'ui-card--prominent',
+}
+
+export default function Card({ 
+  variant = 'default',
+  className, 
+  ...props 
+}: CardProps) {
   const classes = [
-    'rounded-card border border-white/5 bg-hp-surface',
-    'shadow-[0_18px_40px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]',
+    'ui-card',
+    variantClasses[variant],
     className,
   ]
     .filter(Boolean)

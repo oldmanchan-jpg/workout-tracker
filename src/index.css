@@ -3,6 +3,9 @@
    Professional Typography with Google Fonts
    ======================================== */
 
+/* Import HealthPulse Dark Theme */
+@import './styles/theme.css';
+
 /* CSS Reset & Base Styles */
 * {
   margin: 0;
@@ -13,7 +16,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%);
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 body {
@@ -21,9 +25,8 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
-              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%);
+  background-color: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
@@ -32,20 +35,10 @@ body {
   padding: 0;
 }
 
-/* HealthPulse Background Override */
-body.bg-gray-50,
-body[class*="bg-"],
-#root,
-.app-container,
-[class*="app-container"],
-[class*="dashboard"],
-[class*="main"] {
-  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
-              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%) !important;
-}
-
 #root {
   min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 /* ========================================
@@ -84,75 +77,48 @@ body[class*="bg-"],
 }
 
 /* ========================================
-   5-CORE COLOR PALETTE - PROFESSIONAL & USABLE
+   DESIGN TOKENS
    ======================================== */
-:root {
-  /* Core Colors - Dark Mode Theme */
-  --color-primary: #AEC6BA;       /* Light Green - Hover Effects */
-  --color-primary-light: #C8D5D0; /* Lighter Green - Active States */
-  --color-primary-dark: #8FB3A3;  /* Darker Green - Pressed States */
-  --color-secondary: #5B5D5A;     /* Dark Brown - Secondary Elements */
-  --color-secondary-light: #6B6D6A; /* Lighter Brown - Borders */
-  --color-white: #FFFFFF;         /* Pure White - Text & Highlights */
-  
-  /* Background Colors - Dark Mode */
-  --color-bg-primary: #2D2F2C;    /* Dark Brown - Main App Background */
-  --color-bg-secondary: #3A3C39;  /* Slightly Lighter Brown - Cards */
-  --color-bg-dark: #1E1F1D;       /* Darker Brown - Headers */
-  --color-bg-light: #4A4C49;      /* Light Brown - Light Cards */
-  --color-bg-button: #5B5D5A;     /* Brown for Buttons */
-  --color-bg-hover: #AEC6BA;      /* Light Green for Hover */
-  
-  /* Text Colors - Dark Mode */
-  --color-text-primary: #FFFFFF;   /* White - Main Text */
-  --color-text-secondary: #E2E8F0; /* Light Gray - Secondary Text */
-  --color-text-muted: #94A3B8;     /* Gray - Muted Text */
-  --color-text-inverse: #2D2F2C;   /* Dark Brown for Light Backgrounds */
-  
-  /* Border Colors */
-  --color-border-light: #6B6D6A;   /* Light Brown - Light Borders */
-  --color-border-medium: #5B5D5A;  /* Brown - Medium Borders */
-  --color-border-accent: #AEC6BA;  /* Light Green - Accent Borders */
-  
-  /* Shadow Colors */
-  --color-shadow: rgba(0, 0, 0, 0.3);
-  --color-shadow-hover: rgba(0, 0, 0, 0.5);
-  --color-shadow-accent: rgba(174, 198, 186, 0.2);
-}
+/* 
+   ⚠️ IMPORTANT: All design tokens are defined in src/styles/theme.css
+   This is the single source of truth. Do NOT define new tokens here.
+   
+   See docs/DESIGN_TOKENS.md for usage guidelines.
+*/
 
 /* ========================================
    UTILITY CLASSES
    ======================================== */
 
-/* Background Colors */
-.bg-primary { background-color: var(--color-primary); }
-.bg-primary-light { background-color: var(--color-primary-light); }
-.bg-secondary { background-color: var(--color-secondary); }
-.bg-secondary-light { background-color: var(--color-secondary-light); }
-.bg-white { background-color: var(--color-white); }
-.bg-dark { background-color: var(--color-bg-dark); }
-.bg-light { background-color: var(--color-bg-light); }
-.bg-primary-dark { background-color: var(--color-bg-primary); }
-.bg-secondary-dark { background-color: var(--color-bg-secondary); }
-.bg-button { background-color: var(--color-bg-button); }
-.bg-hover { background-color: var(--color-bg-hover); }
+/* Background Colors - Using canonical tokens from theme.css */
+.bg-primary { background-color: var(--accent); }
+.bg-primary-light { background-color: var(--accent-hover); }
+.bg-secondary { background-color: var(--bg-surface); }
+.bg-secondary-light { background-color: var(--bg-hover); }
+.bg-white { background-color: var(--surface); }
+.bg-dark { background-color: var(--bg); }
+.bg-light { background-color: var(--bg-elevated); }
+.bg-primary-dark { background-color: var(--bg); }
+.bg-secondary-dark { background-color: var(--bg-elevated); }
+.bg-button { background-color: var(--accent); }
+.bg-hover { background-color: var(--bg-hover); }
 
-/* Text Colors */
-.text-primary { color: var(--color-primary); }
-.text-primary-light { color: var(--color-primary-light); }
-.text-secondary { color: var(--color-text-secondary); }
-.text-secondary-light { color: var(--color-secondary-light); }
-.text-white { color: var(--color-white); }
-.text-dark { color: var(--color-text-primary); }
-.text-green { color: var(--color-primary-light); }
+/* Text Colors - Using canonical tokens from theme.css */
+.text-primary { color: var(--accent); }
+.text-primary-light { color: var(--accent-hover); }
+.text-secondary { color: var(--text-secondary); }
+.text-secondary-light { color: var(--text-muted); }
+.text-white { color: var(--text); }
+.text-dark { color: var(--text); }
+.text-green { color: var(--accent); }
 
-/* Border Colors */
-.border-primary { border-color: var(--color-primary); }
-.border-primary-light { border-color: var(--color-primary-light); }
-.border-secondary { border-color: var(--color-secondary); }
-.border-purple { border-color: var(--color-border-accent); }
-.border-accent { border-color: var(--color-border-accent); }
-.border-dark { border-color: var(--color-border-light); }
+/* Border Colors - Using canonical tokens from theme.css */
+.border-primary { border-color: var(--accent); }
+.border-primary-light { border-color: var(--accent-hover); }
+.border-secondary { border-color: var(--border); }
+.border-purple { border-color: var(--accent); }
+.border-accent { border-color: var(--accent); }
+.border-dark { border-color: var(--border-subtle); }
 
 /* Spacing Utilities */
 .p-4 { padding: 1rem; }
@@ -246,19 +212,19 @@ body[class*="bg-"],
 .rounded-2xl { border-radius: 1rem; }
 .rounded-full { border-radius: 9999px; }
 
-/* Borders */
-.border { border: 1px solid var(--color-border-light); }
+/* Borders - Using canonical tokens from theme.css */
+.border { border: 1px solid var(--border-subtle); }
 .border-2 { border-width: 2px; }
-.border-t { border-top: 1px solid var(--color-border-light); }
-.border-b { border-bottom: 1px solid var(--color-border-light); }
+.border-t { border-top: 1px solid var(--border-subtle); }
+.border-b { border-bottom: 1px solid var(--border-subtle); }
 
-/* Shadows */
+/* Shadows - Using canonical tokens from theme.css */
 .shadow-soft {
-  box-shadow: 0 2px 8px var(--color-shadow);
+  box-shadow: var(--shadow-soft);
 }
 
 .shadow-soft-hover:hover {
-  box-shadow: 0 4px 16px var(--color-shadow-hover);
+  box-shadow: var(--shadow);
 }
 
 /* ========================================
@@ -442,7 +408,7 @@ body[class*="bg-"],
    ======================================== */
 /* Enhanced Hover Effects */
 .hover\:bg-green-50:hover {
-  background-color: var(--color-bg-secondary) !important;
+  background-color: var(--bg-elevated) !important;
 }
 
 .hover\:bg-red-50:hover {
@@ -454,7 +420,7 @@ body[class*="bg-"],
 }
 
 .hover\:text-primary-light:hover {
-  color: var(--color-primary-light) !important;
+  color: var(--accent-hover) !important;
 }
 
 .hover\:bg-red-700:hover {
@@ -470,11 +436,11 @@ body[class*="bg-"],
 }
 
 .hover\:bg-white:hover {
-  background-color: var(--color-white) !important;
+  background-color: var(--surface) !important;
 }
 
 .hover\:text-dark:hover {
-  color: var(--color-text-primary) !important;
+  color: var(--text) !important;
 }
 
 .hover\:bg-secondary:hover {
@@ -482,7 +448,7 @@ body[class*="bg-"],
 }
 
 .hover\:bg-primary-light:hover {
-  background-color: var(--color-primary-light) !important;
+  background-color: var(--accent-hover) !important;
 }
 
 /* Enhanced Scale Hover Effects */
@@ -500,11 +466,11 @@ body[class*="bg-"],
 
 /* Enhanced Shadow Hover Effects */
 .hover\:shadow-soft:hover {
-  box-shadow: 0 2px 8px var(--color-shadow) !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
 .hover\:shadow-soft-hover:hover {
-  box-shadow: 0 4px 16px var(--color-shadow-hover) !important;
+  box-shadow: var(--shadow) !important;
 }
 
 .hover\:shadow-lg:hover {
@@ -554,8 +520,8 @@ body[class*="bg-"],
    TABLE STYLES
    ======================================== */
 .table tr:hover {
-  background-color: var(--color-bg-secondary) !important;
-  transition: background-color 0.2s ease !important;
+  background-color: var(--bg-elevated) !important;
+  transition: background-color var(--transition) !important;
 }
 
 /* ========================================
@@ -575,30 +541,36 @@ body[class*="bg-"],
   background-color: inherit !important;
 }
 
-/* Ensure select elements use dark theme */
+/* Form controls use dark theme from theme.css - ensure consistency */
 select {
-  background-color: transparent !important;
-  color: var(--color-text-primary, #AEC6BA) !important;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+select:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
 }
 
 select option {
-  background-color: #15181d !important;
-  color: #AEC6BA !important;
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
 }
 
-/* Button Components */
+/* Button Components - Using canonical tokens from theme.css */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border-radius: 0.75rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius);
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition);
   text-decoration: none;
   white-space: nowrap;
   font-family: 'Inter', sans-serif;
@@ -610,36 +582,37 @@ select option {
 }
 
 .btn-primary {
-  background-color: var(--color-bg-button);
-  color: var(--color-text-primary);
+  background-color: var(--accent);
+  color: var(--bg);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-bg-hover);
+  background-color: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--color-shadow-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  background-color: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
+  background-color: var(--bg-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--color-shadow-hover);
+  box-shadow: var(--shadow);
 }
 
 .btn-outline {
   background-color: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
+  color: var(--accent);
+  border: 2px solid var(--accent);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  background-color: var(--accent);
+  color: var(--bg);
   transform: translateY(-1px);
 }
 
@@ -658,22 +631,22 @@ select option {
   width: 100%;
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 2px solid var(--color-border-light);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
-  background-color: var(--color-white);
+  background-color: var(--surface);
   transition: all 0.2s ease;
-  color: var(--color-text-primary);
+  color: var(--text);
   font-family: 'Inter', sans-serif;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-shadow-purple);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--glow);
 }
 
 .input:hover {
-  border-color: var(--color-border-medium);
+  border-color: var(--border);
 }
 
 .input:disabled {
@@ -681,26 +654,26 @@ select option {
   cursor: not-allowed;
 }
 
-/* Ensure cards have proper contrast */
+/* Ensure cards have proper contrast - Using canonical tokens from theme.css */
 .card {
-  background-color: var(--color-bg-secondary) !important;
-  border: 1px solid var(--color-border-light);
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px var(--color-shadow);
-  transition: all 0.2s ease;
+  background-color: var(--bg-elevated) !important;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition);
   overflow: hidden;
 }
 
 .card:hover {
-  box-shadow: 0 4px 16px var(--color-shadow-hover);
+  box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
 
 /* Dark Card Variant */
 .card-dark {
-  background-color: var(--color-bg-secondary) !important;
-  color: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  background-color: var(--bg-elevated) !important;
+  color: var(--text);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Form Components */
@@ -728,7 +701,7 @@ select option {
 .bg-gray-100,
 .bg-slate-50,
 .bg-slate-100 {
-  background-color: var(--color-bg-primary, #AEC6BA) !important;
+  background-color: var(--surface) !important;
 }
 
 /* ========================================
@@ -760,29 +733,29 @@ select option {
 /* ========================================
    WORKOUT TRACKER SPECIFIC STYLES
    ======================================== */
-/* Timer Button - Dark text on light background */
+/* Timer Button - Dark theme */
 .workout-timer {
-  background-color: var(--color-white);
-  color: var(--color-text-primary);
-  border: 2px solid var(--color-border-light);
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
-/* Exercise Headers - Dark text on white background */
+/* Exercise Headers - Dark theme */
 .exercise-header {
-  color: var(--color-text-primary);
-  background-color: var(--color-white);
+  color: var(--text);
+  background-color: var(--surface);
 }
 
-/* Input Fields - Dark text on white background */
+/* Input Fields - Dark theme */
 .workout-input {
-  background-color: var(--color-white);
-  color: var(--color-text-primary);
-  border: 2px solid var(--color-border-light);
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .workout-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-shadow-purple);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--glow);
 }
 
 /* ========================================
@@ -948,4 +921,33 @@ select option {
 /* HealthPulse Divider */
 .hp-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* HealthPulse Select - Dark background for dropdown */
+.hp-select {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.hp-select:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
+}
+
+.hp-select option {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+/* HealthPulse CTA - Dark background for Start Workout button */
+.hp-cta {
+  background: var(--surface) !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--text) !important;
+}
+
+.hp-cta:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 4px var(--glow) !important;
 }

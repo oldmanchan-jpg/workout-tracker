@@ -1,55 +1,59 @@
 # 🎨 Workout Tracker - Design System v2.0
 
 **Date:** January 14, 2026  
-**Direction:** Sophisticated Athletic - Clean, modern, premium feel
+**Direction:** HealthPulse-Level - Dark theme baseline + green accent  
+**Canonical Source:** `src/styles/theme.css` (single source of truth)
 
 ---
 
 ## 🎯 Design Philosophy
 
 ### Aesthetic Direction
-**"Sophisticated Athletic"** - A refined dark interface that feels premium and focused, not generic. Think Linear meets Nike Training Club.
+**"HealthPulse-Level"** - A refined dark interface with green accent that feels premium and focused. Dark theme baseline with energetic green accents for actions and highlights.
 
 ### Core Principles
-1. **Focus** - Remove distractions during workout
-2. **Clarity** - Every element has clear purpose
-3. **Premium** - Feels like a $10/month app, not a free tutorial
-4. **Athletic** - Energetic accents, but not overwhelming
+1. **Single Source of Truth** - All design tokens live in `src/styles/theme.css`
+2. **Deterministic Styling** - Tokens → Components → Pages (no page-by-page CSS patching)
+3. **Consistency** - One canonical place for global theme and primitives
+4. **Premium Feel** - HealthPulse-level quality throughout
 
 ---
 
 ## 🎨 Color Palette
 
+**All tokens defined in `src/styles/theme.css`**
+
 ### Background System
 ```css
---bg-primary: #0a0a0b;      /* Near black - main background */
---bg-elevated: #141416;      /* Cards, elevated surfaces */
---bg-surface: #1c1c1f;       /* Interactive surfaces */
---bg-hover: #242428;         /* Hover states */
+--bg: #0a0a0b;                    /* Near black - main background */
+--bg-elevated: #141416;           /* Cards, elevated surfaces */
+--bg-surface: #1c1c1f;           /* Interactive surfaces */
+--bg-hover: #242428;             /* Hover states */
 ```
 
-### Accent Colors
+### Accent Colors (HealthPulse Green)
 ```css
---accent-primary: #22d3ee;   /* Cyan - primary actions */
---accent-secondary: #818cf8; /* Indigo - secondary elements */
---accent-success: #4ade80;   /* Green - completion, success */
---accent-warning: #fbbf24;   /* Amber - warnings, timer alerts */
---accent-danger: #f87171;    /* Red - errors, timer critical */
+--accent: #29e33c;                /* Green - primary accent */
+--accent-hover: #22c55e;          /* Darker green - hover states */
+--accent-success: #4ade80;        /* Success states */
+--accent-warning: #fbbf24;        /* Warnings, timer alerts */
+--accent-danger: #f87171;         /* Errors, timer critical */
 ```
 
 ### Text Hierarchy
 ```css
---text-primary: #fafafa;     /* Primary text - headings */
---text-secondary: #a1a1aa;   /* Secondary text - labels */
---text-muted: #52525b;       /* Muted text - placeholders */
---text-accent: #22d3ee;      /* Accent text - highlights */
+--text: rgba(255, 255, 255, 0.92);  /* Primary text - headings */
+--text-secondary: rgba(255, 255, 255, 0.70);  /* Secondary text - labels */
+--text-muted: rgba(255, 255, 255, 0.50);  /* Muted text - placeholders */
+--text-accent: #29e33c;          /* Accent text - highlights */
 ```
 
 ### Border & Dividers
 ```css
---border-subtle: #27272a;    /* Subtle borders */
---border-default: #3f3f46;   /* Default borders */
---border-focus: #22d3ee;     /* Focus rings */
+--border: rgba(255, 255, 255, 0.10);  /* Default borders */
+--border-subtle: rgba(255, 255, 255, 0.06);  /* Subtle borders */
+--border-strong: rgba(255, 255, 255, 0.15);  /* Strong borders */
+--border-focus: #29e33c;          /* Focus rings */
 ```
 
 ---
@@ -336,12 +340,11 @@ font-family: 'JetBrains Mono', 'SF Mono', monospace;
 
 ## 🚫 What We're Removing
 
-1. **Generic orange** - Replaced with sophisticated cyan accent
-2. **Gray-on-gray** - Better contrast throughout
-3. **Small checkmarks** - Now 44px touch targets
-4. **TopBar during workout** - Minimal header only
-5. **Generic gradients** - Subtle, purposeful gradients only
-6. **Mid-2000s icons** - Cleaner, simpler icon usage
+1. **Multiple token systems** - Consolidated into single `theme.css`
+2. **Page-by-page CSS patching** - All styling via tokens → components
+3. **Conflicting color definitions** - One canonical color system
+4. **Generic gradients** - Subtle, purposeful gradients only
+5. **Inconsistent spacing** - Unified spacing scale
 
 ---
 
@@ -367,16 +370,23 @@ font-family: 'JetBrains Mono', 'SF Mono', monospace;
 
 ---
 
-## 🎨 Color Comparison
+## 🎨 Token System Architecture
 
-| Element | Old | New |
-|---------|-----|-----|
-| Background | `#111827` (gray-900) | `#0a0a0b` (near black) |
-| Cards | `#1f2937` (gray-800) | `#141416` (elevated) |
-| Primary Accent | `#f97316` (orange-500) | `#22d3ee` (cyan-400) |
-| Success | `#22c55e` (green-500) | `#4ade80` (green-400) |
-| Active Input | Gray bg | Slate bg + cyan border |
-| Checkmark | 20px | 44px |
+### Single Source of Truth
+All design tokens are defined in `src/styles/theme.css`:
+- Colors (backgrounds, text, accents, borders)
+- Spacing scale (--space-1 through --space-12)
+- Typography scale (--text-xs through --text-4xl)
+- Border radius (--radius-sm through --radius-full)
+- Shadows (--shadow-sm through --shadow-glow)
+- Transitions (--transition, --transition-fast, --transition-slow)
+- Z-index scale (--z-base through --z-tooltip)
+
+### Component Usage
+Primitive components (`Button`, `Card`, `Input`, etc.) use tokens directly:
+- No hardcoded colors or values
+- All styling via CSS custom properties
+- Components compose from tokens, pages compose from components
 
 ---
 

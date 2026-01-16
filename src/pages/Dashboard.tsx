@@ -5,6 +5,8 @@ import { Play, Dumbbell, ChevronRight, Clock, Flame, Target } from 'lucide-react
 import { motion } from 'framer-motion'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import TopBar from '@/components/TopBar'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 
 export default function Dashboard() {
   const [templates] = useState<Template[]>(workoutTemplates)
@@ -33,15 +35,16 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="hp-card p-6"
         >
-          <p className="text-hp-muted text-sm uppercase tracking-wide mb-2">Welcome back</p>
-          <h1 className="text-hp-primary text-2xl font-semibold">
-            Ready to <span className="text-hp-accent">Train</span>?
-          </h1>
-          <p className="text-hp-muted text-sm mt-2">
-            Select a workout and crush your goals
-          </p>
+          <Card variant="prominent" className="p-6">
+            <p className="text-hp-muted text-sm uppercase tracking-wide mb-2">Welcome back</p>
+            <h1 className="text-hp-primary text-2xl font-semibold">
+              Ready to <span className="text-hp-accent">Train</span>?
+            </h1>
+            <p className="text-hp-muted text-sm mt-2">
+              Select a workout and crush your goals
+            </p>
+          </Card>
         </motion.div>
 
         {/* This Week Summary Card */}
@@ -49,19 +52,20 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="hp-card p-5"
         >
-          <p className="text-hp-muted text-xs uppercase tracking-wide mb-4">This Week</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-hp-muted text-xs mb-1">Workouts</p>
-              <p className="text-hp-primary text-xl font-semibold">3</p>
+          <Card className="p-5">
+            <p className="text-hp-muted text-xs uppercase tracking-wide mb-4">This Week</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-hp-muted text-xs mb-1">Workouts</p>
+                <p className="text-hp-primary text-xl font-semibold">3</p>
+              </div>
+              <div>
+                <p className="text-hp-muted text-xs mb-1">Volume</p>
+                <p className="text-hp-accent text-xl font-semibold">12,450 kg</p>
+              </div>
             </div>
-            <div>
-              <p className="text-hp-muted text-xs mb-1">Volume</p>
-              <p className="text-hp-accent text-xl font-semibold">12,450 kg</p>
-            </div>
-          </div>
+          </Card>
         </motion.div>
 
         {/* Workout Template Card */}
@@ -69,8 +73,8 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="hp-card p-5 space-y-4"
         >
+          <Card className="p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-hp-primary font-semibold text-lg">Workout Template</h2>
             <span className="text-hp-muted text-sm">{templates.length} available</span>
@@ -81,11 +85,10 @@ export default function Dashboard() {
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-transparent border border-white/6 rounded-2xl text-hp-primary font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c]/30 transition-all cursor-pointer hp-glow-soft"
-              style={{ backgroundColor: 'transparent' }}
+              className="ui-input w-full px-4 py-4 appearance-none font-medium text-base cursor-pointer"
             >
               {templates.map(template => (
-                <option key={template.id} value={template.id} style={{ backgroundColor: '#15181d', color: '#AEC6BA' }}>
+                <option key={template.id} value={template.id}>
                   {template.name}
                 </option>
               ))}
@@ -93,8 +96,8 @@ export default function Dashboard() {
             <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-hp-accent rotate-90 pointer-events-none" />
           </div>
           
-          {selectedTemplate && (
-            <div className="pt-3 border-t border-white/6">
+            {selectedTemplate && (
+            <div className="pt-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
               <div className="flex gap-4 text-hp-muted text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -107,6 +110,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+          </Card>
         </motion.div>
 
         {/* Exercise Preview List Card */}
@@ -115,8 +119,8 @@ export default function Dashboard() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="hp-card p-5 space-y-3"
           >
+            <Card className="p-5 space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-hp-primary font-semibold text-lg">
                 {selectedTemplate.name}
@@ -133,7 +137,16 @@ export default function Dashboard() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ 
+                    backgroundColor: 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
                 >
                   <div className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0 hp-glow-soft">
                     {idx + 1}
@@ -149,6 +162,7 @@ export default function Dashboard() {
                 </motion.div>
               ))}
             </div>
+            </Card>
           </motion.div>
         )}
 
@@ -159,15 +173,13 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Button
               onClick={onStartWorkout}
-              className="w-full h-[56px] bg-black/20 hover:bg-white/8 border border-[#29e33c]/20 text-white/90 font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow-soft"
+              className="w-full h-14 text-lg rounded-full flex items-center justify-center gap-3"
             >
-              <Play className="w-6 h-6 text-[#29e33c]" fill="#29e33c" />
+              <Play className="w-6 h-6" fill="currentColor" />
               Start Workout
-            </motion.button>
+            </Button>
           </motion.div>
         )}
 
@@ -176,17 +188,18 @@ export default function Dashboard() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="hp-card p-4 flex items-start gap-3"
         >
-          <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0 hp-glow-soft">
-            <Target className="w-5 h-5 text-hp-accent" />
-          </div>
-          <div>
-            <p className="text-hp-primary font-medium text-sm mb-1">Track Your RPE</p>
-            <p className="text-hp-muted text-xs">
-              Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
-            </p>
-          </div>
+          <Card variant="flat" className="p-4 flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0">
+              <Target className="w-5 h-5 text-hp-accent" />
+            </div>
+            <div>
+              <p className="text-hp-primary font-medium text-sm mb-1">Track Your RPE</p>
+              <p className="text-hp-muted text-xs">
+                Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
+              </p>
+            </div>
+          </Card>
         </motion.div>
       </main>
     </div>

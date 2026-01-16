@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import type { Template } from '../types'
 import { saveWorkout } from '../services/workoutService'
+import BottomNav from '../components/BottomNav'
 
 interface SetLog {
   reps: number
@@ -302,20 +303,19 @@ export default function ActiveWorkout() {
     const { totalVolume, totalReps } = calculateTotals(exerciseLogs)
 
     return (
-      <div className="min-h-screen bg-black p-4">
-        <div className="max-w-lg mx-auto">
+      <div className="min-h-screen hp-bg p-4">
+        <div className="mx-auto w-full max-w-[420px]">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-[#141416] rounded-[21px] p-8 text-center border border-white/5"
+            className="hp-card p-8 text-center"
           >
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-              className="w-24 h-24 bg-[#29e33c] rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ boxShadow: '0 0 40px rgba(41, 227, 60, 0.4)' }}
+              className="w-24 h-24 bg-[#29e33c] rounded-full flex items-center justify-center mx-auto mb-6 hp-glow"
             >
               <Check className="w-12 h-12 text-black" strokeWidth={3} />
             </motion.div>
@@ -324,7 +324,7 @@ export default function ActiveWorkout() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl font-bold text-white mb-2"
+              className="hp-title text-3xl font-bold mb-2"
             >
               Workout Complete!
             </motion.h1>
@@ -332,7 +332,7 @@ export default function ActiveWorkout() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-[#9a9fa4] mb-8"
+              className="hp-muted mb-8"
             >
               Great job crushing <span className="text-[#29e33c] font-semibold">{template.name}</span>!
             </motion.p>
@@ -342,19 +342,19 @@ export default function ActiveWorkout() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-[#1c1c1f] rounded-[16px] p-4 border border-white/5"
+                className="hp-card-2 p-4"
               >
-                <p className="text-[#9a9fa4] text-sm mb-1">Total Volume</p>
-                <p className="text-2xl font-bold text-[#29e33c]">{totalVolume.toFixed(0)} kg</p>
+                <p className="hp-muted text-sm mb-1">Total Volume</p>
+                <p className="text-[#29e33c] text-2xl font-bold">{totalVolume.toFixed(0)} kg</p>
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-[#1c1c1f] rounded-[16px] p-4 border border-white/5"
+                className="hp-card-2 p-4"
               >
-                <p className="text-[#9a9fa4] text-sm mb-1">Total Reps</p>
-                <p className="text-2xl font-bold text-white">{totalReps}</p>
+                <p className="hp-muted text-sm mb-1">Total Reps</p>
+                <p className="hp-title text-2xl font-bold">{totalReps}</p>
               </motion.div>
             </div>
 
@@ -362,12 +362,12 @@ export default function ActiveWorkout() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              className="bg-[#1c1c1f] rounded-[16px] p-4 mb-6 text-left border border-white/5"
+              className="hp-card-2 p-4 mb-6 text-left"
             >
-              <h3 className="text-white font-semibold mb-3">Summary</h3>
+              <h3 className="hp-title font-semibold mb-3">Summary</h3>
               {exerciseLogs.map((log, idx) => (
-                <div key={idx} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                  <span className="text-white">{log.name}</span>
+                <div key={idx} className="flex items-center justify-between py-2 hp-divider last:border-0">
+                  <span className="hp-title">{log.name}</span>
                   <span className="text-[#29e33c] font-medium">{log.sets.length} sets</span>
                 </div>
               ))}
@@ -380,8 +380,7 @@ export default function ActiveWorkout() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/')}
-              className="w-full py-4 bg-[#29e33c] text-black font-bold text-lg rounded-[12px] transition-all"
-              style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.3)' }}
+              className="w-full py-4 bg-[#29e33c] text-black font-bold text-lg rounded-full hp-glow-soft"
             >
               Back to Dashboard
             </motion.button>
@@ -393,40 +392,32 @@ export default function ActiveWorkout() {
 
   // Active workout screen
   return (
-    <div className="min-h-screen flex justify-center bg-[radial-gradient(80%_60%_at_20%_0%,rgba(41,227,60,0.18),transparent_55%),linear-gradient(#010101,#010101)]">
-      <div className="w-[430px] min-h-screen relative px-6 pt-10 pb-28 text-left text-white/90">
-        {import.meta.env.DEV && (
-          <img
-            src="/figma/Pulse-recording.png"
-            alt=""
-            className="pointer-events-none absolute inset-0 opacity-40"
-          />
-        )}
-
-        <div className="relative z-10 space-y-6">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen hp-bg">
+      <div className="mx-auto w-full max-w-[420px] px-4 pb-24 pt-4">
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => {
                 if (confirm('Are you sure you want to quit this workout?')) {
                   navigate('/')
                 }
               }}
-              className="w-11 h-11 flex items-center justify-center rounded-full bg-hp-surface border border-white/10 text-white/70 hover:text-white transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full hp-pill text-white/70 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            <div className="text-center">
-              <h1 className="text-lg font-semibold text-white">{template.name}</h1>
-              <p className="text-xs text-white/60">{completedSets}/{totalSets} sets</p>
+            <div className="text-center flex-1">
+              <h1 className="hp-title text-lg font-semibold">{template.name}</h1>
+              <p className="hp-muted text-xs">{completedSets}/{totalSets} sets</p>
             </div>
 
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleFinishWorkout}
-              className="bg-hp-accent text-black rounded-full px-5 py-2 text-sm font-medium"
+              className="bg-[#29e33c] text-black rounded-full px-5 py-2 text-sm font-semibold hp-glow-soft"
             >
               Finish
             </motion.button>
@@ -446,15 +437,15 @@ export default function ActiveWorkout() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: exerciseIndex * 0.05 }}
-                  className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
+                  className="hp-card p-4"
                 >
                   <button
                     onClick={() => toggleExerciseCollapse(exerciseIndex)}
-                    className="w-full flex items-center justify-between"
+                    className="w-full flex items-center justify-between hover:opacity-80 transition-opacity active:scale-[0.99]"
                   >
                     <div className="text-left">
-                      <h3 className="text-base font-semibold text-white">{exercise.name}</h3>
-                      <p className="text-xs text-white/60">
+                      <h3 className="hp-title text-base font-semibold">{exercise.name}</h3>
+                      <p className="hp-muted text-xs">
                         {completedCount}/{totalSetCount} sets complete
                       </p>
                     </div>
@@ -462,7 +453,7 @@ export default function ActiveWorkout() {
                       animate={{ rotate: exercise.isCollapsed ? 0 : 180 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <ChevronDown className={`w-5 h-5 ${hasActiveSet ? 'text-[#29e33c]' : 'text-white/60'}`} />
+                      <ChevronDown className={`w-5 h-5 ${hasActiveSet ? 'text-[#29e33c]' : 'hp-muted'}`} />
                     </motion.div>
                   </button>
 
@@ -487,11 +478,11 @@ export default function ActiveWorkout() {
                                 animate={isInProgress ? { scale: 1 } : {}}
                                 className="grid grid-cols-[auto_1fr_1fr_56px] items-center gap-3"
                               >
-                                <span className="min-w-[40px] px-3 py-1 rounded-full text-xs font-semibold bg-black/20 text-white/70 border border-white/10 text-center">
+                                <span className="min-w-[40px] px-3 py-1.5 rounded-full text-xs font-semibold hp-pill hp-muted text-center">
                                   {setIndex + 1}
                                 </span>
 
-                                <div className="px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                <div className="hp-pill h-[44px] px-3 flex items-center">
                                   <input
                                     type="number"
                                     inputMode="decimal"
@@ -504,11 +495,11 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.weight?.toString() || '0'}
-                                    className="w-full bg-transparent text-center text-sm font-semibold text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40"
+                                    className="w-full bg-transparent text-center text-sm font-semibold hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
                                   />
                                 </div>
 
-                                <div className="px-3 py-2 rounded-full bg-black/20 border border-white/10">
+                                <div className="hp-pill h-[44px] px-3 flex items-center">
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -520,13 +511,13 @@ export default function ActiveWorkout() {
                                     }}
                                     disabled={!isInProgress}
                                     placeholder={templateExercise.reps.toString()}
-                                    className="w-full bg-transparent text-center text-sm font-semibold text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40"
+                                    className="w-full bg-transparent text-center text-sm font-semibold hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)]"
                                   />
                                 </div>
 
                                 <div className="w-[56px] flex items-center justify-center">
                                   {isCompleted ? (
-                                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#29e33c]">
+                                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#29e33c] hp-glow-soft">
                                       <Check className="w-5 h-5 text-black" strokeWidth={3} />
                                     </div>
                                   ) : isInProgress ? (
@@ -534,12 +525,12 @@ export default function ActiveWorkout() {
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
                                       onClick={() => handleCompleteSet(exerciseIndex, setIndex)}
-                                      className="w-11 h-11 flex items-center justify-center rounded-full border border-[#29e33c] bg-black/20"
+                                      className="w-11 h-11 flex items-center justify-center rounded-full border-2 border-[#29e33c] hp-pill"
                                     >
                                       <Check className="w-5 h-5 text-[#29e33c]" />
                                     </motion.button>
                                   ) : (
-                                    <div className="w-11 h-11 rounded-full border border-white/10 bg-black/20" />
+                                    <div className="w-11 h-11 rounded-full hp-pill" />
                                   )}
                                 </div>
                               </motion.div>
@@ -559,14 +550,14 @@ export default function ActiveWorkout() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
+            className="hp-card p-5"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-white">Rest Timer</span>
-              <span className="text-xs text-white/60">{formatTime(defaultRestTime)}</span>
+              <span className="hp-title text-sm font-semibold">Rest Timer</span>
+              <span className="hp-muted text-xs">{formatTime(defaultRestTime)}</span>
             </div>
 
-            <div className="text-center text-4xl font-semibold tracking-wide text-white mb-4">
+            <div className="text-center text-4xl font-semibold tracking-wide hp-title mb-6">
               {formatTime(restTimerRemaining)}
             </div>
 
@@ -575,7 +566,7 @@ export default function ActiveWorkout() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={restTimerActive ? pauseRestTimer : startRestTimer}
-                className="flex-1 py-3 bg-hp-accent text-black rounded-full text-sm font-medium"
+                className="flex-1 h-14 bg-[#29e33c] text-black rounded-full text-sm font-semibold hp-glow-soft"
               >
                 {restTimerActive ? 'Pause' : 'Start'}
               </motion.button>
@@ -583,7 +574,7 @@ export default function ActiveWorkout() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={resetRestTimer}
-                className="w-11 h-11 flex items-center justify-center rounded-full bg-black/20 border border-white/10 text-white/70 hover:text-white transition-colors"
+                className="w-11 h-11 flex items-center justify-center rounded-full hp-pill hp-muted hover:text-white transition-colors"
               >
                 <RotateCcw className="w-5 h-5" />
               </motion.button>
@@ -595,21 +586,22 @@ export default function ActiveWorkout() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="rounded-[24px] bg-hp-surface border border-white/5 p-4"
+            className="hp-card p-4"
           >
-            <label className="block text-sm font-semibold text-white mb-2">
+            <label className="block hp-title text-sm font-semibold mb-2">
               Workout Notes
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="How did you feel today?"
-              className="w-full bg-black/20 border border-white/10 rounded-[16px] p-3 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/40 resize-none"
+              className="w-full hp-pill p-3 text-sm hp-title placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:shadow-[0_0_0_2px_rgba(41,227,60,0.2)] resize-none min-h-[80px]"
               rows={3}
             />
           </motion.div>
         </div>
       </div>
+      <BottomNav />
     </div>
   )
 }

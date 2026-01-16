@@ -24,63 +24,56 @@ export default function Dashboard() {
     : 0
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen">
       <TopBar />
       
-      <main className="max-w-lg mx-auto px-4 pb-8 space-y-6">
-        {/* Welcome Section */}
+      <main className="mx-auto w-full max-w-[420px] px-4 pb-24 pt-4 space-y-4">
+        {/* Welcome Header Card */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="pt-4"
+          className="hp-card p-6"
         >
-          <p className="text-[#9a9fa4] text-sm font-medium">Welcome back</p>
-          <h1 className="text-white text-2xl font-semibold mt-1">
-            Ready to <span className="text-[#29e33c]">Train</span>?
+          <p className="text-hp-muted text-sm uppercase tracking-wide mb-2">Welcome back</p>
+          <h1 className="text-hp-primary text-2xl font-semibold">
+            Ready to <span className="text-hp-accent">Train</span>?
           </h1>
-          <p className="text-[#9a9fa4] text-sm mt-2">
+          <p className="text-hp-muted text-sm mt-2">
             Select a workout and crush your goals
           </p>
         </motion.div>
 
-        {/* Quick Stats Row */}
+        {/* This Week Summary Card */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="bg-[#141416] rounded-[21px] p-4 border border-white/5"
+          className="hp-card p-5"
         >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-12 h-12 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
-                style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.15)' }}
-              >
-                <Dumbbell className="w-6 h-6 text-[#29e33c]" />
-              </div>
-              <div>
-                <p className="text-[#9a9fa4] text-xs">This Week</p>
-                <p className="text-white font-semibold text-lg">3 Workouts</p>
-              </div>
+          <p className="text-hp-muted text-xs uppercase tracking-wide mb-4">This Week</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-hp-muted text-xs mb-1">Workouts</p>
+              <p className="text-hp-primary text-xl font-semibold">3</p>
             </div>
-            <div className="text-right">
-              <p className="text-[#9a9fa4] text-xs">Volume</p>
-              <p className="text-[#29e33c] font-semibold text-lg">12,450 kg</p>
+            <div>
+              <p className="text-hp-muted text-xs mb-1">Volume</p>
+              <p className="text-hp-accent text-xl font-semibold">12,450 kg</p>
             </div>
           </div>
         </motion.div>
 
-        {/* Template Selection */}
+        {/* Workout Template Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="space-y-4"
+          className="hp-card p-5 space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-white font-semibold text-lg">Workout Template</h2>
-            <span className="text-[#9a9fa4] text-sm">{templates.length} available</span>
+            <h2 className="text-hp-primary font-semibold text-lg">Workout Template</h2>
+            <span className="text-hp-muted text-sm">{templates.length} available</span>
           </div>
 
           {/* Template Dropdown */}
@@ -88,114 +81,108 @@ export default function Dashboard() {
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-4 bg-[#141416] border border-[#29e33c]/30 rounded-[16px] text-white font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c] transition-all cursor-pointer"
-              style={{ boxShadow: '0 0 15px rgba(41, 227, 60, 0.1)' }}
+              className="w-full px-4 py-4 bg-[#15181d] border border-white/6 rounded-2xl text-hp-primary font-medium text-base appearance-none focus:outline-none focus:border-[#29e33c]/30 transition-all cursor-pointer hp-glow-soft"
             >
               {templates.map(template => (
-                <option key={template.id} value={template.id} className="bg-[#141416]">
+                <option key={template.id} value={template.id} className="bg-[#15181d]">
                   {template.name}
                 </option>
               ))}
             </select>
-            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
+            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-hp-accent rotate-90 pointer-events-none" />
           </div>
-        </motion.div>
-
-        {/* Selected Template Preview */}
-        {selectedTemplate && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
-          >
-            {/* Template Header */}
-            <div className="p-4 border-b border-white/5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-white font-semibold text-xl">
-                  {selectedTemplate.name}
-                </h3>
-                <span 
-                  className="px-3 py-1 bg-[#29e33c]/20 text-[#29e33c] rounded-full text-sm font-medium"
-                  style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.2)' }}
-                >
-                  {selectedTemplate.exercises.length} exercises
-                </span>
-              </div>
-              
-              {/* Meta Info */}
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+          
+          {selectedTemplate && (
+            <div className="pt-3 border-t border-white/6">
+              <div className="flex gap-4 text-hp-muted text-sm">
+                <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>~{estimatedTime} min</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#9a9fa4] text-sm">
+                <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4" />
                   <span>{selectedTemplate.exercises.reduce((acc, ex) => acc + ex.sets, 0)} sets</span>
                 </div>
               </div>
             </div>
+          )}
+        </motion.div>
 
-            {/* Exercise List */}
-            <div className="p-4 space-y-2 max-h-[280px] overflow-y-auto">
+        {/* Exercise Preview List Card */}
+        {selectedTemplate && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="hp-card p-5 space-y-3"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-hp-primary font-semibold text-lg">
+                {selectedTemplate.name}
+              </h3>
+              <span className="text-hp-muted text-xs uppercase tracking-wide">
+                {selectedTemplate.exercises.length} exercises
+              </span>
+            </div>
+            
+            <div className="space-y-2 max-h-[280px] overflow-y-auto">
               {selectedTemplate.exercises.map((ex, idx) => (
                 <motion.div 
                   key={idx}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="flex items-center gap-3 p-3 bg-[#1c1c1f] rounded-[12px] hover:bg-[#242426] transition-colors border border-white/5"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors"
                 >
-                  <div 
-                    className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0"
-                    style={{ boxShadow: '0 0 10px rgba(41, 227, 60, 0.3)' }}
-                  >
+                  <div className="w-8 h-8 rounded-full bg-[#29e33c] flex items-center justify-center text-black font-bold text-sm flex-shrink-0 hp-glow-soft">
                     {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{ex.name}</p>
-                    <p className="text-[#9a9fa4] text-sm">
+                    <p className="text-hp-primary font-medium truncate">{ex.name}</p>
+                    <p className="text-hp-muted text-sm">
                       {ex.sets} sets × {ex.reps} reps
-                      {ex.weight && <span className="text-[#29e33c]"> • {ex.weight}kg</span>}
+                      {ex.weight && <span className="text-hp-accent"> • {ex.weight}kg</span>}
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-[#9a9fa4] flex-shrink-0" />
+                  <ChevronRight className="w-5 h-5 text-hp-muted flex-shrink-0" />
                 </motion.div>
               ))}
-            </div>
-
-            {/* Start Button */}
-            <div className="p-4 pt-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onStartWorkout}
-                className="w-full py-4 bg-[#29e33c] hover:bg-[#24c934] text-black font-bold text-lg rounded-[12px] flex items-center justify-center gap-3 transition-all"
-                style={{ boxShadow: '0 0 30px rgba(41, 227, 60, 0.4)' }}
-              >
-                <Play className="w-6 h-6" fill="black" />
-                Start Workout
-              </motion.button>
             </div>
           </motion.div>
         )}
 
-        {/* Bottom Tip */}
+        {/* Primary CTA - Start Workout Button */}
+        {selectedTemplate && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onStartWorkout}
+              className="w-full h-[56px] bg-[#29e33c] hover:bg-[#24c934] text-black font-semibold text-lg rounded-full flex items-center justify-center gap-3 transition-all hp-glow"
+            >
+              <Play className="w-6 h-6" fill="black" />
+              Start Workout
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Bottom Tip Card */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex items-start gap-3 p-4 bg-[#141416] rounded-[16px] border border-[#29e33c]/20"
-          style={{ boxShadow: '0 0 20px rgba(41, 227, 60, 0.05)' }}
+          className="hp-card p-4 flex items-start gap-3"
         >
-          <div 
-            className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0"
-          >
-            <Target className="w-5 h-5 text-[#29e33c]" />
+          <div className="w-10 h-10 rounded-full bg-[#29e33c]/20 flex items-center justify-center flex-shrink-0 hp-glow-soft">
+            <Target className="w-5 h-5 text-hp-accent" />
           </div>
           <div>
-            <p className="text-white font-medium text-sm">Track Your RPE</p>
-            <p className="text-[#9a9fa4] text-xs mt-1">
+            <p className="text-hp-primary font-medium text-sm mb-1">Track Your RPE</p>
+            <p className="text-hp-muted text-xs">
               Rate of Perceived Exertion helps monitor your training intensity and prevent overtraining.
             </p>
           </div>

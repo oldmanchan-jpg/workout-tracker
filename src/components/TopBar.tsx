@@ -39,18 +39,17 @@ export default function TopBar() {
   }
 
   return (
-    <div className="sticky top-0 z-20 bg-black/90 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="sticky top-0 z-20 bg-black/20 backdrop-blur-md">
+      <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div
-            className="w-9 h-9 rounded-full bg-[#29e33c]/20 flex items-center justify-center"
-            style={{ boxShadow: '0 0 18px rgba(41,227,60,0.18)' }}
+            className="w-9 h-9 rounded-full bg-[#29e33c]/20 flex items-center justify-center hp-glow-soft"
           >
-            <Dumbbell className="w-5 h-5 text-[#29e33c]" />
+            <Dumbbell className="w-5 h-5 text-hp-accent" />
           </div>
           <div>
-            <p className="text-white font-semibold leading-tight">Workout Tracker</p>
-            <p className="text-[#9a9fa4] text-[11px] leading-tight">HealthPulse style</p>
+            <p className="text-hp-primary font-semibold leading-tight">Workout Tracker</p>
+            <p className="text-hp-muted text-[11px] leading-tight">HealthPulse style</p>
           </div>
         </div>
 
@@ -59,15 +58,15 @@ export default function TopBar() {
           whileTap={{ scale: 0.97 }}
           onClick={onSignOut}
           disabled={signingOut}
-          className="h-9 px-3 rounded-full bg-[#141416] border border-white/5 text-[#9a9fa4] hover:text-white transition-colors flex items-center gap-2 disabled:opacity-60"
+          className="h-9 px-3 rounded-full bg-white/5 border border-white/6 text-hp-muted hover:text-hp-primary transition-colors flex items-center gap-2 disabled:opacity-60"
         >
           <LogOut className="w-4 h-4" />
           <span className="text-xs font-medium">Logout</span>
         </motion.button>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 pb-3">
-        <div className="w-full h-[58px] rounded-[999px] bg-[#141416] border border-white/5 px-6 flex items-center justify-between">
+      <div className="max-w-[420px] mx-auto px-4 pb-3">
+        <div className="w-full h-[58px] rounded-full bg-white/5 border border-white/6 px-6 flex items-center justify-between">
           {visibleTabs.map(t => {
             const Icon = t.icon
             const active = isActive(t.path)
@@ -78,13 +77,13 @@ export default function TopBar() {
                 onClick={() => navigate(t.path)}
                 className={
                   active
-                    ? 'flex flex-col items-center gap-1 text-[#29e33c]'
-                    : 'flex flex-col items-center gap-1 text-white/30 hover:text-white/60 transition-colors'
+                    ? 'flex flex-col items-center gap-1 text-hp-accent'
+                    : 'flex flex-col items-center gap-1 text-hp-muted hover:text-hp-primary transition-colors'
                 }
                 aria-label={t.label}
               >
                 <Icon className="w-5 h-5" />
-                {active ? <span className="h-1 w-6 rounded-full bg-[#29e33c]" /> : <span className="h-1 w-6" />}
+                {active ? <span className="h-1 w-6 rounded-full bg-hp-accent hp-glow-soft" /> : <span className="h-1 w-6" />}
               </button>
             )
           })}

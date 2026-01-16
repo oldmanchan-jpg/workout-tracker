@@ -13,7 +13,7 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
+  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%);
 }
 
 body {
@@ -21,8 +21,9 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   line-height: 1.6;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
+  color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
+              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
@@ -31,38 +32,20 @@ body {
   padding: 0;
 }
 
-/* Override any conflicting background classes */
-body.bg-gray-50 {
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
-}
-
-/* Force background on all body variations */
-body[class*="bg-"] {
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
-}
-
-#root {
-  min-height: 100vh;
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
-}
-
-/* Force background on root and all its children */
-#root * {
-  background-color: inherit;
-}
-
-/* Ensure main app container has background */
-.app-container {
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
-  min-height: 100vh;
-}
-
-/* Force background on all app containers */
+/* HealthPulse Background Override */
+body.bg-gray-50,
+body[class*="bg-"],
+#root,
 .app-container,
 [class*="app-container"],
 [class*="dashboard"],
 [class*="main"] {
-  background-color: var(--color-bg-primary, #2D2F2C) !important;
+  background: linear-gradient(180deg, #0b0d10 0%, #0f1115 100%),
+              radial-gradient(ellipse at top, rgba(41, 227, 60, 0.14) 0%, transparent 70%) !important;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 /* ========================================
@@ -866,4 +849,59 @@ body[class*="bg-"] {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ========================================
+   HEALTHPULSE UTILITY CLASSES
+   ======================================== */
+
+/* HealthPulse Card */
+.hp-card {
+  background: #15181d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.hp-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* HealthPulse Pill */
+.hp-pill {
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+}
+
+.hp-pill:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* HealthPulse Glow */
+.hp-glow {
+  box-shadow: 0 0 20px rgba(41, 227, 60, 0.35),
+              0 0 40px rgba(41, 227, 60, 0.14);
+}
+
+.hp-glow-soft {
+  box-shadow: 0 0 15px rgba(41, 227, 60, 0.2),
+              0 0 30px rgba(41, 227, 60, 0.1);
+}
+
+/* HealthPulse Text Colors */
+.text-hp-primary {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.text-hp-muted {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.text-hp-accent {
+  color: #29e33c;
 }

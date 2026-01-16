@@ -1,56 +1,69 @@
-import { Component, ErrorInfo, ReactNode, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Suspense, Component, ReactNode } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useProfile } from './hooks/useProfile'
+
+// Pages
+import Dashboard from './pages/Dashboard'
+import ActiveWorkout from './pages/ActiveWorkout'
+import Progress from './pages/Progress'
+import Admin from './pages/Admin'
 import Login from './components/Auth/Login'
 import SignUp from './components/Auth/SignUp'
 import PendingApproval from './components/PendingApproval'
 import SwipeablePages from './components/SwipeablePages'
-import Dashboard from '@/pages/Dashboard'
-import ActiveWorkout from './pages/ActiveWorkout'
-import Progress from '@/pages/Progress'
-import Admin from './pages/Admin'
-import Settings from './pages/Settings'
 
-class ErrorBoundary extends Component<
-  { children: ReactNode },
-  { error: Error | null; errorInfo: ErrorInfo | null }
-> {
+// ============ ERROR BOUNDARY ============
+interface ErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
   constructor(props: { children: ReactNode }) {
     super(props)
-    this.state = { error: null, errorInfo: null }
+    this.state = { hasError: false, error: null }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    this.setState({ error, errorInfo })
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
   }
 
   render() {
-    if (this.state.error) {
-      const error = this.state.error
+    if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#010101] text-white/70 p-8 overflow-auto">
-          <h1 className="text-2xl font-bold mb-4 text-white">App crashed</h1>
-          
-          <div className="space-y-4">
-            {error.message && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2 text-white">error.message:</h2>
-                <pre className="text-xs text-white/80 overflow-auto max-w-full bg-black/30 p-4 rounded border border-white/10">
-                  {error.message}
-                </pre>
-              </div>
-            )}
-
-            {error.stack && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2 text-white">error.stack:</h2>
-                <pre className="text-xs text-white/80 overflow-auto max-w-full max-h-96 bg-black/30 p-4 rounded border border-white/10">
-                  {error.stack}
-                </pre>
-              </div>
-            )}
-          </div>
+        <div style={{ 
+          minHeight: '100vh', 
+          backgroundColor: '#111', 
+          color: '#fff', 
+          padding: '2rem',
+          fontFamily: 'system-ui, sans-serif'
+        }}>
+          <h1 style={{ color: '#f44', marginBottom: '1rem' }}>App crashed</h1>
+          <p style={{ marginBottom: '1rem' }}>
+            <strong>String(error):</strong>
+          </p>
+          <pre style={{ 
+            background: '#222', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            overflow: 'auto',
+            marginBottom: '1rem'
+          }}>
+            {String(this.state.error)}
+          </pre>
+          <p style={{ marginBottom: '1rem' }}>
+            <strong>error.stack:</strong>
+          </p>
+          <pre style={{ 
+            background: '#222', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '12px'
+          }}>
+            {this.state.error?.stack}
+          </pre>
         </div>
       )
     }
@@ -58,70 +71,134 @@ class ErrorBoundary extends Component<
   }
 }
 
-function AuthedApp() {
-  const { profile, loading: profileLoading, isAdmin } = useProfile()
+// ============ LOADING SCREEN ============
+function LoadingScreen({ message = 'Loading...' }: { message?: string }) {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#111',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ 
+          width: '40px', 
+          height: '40px', 
+          border: '3px solid #333',
+          borderTopColor: '#29e33c',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 1rem'
+        }} />
+        <p>{message}</p>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
 
-  // Check if profile is inactive (and user is not admin)
-  if (!profileLoading && profile && !profile.is_active && !isAdmin) {
+// ============ MOUNT INDICATOR ============
+function MountIndicator() {
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: '8px',
+      left: '8px',
+      background: '#29e33c',
+      color: '#000',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '10px',
+      fontWeight: 'bold',
+      zIndex: 9999,
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      ✓ Mounted
+    </div>
+  )
+}
+
+// ============ PROTECTED ROUTE ============
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { user, loading: authLoading } = useAuth()
+  const { profile, isAdmin, loading: profileLoading } = useProfile()
+
+  // NEVER return null - always show something
+  if (authLoading) {
+    return <LoadingScreen message="Checking auth..." />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (profileLoading) {
+    return <LoadingScreen message="Loading profile..." />
+  }
+
+  // Check if client is inactive (not admin)
+  if (profile && !isAdmin && !profile.is_active) {
     return <PendingApproval />
   }
 
-  // If logged in, show the main app
-  return (
-    <Router>
-      <SwipeablePages>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/workout" element={<ActiveWorkout />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Dashboard />} />
-        </Routes>
-      </SwipeablePages>
-    </Router>
-  )
+  return <>{children}</>
 }
 
-function AuthWrapper() {
+// ============ APP ROUTES ============
+function AppRoutes() {
   const { user, loading } = useAuth()
-  const [showSignUp, setShowSignUp] = useState(false)
 
-  // Show loading screen while checking auth
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#010101] text-white/70">
-        Loading…
-      </div>
-    )
+    return <LoadingScreen message="Initializing..." />
   }
 
-  // If not logged in, show auth screens
-  if (!user) {
-    return showSignUp ? (
-      <SignUp onSwitchToLogin={() => setShowSignUp(false)} />
-    ) : (
-      <Login onSwitchToSignUp={() => setShowSignUp(true)} />
-    )
-  }
-
-  // If logged in, render AuthedApp which handles profile logic
-  return <AuthedApp />
-}
-
-function App() {
   return (
-    <>
-      <ErrorBoundary>
-        <AuthProvider>
-          <AuthWrapper />
-        </AuthProvider>
-      </ErrorBoundary>
-      <div className="fixed bottom-2 left-2 text-xs text-white/30 pointer-events-none z-50">
-        Mounted OK
-      </div>
-    </>
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/signup" element={user ? <Navigate to="/" replace /> : <SignUp />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <SwipeablePages />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workout"
+        element={
+          <ProtectedRoute>
+            <ActiveWorkout />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        }
+      />
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
-export default App
+// ============ MAIN APP ============
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+          <MountIndicator />
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  )
+}

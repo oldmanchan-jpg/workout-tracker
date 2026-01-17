@@ -134,7 +134,7 @@ export default function Dashboard() {
               </span>
             </div>
             
-            <div className="space-y-2 max-h-[280px] overflow-y-auto">
+            <div className="space-y-2">
               {selectedTemplate.exercises.map((ex, idx) => (
                 <motion.div 
                   key={idx}
@@ -176,17 +176,20 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="section-gap"
+            className="sticky z-20 -mx-4 px-4 pt-3 pb-3"
+            style={{
+              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 104px)',
+              background: 'linear-gradient(to top, rgba(11,13,16,0.98), rgba(11,13,16,0.85), rgba(11,13,16,0))',
+              backdropFilter: 'blur(10px)',
+            }}
           >
-            <div className="sticky z-10" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
-              <Button
-                onClick={onStartWorkout}
-                className="w-full h-14 text-lg rounded-full flex items-center justify-center gap-3"
-              >
-                <Play className="w-6 h-6" fill="currentColor" />
-                Start Workout
-              </Button>
-            </div>
+            <Button
+              onClick={onStartWorkout}
+              className="w-full h-14 text-lg rounded-full flex items-center justify-center gap-3"
+            >
+              <Play className="w-6 h-6" fill="currentColor" />
+              Start Workout
+            </Button>
           </motion.div>
         )}
 
@@ -209,6 +212,9 @@ export default function Dashboard() {
             </div>
           </Card>
         </motion.div>
+
+        {/* End Spacer */}
+        <div aria-hidden="true" className="h-10" />
       </main>
     </div>
   )

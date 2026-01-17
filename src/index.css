@@ -13,8 +13,7 @@
 
 /* Page Container - Bottom padding for navigation with safe-area support */
 .page-container {
-  padding-bottom: calc(240px + env(safe-area-inset-bottom, 0px));
-
+  padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   min-height: 100vh;
 }
 

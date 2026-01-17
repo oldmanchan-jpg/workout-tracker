@@ -23,7 +23,7 @@ export default function BottomNav() {
       aria-label="Bottom navigation"
     >
       {/* Glass pill wrapper */}
-      <div className="rounded-[28px] bg-[rgba(15,17,21,0.85)] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.03)_inset] px-3 py-3">
+      <div className="rounded-[28px] bg-[rgba(15,17,21,0.92)] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.03)_inset] px-3 py-3">
         {/* Hard guarantee: always horizontal even if Admin appears/disappears */}
         <div className="grid grid-flow-col auto-cols-fr items-center">
           {tabs.map((tab) => {

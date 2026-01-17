@@ -11,6 +11,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Page Container - Bottom padding for navigation with safe-area support */
+.page-container {
+  padding-bottom: calc(240px + env(safe-area-inset-bottom, 0px));
+
+  min-height: 100vh;
+}
+
 @layer base {
   /* Global link styling - prevent underlines and purple visited states */
   a {
@@ -105,12 +112,6 @@ body {
 /* ========================================
    UTILITY CLASSES
    ======================================== */
-
-/* Page Container - Bottom padding for navigation */
-.page-container {
-  padding-bottom: 180px;
-  min-height: 100vh;
-}
 
 /* Background Colors - Using canonical tokens from theme.css */
 .bg-primary { background-color: var(--accent); }

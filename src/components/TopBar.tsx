@@ -20,7 +20,7 @@ export default function TopBar() {
 
   return (
     <div 
-      className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl"
+      className="sticky top-0 z-50 bg-[#0b0d10]/95 backdrop-blur-xl"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">

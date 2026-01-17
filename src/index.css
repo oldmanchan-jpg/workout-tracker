@@ -19,7 +19,7 @@
 }
 
 .page-container {
-  padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
   min-height: 100vh;
 }
 

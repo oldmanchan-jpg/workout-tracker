@@ -11,7 +11,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Page Container - Bottom padding for navigation with safe-area support */
+/* Page spacing must be handled via .page-container, not body padding.
+   TopBar is sticky (in document flow), BottomNav is fixed (overlay).
+   Body padding causes double-accounting with page-container padding. */
 :root {
   --nav-clearance: 220px;
 }
@@ -50,8 +52,7 @@ body {
   margin: 0;
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #0b0d10;
-  padding-top: 76px;
-  padding-bottom: 120px;
+  padding: 0;
 }
 
 #root {

@@ -12,8 +12,12 @@
 @tailwind utilities;
 
 /* Page Container - Bottom padding for navigation with safe-area support */
+:root {
+  --nav-clearance: 220px;
+}
+
 .page-container {
-  padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
   min-height: 100vh;
 }
 

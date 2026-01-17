@@ -178,13 +178,15 @@ export default function Dashboard() {
             transition={{ delay: 0.4 }}
             className="section-gap"
           >
-            <Button
-              onClick={onStartWorkout}
-              className="w-full h-14 text-lg rounded-full flex items-center justify-center gap-3"
-            >
-              <Play className="w-6 h-6" fill="currentColor" />
-              Start Workout
-            </Button>
+            <div className="sticky z-10" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
+              <Button
+                onClick={onStartWorkout}
+                className="w-full h-14 text-lg rounded-full flex items-center justify-center gap-3"
+              >
+                <Play className="w-6 h-6" fill="currentColor" />
+                Start Workout
+              </Button>
+            </div>
           </motion.div>
         )}
 

@@ -25,7 +25,7 @@ export default function BottomNav() {
         className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-[240px] bg-gradient-to-t from-[#0b0d10] via-[#0b0d10]/95 to-transparent"
       />
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 h-20 w-full max-w-[420px] mx-auto px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+        className="fixed bottom-0 left-0 right-0 z-50 min-h-[88px] pt-3 w-full max-w-[420px] mx-auto px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
         aria-label="Bottom navigation"
       >
         {/* Glass pill wrapper */}

@@ -22,14 +22,14 @@ export default function BottomNav() {
       {/* Bottom scrim - fades page content into bottom area */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-[180px] bg-gradient-to-t from-[#0b0d10] via-[#0b0d10]/85 to-transparent"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-[240px] bg-gradient-to-t from-[#0b0d10] via-[#0b0d10]/95 to-transparent"
       />
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 h-20 w-full max-w-[420px] mx-auto px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]"
         aria-label="Bottom navigation"
       >
         {/* Glass pill wrapper */}
-        <div className="rounded-[28px] bg-[rgba(11,13,16,0.95)] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.03)_inset] px-3 py-3">
+        <div className="rounded-[28px] bg-[rgba(11,13,16,0.985)] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.03)_inset] px-3 py-3">
         {/* Hard guarantee: always horizontal even if Admin appears/disappears */}
         <div className="grid grid-flow-col auto-cols-fr items-center">
           {tabs.map((tab) => {

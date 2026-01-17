@@ -13,7 +13,17 @@
 
 /* Page Container - Bottom padding for navigation with safe-area support */
 :root {
-  --nav-clearance: 220px;
+  --topbar-h: 84px;
+  --nav-clearance: 132px;
+}
+
+.app-scroll {
+  padding-top: var(--topbar-h);
+  padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
+  scroll-padding-top: var(--topbar-h);
+  scroll-padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .page-container {

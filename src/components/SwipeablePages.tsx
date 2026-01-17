@@ -45,8 +45,14 @@ export default function SwipeablePages(props: any) {
   }
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      {props?.children ? props.children : <Outlet />}
+    <div 
+      onTouchStart={onTouchStart} 
+      onTouchEnd={onTouchEnd}
+      className="h-screen overflow-hidden"
+    >
+      <div className="app-scroll overflow-y-auto h-full">
+        {props?.children ? props.children : <Outlet />}
+      </div>
       <BottomNav />
     </div>
   )

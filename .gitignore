@@ -9,3 +9,9 @@ F e m a l e _ C l i e n t _ H y b r i d _ B l o c k 1 _ F I N A L . j s o n
 Female_Client_Hybrid_Block1_FINAL.xlsx
 
  
+# Local exports / scratch
+Female_Client_Hybrid_Block1_FINAL.json
+
+# Local Supabase folder (do not commit)
+supabase/
+

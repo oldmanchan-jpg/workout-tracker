@@ -4,7 +4,7 @@ import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown, ChevronRight } f
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import type { Template, WorkoutType } from '../types'
-import { saveWorkout, getAllTemplates, WORKOUT_TEMPLATES_UPDATED } from '../services/workoutService'
+import { saveWorkout, fetchTemplatesForCurrentUserFromSupabase } from '../services/workoutService'
 import BottomNav from '../components/BottomNav'
 
 interface SetLog {
@@ -37,11 +37,15 @@ interface ExerciseLog {
 // Template Picker Component - handles template selection UI
 function TemplatePicker({ 
   templates, 
+  templatesLoading,
+  templatesError,
   selectedTemplateId, 
   onTemplateChange, 
   onStartWorkout 
 }: { 
   templates: Template[]
+  templatesLoading: boolean
+  templatesError?: string | null
   selectedTemplateId: string
   onTemplateChange: (id: string) => void
   onStartWorkout: (template: Template) => void
@@ -76,21 +80,35 @@ function TemplatePicker({
           </div>
 
           {/* Template Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedTemplateId}
-              onChange={(e) => onTemplateChange(e.target.value)}
-              className="ui-input w-full px-4 py-4 appearance-none font-medium text-base cursor-pointer bg-black/20 border-white/10 text-white"
-              style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
-            >
-              {templates.map(t => (
-                <option key={t.id} value={t.id} className="bg-[#141416]">
-                  {t.name}
-                </option>
-              ))}
-            </select>
-            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
-          </div>
+          {templatesLoading ? (
+            <div className="ui-input w-full px-4 py-4 font-medium text-base bg-black/20 border-white/10 text-white/80">
+              Loading templates...
+            </div>
+          ) : templates.length === 0 ? (
+            <div className="ui-input w-full px-4 py-4 bg-black/20 border-white/10 text-center">
+              <div className="hp-title font-semibold">No templates assigned yet</div>
+              <div className="hp-muted text-sm mt-1">Contact your coach to get started</div>
+              {templatesError ? (
+                <div className="hp-muted text-xs mt-2 opacity-70">{templatesError}</div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="relative">
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => onTemplateChange(e.target.value)}
+                className="ui-input w-full px-4 py-4 appearance-none font-medium text-base cursor-pointer bg-black/20 border-white/10 text-white"
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                {templates.map(t => (
+                  <option key={t.id} value={t.id} className="bg-[#141416]">
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
+            </div>
+          )}
 
           {/* Start Workout Button */}
           {selectedTemplate && (
@@ -1205,35 +1223,47 @@ export default function ActiveWorkout() {
   const location = useLocation()
   const templateFromState = location.state?.template as Template | undefined
 
-  // Get all templates (fallback + imported) - use state instead of direct call
-  const [templates, setTemplates] = useState(() => getAllTemplates())
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [activeTemplate, setActiveTemplate] = useState<Template | undefined>(templateFromState)
+  const [templatesLoading, setTemplatesLoading] = useState<boolean>(true)
+  const [templatesError, setTemplatesError] = useState<string | null>(null)
 
-  // Listen for template updates
+  // Load templates on mount (RLS-filtered)
   useEffect(() => {
-    const handleUpdate = () => {
-      const updatedTemplates = getAllTemplates()
-      setTemplates(updatedTemplates)
-      // Update selectedTemplateId if current selection is no longer valid
-      setSelectedTemplateId(prev => {
-        if (updatedTemplates.length > 0 && !updatedTemplates.find(t => t.id === prev)) {
-          return updatedTemplates[0].id
-        }
-        return prev
-      })
-    }
-    const handleStorage = (e: StorageEvent) => {
-      // Cross-tab sync when Admin imports in another tab
-      if (e.key === 'workout_templates_v1') {
-        handleUpdate()
+    let cancelled = false
+
+    const loadTemplates = async () => {
+      setTemplatesLoading(true)
+      setTemplatesError(null)
+      try {
+        const list = await fetchTemplatesForCurrentUserFromSupabase()
+        if (cancelled) return
+
+        setTemplates(list)
+
+        // Preserve existing selection behavior (keep if valid, otherwise fall back)
+        setSelectedTemplateId(prev => {
+          if (list.length === 0) return ''
+          if (!prev || !list.find(t => t.id === prev)) {
+            return list[0].id
+          }
+          return prev
+        })
+      } catch (err) {
+        console.error('Failed to load templates from Supabase:', err)
+        if (cancelled) return
+        setTemplates([])
+        setSelectedTemplateId('')
+        setTemplatesError('Failed to load templates')
+      } finally {
+        if (!cancelled) setTemplatesLoading(false)
       }
     }
-    window.addEventListener(WORKOUT_TEMPLATES_UPDATED, handleUpdate)
-    window.addEventListener('storage', handleStorage)
+
+    loadTemplates()
     return () => {
-      window.removeEventListener(WORKOUT_TEMPLATES_UPDATED, handleUpdate)
-      window.removeEventListener('storage', handleStorage)
+      cancelled = true
     }
   }, [])
 
@@ -1242,6 +1272,8 @@ export default function ActiveWorkout() {
     return (
       <TemplatePicker
         templates={templates}
+        templatesLoading={templatesLoading}
+        templatesError={templatesError}
         selectedTemplateId={selectedTemplateId}
         onTemplateChange={setSelectedTemplateId}
         onStartWorkout={setActiveTemplate}

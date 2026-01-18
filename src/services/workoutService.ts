@@ -471,3 +471,170 @@ export function importTemplatesFromJSON(jsonText: string): { success: boolean; t
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
+
+/**
+ * Upsert templates into Supabase `public.templates`.
+ * Keeps existing localStorage functions intact (used as fallback/backup).
+ */
+export async function upsertTemplatesToSupabase(
+  templates: Template[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError) {
+      return { success: false, error: userError.message }
+    }
+
+    if (!user) {
+      return { success: false, error: 'User not authenticated' }
+    }
+
+    const rows = templates.map((t) => ({
+      id: t.id,
+      name: t.name,
+      type: t.type ?? 'strength',
+      data: t,
+      created_by: user.id
+    }))
+
+    const { error } = await supabase
+      .from('templates')
+      .upsert(rows, { onConflict: 'id' })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+  }
+}
+
+/**
+ * Fetch templates visible to the current user (RLS-enforced).
+ * Admins see all templates; clients see only assigned templates.
+ */
+export async function fetchTemplatesForCurrentUserFromSupabase(): Promise<Template[]> {
+  try {
+    const { data, error } = await supabase
+      .from('templates')
+      .select('id, data')
+
+    if (error) {
+      console.error('Error fetching templates from Supabase:', error)
+      return []
+    }
+
+    const rows = (data || []) as Array<{ id: string; data: unknown }>
+
+    return rows
+      .map((row) => {
+        const fromData = (row.data && typeof row.data === 'object')
+          ? (row.data as Template)
+          : ({} as Template)
+
+        return {
+          ...fromData,
+          id: row.id
+        } as Template
+      })
+      .filter((t) => typeof t?.id === 'string' && t.id.length > 0)
+  } catch (error) {
+    console.error('Failed to fetch templates from Supabase:', error)
+    return []
+  }
+}
+
+export async function fetchClientProfiles(): Promise<Array<{ id: string; email: string | null }>> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id,email')
+      .eq('role', 'client')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching client profiles:', error)
+      return []
+    }
+
+    return (data || []) as Array<{ id: string; email: string | null }>
+  } catch (error) {
+    console.error('Failed to fetch client profiles:', error)
+    return []
+  }
+}
+
+export async function fetchAssignmentsForClient(clientId: string): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('template_assignments')
+      .select('template_id')
+      .eq('client_id', clientId)
+
+    if (error) {
+      console.error('Error fetching assignments:', error)
+      return []
+    }
+
+    return ((data || []) as Array<{ template_id: string | null }>)
+      .map((r) => r.template_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0)
+  } catch (error) {
+    console.error('Failed to fetch assignments:', error)
+    return []
+  }
+}
+
+export async function setAssignmentsForClient(
+  clientId: string,
+  templateIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError) {
+      return { success: false, error: userError.message }
+    }
+
+    if (!user) {
+      return { success: false, error: 'User not authenticated' }
+    }
+
+    // 1) delete existing assignments for client_id
+    const { error: deleteError } = await supabase
+      .from('template_assignments')
+      .delete()
+      .eq('client_id', clientId)
+
+    if (deleteError) {
+      return { success: false, error: deleteError.message }
+    }
+
+    // 2) insert new rows (if any)
+    const uniqueTemplateIds = Array.from(new Set(templateIds)).filter(Boolean)
+    if (uniqueTemplateIds.length === 0) {
+      return { success: true }
+    }
+
+    const rows = uniqueTemplateIds.map((templateId) => ({
+      client_id: clientId,
+      template_id: templateId,
+      assigned_by: user.id
+    }))
+
+    const { error: insertError } = await supabase
+      .from('template_assignments')
+      .insert(rows)
+
+    if (insertError) {
+      return { success: false, error: insertError.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+  }
+}

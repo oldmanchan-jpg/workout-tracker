@@ -5,7 +5,17 @@ import { supabase } from '../lib/supabase'
 import { Users, Shield, CheckCircle, XCircle, UserPlus, Mail, Upload, FileText } from 'lucide-react'
 import { motion } from 'framer-motion'
 import TopBar from '@/components/TopBar'
-import { importTemplatesFromJSON, saveTemplatesToStorage, getAllTemplates, loadTemplatesFromStorage } from '../services/workoutService'
+import type { Template } from '../types'
+import {
+  fetchAssignmentsForClient,
+  fetchClientProfiles,
+  fetchTemplatesForCurrentUserFromSupabase,
+  importTemplatesFromJSON,
+  loadTemplatesFromStorage,
+  saveTemplatesToStorage,
+  setAssignmentsForClient,
+  upsertTemplatesToSupabase
+} from '../services/workoutService'
 
 export default function Admin() {
   const navigate = useNavigate()
@@ -18,6 +28,14 @@ export default function Admin() {
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState(false)
   const [templateCount, setTemplateCount] = useState(0)
+  const [templatesLoading, setTemplatesLoading] = useState(false)
+  const [availableTemplates, setAvailableTemplates] = useState<Template[]>([])
+
+  // Assignment UI state (minimal)
+  const [assignmentClients, setAssignmentClients] = useState<Array<{ id: string; email: string | null }>>([])
+  const [selectedClientId, setSelectedClientId] = useState<string>('')
+  const [assignedTemplateIds, setAssignedTemplateIds] = useState<string[]>([])
+  const [assignmentStatus, setAssignmentStatus] = useState<string | null>(null)
 
   // Redirect non-admins
   useEffect(() => {
@@ -50,12 +68,48 @@ export default function Admin() {
     }
   }, [isAdmin])
 
-  // Update template count on mount and when templates change
+  // Load templates (Supabase) for admin
   useEffect(() => {
-    if (isAdmin) {
-      setTemplateCount(getAllTemplates().length)
+    async function loadTemplates() {
+      if (!isAdmin) return
+      setTemplatesLoading(true)
+      try {
+        const templates = await fetchTemplatesForCurrentUserFromSupabase()
+        setAvailableTemplates(templates)
+        setTemplateCount(templates.length)
+      } finally {
+        setTemplatesLoading(false)
+      }
     }
+
+    if (isAdmin) loadTemplates()
   }, [isAdmin])
+
+  // Load client list for assignments (minimal shape)
+  useEffect(() => {
+    async function loadAssignmentClients() {
+      if (!isAdmin) return
+      const rows = await fetchClientProfiles()
+      setAssignmentClients(rows)
+    }
+
+    if (isAdmin) loadAssignmentClients()
+  }, [isAdmin])
+
+  // When a client is selected, load their assignments
+  useEffect(() => {
+    async function loadAssignments() {
+      if (!isAdmin) return
+      if (!selectedClientId) {
+        setAssignedTemplateIds([])
+        return
+      }
+      const ids = await fetchAssignmentsForClient(selectedClientId)
+      setAssignedTemplateIds(ids)
+    }
+
+    loadAssignments()
+  }, [isAdmin, selectedClientId])
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +134,7 @@ export default function Admin() {
   }
 
   // Handle import
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!importText.trim()) {
       setImportError('Please paste or upload JSON content')
       return
@@ -96,26 +150,31 @@ export default function Admin() {
       return
     }
 
-    // Merge with existing templates
+    setTemplatesLoading(true)
+    const upsertResult = await upsertTemplatesToSupabase(result.templates)
+    setTemplatesLoading(false)
+
+    if (!upsertResult.success) {
+      setImportError(upsertResult.error || 'Failed to save templates to Supabase')
+      return
+    }
+
+    // Optional: keep localStorage save as admin-only backup
     const existing = loadTemplatesFromStorage()
     const merged = [...existing, ...result.templates]
-    
-    // Deduplicate by id
-    const uniqueMap = new Map()
+    const uniqueMap = new Map<string, Template>()
     merged.forEach(t => uniqueMap.set(t.id, t))
-    const uniqueTemplates = Array.from(uniqueMap.values())
-    
-    // Save to localStorage
-    saveTemplatesToStorage(uniqueTemplates)
-    
-    // Update count
-    setTemplateCount(getAllTemplates().length)
-    
-    // Show success
+    saveTemplatesToStorage(Array.from(uniqueMap.values()))
+
+    // Refresh available templates from Supabase
+    setTemplatesLoading(true)
+    const templates = await fetchTemplatesForCurrentUserFromSupabase()
+    setAvailableTemplates(templates)
+    setTemplateCount(templates.length)
+    setTemplatesLoading(false)
+
     setImportSuccess(true)
     setImportText('')
-    
-    // Clear success message after 3 seconds
     setTimeout(() => setImportSuccess(false), 3000)
   }
 
@@ -401,12 +460,115 @@ export default function Admin() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleImport}
-              disabled={!importText.trim()}
+              disabled={!importText.trim() || templatesLoading}
               className="w-full py-3 bg-[#29e33c] text-black font-semibold rounded-[10px] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hp-glow-soft"
             >
               <FileText className="w-5 h-5" />
-              Import Templates
+              {templatesLoading ? 'Importing...' : 'Import Templates'}
             </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Assign Templates Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
+        >
+          <div className="px-4 py-4 border-b border-white/5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-white font-semibold">Assign Templates</h2>
+              <span className="text-[#9a9fa4] text-sm">{availableTemplates.length} templates</span>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Client</label>
+              <select
+                value={selectedClientId}
+                onChange={(e) => {
+                  setSelectedClientId(e.target.value)
+                  setAssignmentStatus(null)
+                }}
+                className="ui-input w-full px-4 py-3 appearance-none font-medium text-sm cursor-pointer bg-black/20 border-white/10 text-white"
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                <option value="" className="bg-[#141416]">Select a client…</option>
+                {assignmentClients.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-[#141416]">
+                    {c.email || c.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedClientId && (
+              <div className="space-y-2">
+                <p className="text-[#9a9fa4] text-sm">Templates</p>
+
+                {availableTemplates.length === 0 ? (
+                  <div className="bg-black/20 border border-white/10 rounded-[10px] p-3">
+                    <p className="text-[#9a9fa4] text-sm">No templates available to assign yet. Import templates first.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {availableTemplates.map((t) => {
+                      const checked = assignedTemplateIds.includes(t.id)
+                      return (
+                        <label
+                          key={t.id}
+                          className="flex items-center gap-3 bg-black/20 border border-white/10 rounded-[10px] px-3 py-2 cursor-pointer hover:bg-black/30 transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              setAssignmentStatus(null)
+                              setAssignedTemplateIds((prev) => {
+                                if (e.target.checked) return Array.from(new Set([...prev, t.id]))
+                                return prev.filter((id) => id !== t.id)
+                              })
+                            }}
+                            className="accent-[#29e33c]"
+                          />
+                          <span className="text-white text-sm font-medium">{t.name}</span>
+                          <span className="text-[#9a9fa4] text-xs ml-auto">{t.id}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={templatesLoading}
+                  onClick={async () => {
+                    if (!selectedClientId) return
+                    setAssignmentStatus(null)
+                    setTemplatesLoading(true)
+                    const res = await setAssignmentsForClient(selectedClientId, assignedTemplateIds)
+                    setTemplatesLoading(false)
+                    if (!res.success) {
+                      setAssignmentStatus(res.error || 'Failed to save assignments')
+                      return
+                    }
+                    setAssignmentStatus('Assignments saved.')
+                  }}
+                  className="w-full py-3 bg-[#29e33c] text-black font-semibold rounded-[10px] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hp-glow-soft"
+                >
+                  {templatesLoading ? 'Saving...' : 'Save Assignments'}
+                </motion.button>
+
+                {assignmentStatus && (
+                  <div className="bg-black/20 border border-white/10 rounded-[10px] p-3">
+                    <p className="text-white text-sm">{assignmentStatus}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
 

@@ -2,15 +2,22 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile, Profile } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
-import { Users, Shield, CheckCircle, XCircle, UserPlus, Mail } from 'lucide-react'
+import { Users, Shield, CheckCircle, XCircle, UserPlus, Mail, Upload, FileText } from 'lucide-react'
 import { motion } from 'framer-motion'
 import TopBar from '@/components/TopBar'
+import { importTemplatesFromJSON, saveTemplatesToStorage, getAllTemplates, loadTemplatesFromStorage } from '../services/workoutService'
 
 export default function Admin() {
   const navigate = useNavigate()
   const { isAdmin, loading: profileLoading } = useProfile()
   const [clients, setClients] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // Template import state
+  const [importText, setImportText] = useState('')
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importSuccess, setImportSuccess] = useState(false)
+  const [templateCount, setTemplateCount] = useState(0)
 
   // Redirect non-admins
   useEffect(() => {
@@ -42,6 +49,75 @@ export default function Admin() {
       fetchClients()
     }
   }, [isAdmin])
+
+  // Update template count on mount and when templates change
+  useEffect(() => {
+    if (isAdmin) {
+      setTemplateCount(getAllTemplates().length)
+    }
+  }, [isAdmin])
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.endsWith('.json')) {
+      setImportError('Please select a JSON file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const text = e.target?.result as string
+      setImportText(text)
+      setImportError(null)
+    }
+    reader.onerror = () => {
+      setImportError('Error reading file')
+    }
+    reader.readAsText(file)
+  }
+
+  // Handle import
+  const handleImport = () => {
+    if (!importText.trim()) {
+      setImportError('Please paste or upload JSON content')
+      return
+    }
+
+    setImportError(null)
+    setImportSuccess(false)
+
+    const result = importTemplatesFromJSON(importText)
+    
+    if (!result.success || !result.templates) {
+      setImportError(result.error || 'Import failed')
+      return
+    }
+
+    // Merge with existing templates
+    const existing = loadTemplatesFromStorage()
+    const merged = [...existing, ...result.templates]
+    
+    // Deduplicate by id
+    const uniqueMap = new Map()
+    merged.forEach(t => uniqueMap.set(t.id, t))
+    const uniqueTemplates = Array.from(uniqueMap.values())
+    
+    // Save to localStorage
+    saveTemplatesToStorage(uniqueTemplates)
+    
+    // Update count
+    setTemplateCount(getAllTemplates().length)
+    
+    // Show success
+    setImportSuccess(true)
+    setImportText('')
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => setImportSuccess(false), 3000)
+  }
 
   // Toggle client active status
   const toggleActiveStatus = async (clientId: string, currentStatus: boolean) => {
@@ -236,6 +312,102 @@ export default function Admin() {
               ))}
             </div>
           )}
+        </motion.div>
+
+        {/* Import Workout Templates Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-[#141416] rounded-[21px] overflow-hidden border border-white/5"
+        >
+          <div className="px-4 py-4 border-b border-white/5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-white font-semibold">Import Workout Templates</h2>
+              <span className="text-[#9a9fa4] text-sm">
+                Currently loaded: {templateCount} templates
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-4">
+            {/* File Upload */}
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">
+                Upload JSON File
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="template-file-input"
+                />
+                <label
+                  htmlFor="template-file-input"
+                  className="flex items-center gap-2 px-4 py-3 bg-black/20 border border-white/10 rounded-[10px] cursor-pointer hover:bg-black/30 transition-colors"
+                >
+                  <Upload className="w-5 h-5 text-[#29e33c]" />
+                  <span className="text-white text-sm">Choose JSON file</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Textarea Paste */}
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">
+                Or Paste JSON
+              </label>
+              <textarea
+                value={importText}
+                onChange={(e) => {
+                  setImportText(e.target.value)
+                  setImportError(null)
+                  setImportSuccess(false)
+                }}
+                placeholder='Paste JSON here, e.g.:\n[\n  {\n    "name": "My Workout",\n    "exercises": [\n      { "name": "Bench Press", "sets": 4, "reps": 12, "weight": 45 }\n    ]\n  }\n]'
+                className="w-full h-32 px-4 py-3 bg-black/20 border border-white/10 rounded-[10px] text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 resize-none font-mono text-sm"
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+              />
+            </div>
+
+            {/* Error Message */}
+            {importError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 flex items-start gap-2"
+              >
+                <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-500 text-sm">{importError}</p>
+              </motion.div>
+            )}
+
+            {/* Success Message */}
+            {importSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#29e33c]/10 border border-[#29e33c]/20 rounded-[10px] p-3 flex items-start gap-2"
+              >
+                <CheckCircle className="w-5 h-5 text-[#29e33c] flex-shrink-0 mt-0.5" />
+                <p className="text-[#29e33c] text-sm">Templates imported successfully!</p>
+              </motion.div>
+            )}
+
+            {/* Import Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleImport}
+              disabled={!importText.trim()}
+              className="w-full py-3 bg-[#29e33c] text-black font-semibold rounded-[10px] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hp-glow-soft"
+            >
+              <FileText className="w-5 h-5" />
+              Import Templates
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Quick Actions */}

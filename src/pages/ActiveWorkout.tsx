@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Check, Play, Pause, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import type { Template } from '../types'
-import { saveWorkout } from '../services/workoutService'
+import { saveWorkout, getAllTemplates } from '../services/workoutService'
 import BottomNav from '../components/BottomNav'
 
 interface SetLog {
@@ -37,23 +37,77 @@ interface ExerciseLog {
 export default function ActiveWorkout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const template = location.state?.template as Template | undefined
+  const templateFromState = location.state?.template as Template | undefined
 
-  // Show fallback UI when no active workout exists
-  if (!template) {
+  // Get all templates (fallback + imported)
+  const templates = getAllTemplates()
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templates[0]?.id || '')
+  const [template, setTemplate] = useState<Template | undefined>(templateFromState)
+  const [workoutStarted, setWorkoutStarted] = useState<boolean>(!!templateFromState)
+
+  // Show template selection UI when no workout has started
+  if (!workoutStarted || !template) {
+    const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
+
     return (
       <div className="min-h-screen hp-bg page-container p-4">
-        <div className="mx-auto w-full max-w-[420px] flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="hp-card p-8 text-center">
-            <h1 className="hp-title text-2xl font-bold mb-4">No Active Workout</h1>
-            <p className="hp-muted mb-6">Start a workout from the Dashboard</p>
+        <div className="mx-auto w-full max-w-[420px] pt-4 space-y-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => navigate('/')}
-              className="w-full py-4 bg-[#29e33c] text-black font-bold text-lg rounded-full hp-glow-soft"
+              className="w-10 h-10 flex items-center justify-center rounded-full hp-pill text-white/70 hover:text-white transition-colors"
             >
-              Go to Dashboard
+              <ArrowLeft className="w-5 h-5" />
             </button>
+            <h1 className="hp-title text-lg font-semibold flex-1 text-center">Start Workout</h1>
+            <div className="w-10" /> {/* Spacer for centering */}
           </div>
+
+          {/* Template Selection Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="hp-card p-5 space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="hp-title font-semibold text-lg">Select Template</h2>
+              <span className="hp-muted text-sm">{templates.length} available</span>
+            </div>
+
+            {/* Template Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => setSelectedTemplateId(e.target.value)}
+                className="ui-input w-full px-4 py-4 appearance-none font-medium text-base cursor-pointer bg-black/20 border-white/10 text-white"
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                {templates.map(t => (
+                  <option key={t.id} value={t.id} className="bg-[#141416]">
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#29e33c] rotate-90 pointer-events-none" />
+            </div>
+
+            {/* Start Workout Button */}
+            {selectedTemplate && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setTemplate(selectedTemplate)
+                  setWorkoutStarted(true)
+                }}
+                className="w-full h-14 bg-[#29e33c] text-black font-bold text-lg rounded-full flex items-center justify-center gap-3 hp-glow-soft"
+              >
+                <Play className="w-6 h-6" fill="currentColor" />
+                Start Workout
+              </motion.button>
+            )}
+          </motion.div>
         </div>
         <BottomNav />
       </div>

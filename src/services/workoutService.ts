@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase'
+import { workoutTemplates } from '../data/workoutTemplates'
+import type { Template } from '../types'
 
 export interface WorkoutData {
   workout_date: string
@@ -170,5 +172,157 @@ export function calculateWorkoutStats(workouts: SavedWorkout[]) {
     totalVolume,
     totalReps,
     avgVolume
+  }
+}
+
+// Template storage constants
+const LS_TEMPLATES_KEY = "workout_templates_v1"
+
+/**
+ * Generate a slug from a string (for ID generation)
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/**
+ * Generate a random 4-character string
+ */
+function random4(): string {
+  return Math.random().toString(36).substring(2, 6)
+}
+
+/**
+ * Load templates from localStorage
+ */
+export function loadTemplatesFromStorage(): Template[] {
+  try {
+    const stored = localStorage.getItem(LS_TEMPLATES_KEY)
+    if (!stored) return []
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.error('Error loading templates from storage:', error)
+    return []
+  }
+}
+
+/**
+ * Save templates to localStorage
+ */
+export function saveTemplatesToStorage(templates: Template[]): void {
+  try {
+    localStorage.setItem(LS_TEMPLATES_KEY, JSON.stringify(templates))
+  } catch (error) {
+    console.error('Error saving templates to storage:', error)
+  }
+}
+
+/**
+ * Get all templates (fallback + imported, deduplicated by id)
+ */
+export function getAllTemplates(): Template[] {
+  const imported = loadTemplatesFromStorage()
+  const fallback = workoutTemplates
+  
+  // Create a map to deduplicate by id
+  const templateMap = new Map<string, Template>()
+  
+  // Add fallback templates first
+  fallback.forEach(t => templateMap.set(t.id, t))
+  
+  // Add imported templates (will override fallback if same id)
+  imported.forEach(t => templateMap.set(t.id, t))
+  
+  return Array.from(templateMap.values())
+}
+
+/**
+ * Import templates from JSON string
+ * Supports both array format: [{...}] and object format: { templates: [...] }
+ */
+export function importTemplatesFromJSON(jsonText: string): { success: boolean; templates?: Template[]; error?: string } {
+  try {
+    // Parse JSON
+    const parsed = JSON.parse(jsonText)
+    
+    // Handle both array and object formats
+    let templatesArray: any[]
+    if (Array.isArray(parsed)) {
+      templatesArray = parsed
+    } else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.templates)) {
+      templatesArray = parsed.templates
+    } else {
+      return { success: false, error: 'Invalid format: Expected array or object with "templates" array' }
+    }
+    
+    if (templatesArray.length === 0) {
+      return { success: false, error: 'No templates found in JSON' }
+    }
+    
+    // Validate and adapt each template
+    const adaptedTemplates: Template[] = []
+    
+    for (let i = 0; i < templatesArray.length; i++) {
+      const t = templatesArray[i]
+      
+      // Validate required fields
+      if (!t.name || typeof t.name !== 'string') {
+        return { success: false, error: `Template ${i + 1}: Missing or invalid "name" field` }
+      }
+      
+      if (!Array.isArray(t.exercises) || t.exercises.length === 0) {
+        return { success: false, error: `Template ${i + 1}: Missing or empty "exercises" array` }
+      }
+      
+      // Validate and adapt exercises
+      const adaptedExercises: Template['exercises'] = []
+      
+      for (let j = 0; j < t.exercises.length; j++) {
+        const ex = t.exercises[j]
+        
+        if (!ex.name || typeof ex.name !== 'string') {
+          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: Missing or invalid "name" field` }
+        }
+        
+        if (typeof ex.sets !== 'number' || ex.sets < 1) {
+          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "sets" must be a number >= 1` }
+        }
+        
+        if (typeof ex.reps !== 'number' || ex.reps < 1) {
+          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "reps" must be a number >= 1` }
+        }
+        
+        // Adapt exercise to match Template shape
+        adaptedExercises.push({
+          name: ex.name,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: typeof ex.weight === 'number' && ex.weight >= 0 ? ex.weight : undefined
+        })
+      }
+      
+      // Generate ID if missing
+      const id = t.id && typeof t.id === 'string' ? t.id : `${slugify(t.name)}-${random4()}`
+      
+      // Create adapted template matching Template type
+      adaptedTemplates.push({
+        id,
+        name: t.name,
+        exercises: adaptedExercises
+      })
+    }
+    
+    return { success: true, templates: adaptedTemplates }
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return { success: false, error: 'Invalid JSON format' }
+    }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

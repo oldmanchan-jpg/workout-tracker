@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase'
 import { workoutTemplates } from '../data/workoutTemplates'
 import type { Template } from '../types'
 
+export const WORKOUT_TEMPLATES_UPDATED = 'workout-templates-updated'
+
 export interface WorkoutData {
   workout_date: string
   template_name: string
@@ -218,6 +220,8 @@ export function loadTemplatesFromStorage(): Template[] {
 export function saveTemplatesToStorage(templates: Template[]): void {
   try {
     localStorage.setItem(LS_TEMPLATES_KEY, JSON.stringify(templates))
+    // Dispatch event AFTER successful save
+    window.dispatchEvent(new Event(WORKOUT_TEMPLATES_UPDATED))
   } catch (error) {
     console.error('Error saving templates to storage:', error)
   }

@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { workoutTemplates } from '../data/workoutTemplates'
-import type { Template } from '../types'
+import type { Template, WorkoutType } from '../types'
 
 export const WORKOUT_TEMPLATES_UPDATED = 'workout-templates-updated'
 
@@ -271,6 +271,47 @@ export function importTemplatesFromJSON(jsonText: string): { success: boolean; t
     
     // Validate and adapt each template
     const adaptedTemplates: Template[] = []
+
+    const isNonEmptyString = (v: any): v is string => typeof v === 'string' && v.trim().length > 0
+
+    const validateTargetedItems = (
+      items: any,
+      label: string,
+      opts: { required: boolean; requireNonEmpty: boolean }
+    ):
+      | { ok: true; value: Array<{ label: string; target: string }> | null }
+      | { ok: false; error: string } => {
+      if (items === undefined || items === null) {
+        if (opts.required) return { ok: false, error: `Missing "${label}" field` }
+        return { ok: true, value: null }
+      }
+      if (!Array.isArray(items)) return { ok: false, error: `"${label}" must be an array` }
+      if (opts.requireNonEmpty && items.length === 0) return { ok: false, error: `"${label}" must not be empty` }
+
+      const adapted: Array<{ label: string; target: string }> = []
+      for (let k = 0; k < items.length; k++) {
+        const it = items[k]
+        if (!it || typeof it !== 'object') {
+          return { ok: false, error: `"${label}" item ${k + 1}: must be an object` }
+        }
+        if (!isNonEmptyString(it.label)) {
+          return { ok: false, error: `"${label}" item ${k + 1}: Missing or invalid "label"` }
+        }
+        if (!isNonEmptyString(it.target)) {
+          return { ok: false, error: `"${label}" item ${k + 1}: Missing or invalid "target"` }
+        }
+        adapted.push({ label: it.label, target: it.target })
+      }
+      return { ok: true, value: adapted }
+    }
+
+    type TargetedItemsValidationResult =
+      | { ok: true; value: Array<{ label: string; target: string }> | null }
+      | { ok: false; error: string }
+
+    const isTargetedItemsError = (
+      res: TargetedItemsValidationResult
+    ): res is { ok: false; error: string } => res.ok === false
     
     for (let i = 0; i < templatesArray.length; i++) {
       const t = templatesArray[i]
@@ -279,47 +320,147 @@ export function importTemplatesFromJSON(jsonText: string): { success: boolean; t
       if (!t.name || typeof t.name !== 'string') {
         return { success: false, error: `Template ${i + 1}: Missing or invalid "name" field` }
       }
-      
-      if (!Array.isArray(t.exercises) || t.exercises.length === 0) {
-        return { success: false, error: `Template ${i + 1}: Missing or empty "exercises" array` }
+
+      // Validate workout type (default strength)
+      const rawType = t.type
+      let workoutType: WorkoutType = 'strength'
+      if (rawType !== undefined) {
+        if (typeof rawType !== 'string') {
+          return { success: false, error: `Template ${i + 1}: "type" must be a string` }
+        }
+        if (rawType !== 'strength' && rawType !== 'emom' && rawType !== 'circuit') {
+          return { success: false, error: `Template ${i + 1}: Invalid "type" (must be "strength", "emom", or "circuit")` }
+        }
+        workoutType = rawType
       }
-      
-      // Validate and adapt exercises
-      const adaptedExercises: Template['exercises'] = []
-      
-      for (let j = 0; j < t.exercises.length; j++) {
-        const ex = t.exercises[j]
-        
-        if (!ex.name || typeof ex.name !== 'string') {
-          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: Missing or invalid "name" field` }
-        }
-        
-        if (typeof ex.sets !== 'number' || ex.sets < 1) {
-          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "sets" must be a number >= 1` }
-        }
-        
-        if (typeof ex.reps !== 'number' || ex.reps < 1) {
-          return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "reps" must be a number >= 1` }
-        }
-        
-        // Adapt exercise to match Template shape
-        adaptedExercises.push({
-          name: ex.name,
-          sets: ex.sets,
-          reps: ex.reps,
-          weight: typeof ex.weight === 'number' && ex.weight >= 0 ? ex.weight : undefined
-        })
-      }
-      
+
       // Generate ID if missing
       const id = t.id && typeof t.id === 'string' ? t.id : `${slugify(t.name)}-${random4()}`
-      
-      // Create adapted template matching Template type
-      adaptedTemplates.push({
-        id,
-        name: t.name,
-        exercises: adaptedExercises
-      })
+
+      if (workoutType === 'strength') {
+        if (!Array.isArray(t.exercises) || t.exercises.length === 0) {
+          return { success: false, error: `Template ${i + 1}: Missing or empty "exercises" array` }
+        }
+
+        // Validate and adapt exercises
+        const adaptedExercises: Template['exercises'] = []
+        for (let j = 0; j < t.exercises.length; j++) {
+          const ex = t.exercises[j]
+
+          if (!ex.name || typeof ex.name !== 'string') {
+            return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: Missing or invalid "name" field` }
+          }
+
+          if (typeof ex.sets !== 'number' || ex.sets < 1) {
+            return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "sets" must be a number >= 1` }
+          }
+
+          if (typeof ex.reps !== 'number' || ex.reps < 1) {
+            return { success: false, error: `Template ${i + 1}, Exercise ${j + 1}: "reps" must be a number >= 1` }
+          }
+
+          adaptedExercises.push({
+            name: ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            weight: typeof ex.weight === 'number' && ex.weight >= 0 ? ex.weight : undefined
+          })
+        }
+
+        adaptedTemplates.push({
+          id,
+          name: t.name,
+          // Keep type optional for strength (missing defaults to strength)
+          type: rawType === 'strength' ? 'strength' : undefined,
+          exercises: adaptedExercises
+        })
+      } else if (workoutType === 'emom') {
+        if (typeof t.durationMinutes !== 'number' || t.durationMinutes <= 0) {
+          return { success: false, error: `Template ${i + 1}: "durationMinutes" must be a number > 0` }
+        }
+
+        const warmupRes = validateTargetedItems(t.warmup, 'warmup', { required: false, requireNonEmpty: false })
+        if (isTargetedItemsError(warmupRes)) {
+          return { success: false, error: `Template ${i + 1}: ${warmupRes.error}` }
+        }
+
+        const minuteARes = validateTargetedItems(t.minuteA, 'minuteA', { required: true, requireNonEmpty: true })
+        if (isTargetedItemsError(minuteARes)) {
+          return { success: false, error: `Template ${i + 1}: ${minuteARes.error}` }
+        }
+
+        const minuteBRes = validateTargetedItems(t.minuteB, 'minuteB', { required: true, requireNonEmpty: true })
+        if (isTargetedItemsError(minuteBRes)) {
+          return { success: false, error: `Template ${i + 1}: ${minuteBRes.error}` }
+        }
+
+        const extrasRes = validateTargetedItems(t.extras, 'extras', { required: false, requireNonEmpty: false })
+        if (isTargetedItemsError(extrasRes)) {
+          return { success: false, error: `Template ${i + 1}: ${extrasRes.error}` }
+        }
+
+        adaptedTemplates.push({
+          id,
+          name: t.name,
+          type: 'emom',
+          durationMinutes: t.durationMinutes,
+          // Keep exercises field present for compatibility with existing strength code paths
+          exercises: [],
+          warmup: warmupRes.value || undefined,
+          minuteA: minuteARes.value || [],
+          minuteB: minuteBRes.value || [],
+          extras: extrasRes.value || undefined
+        })
+      } else if (workoutType === 'circuit') {
+        if (typeof t.rounds !== 'number' || t.rounds < 1) {
+          return { success: false, error: `Template ${i + 1}: "rounds" must be a number >= 1` }
+        }
+
+        if (t.restBetweenRoundsSeconds !== undefined) {
+          if (typeof t.restBetweenRoundsSeconds !== 'number' || t.restBetweenRoundsSeconds < 0) {
+            return { success: false, error: `Template ${i + 1}: "restBetweenRoundsSeconds" must be a number >= 0` }
+          }
+        }
+
+        const warmupRes = validateTargetedItems(t.warmup, 'warmup', { required: false, requireNonEmpty: false })
+        if (isTargetedItemsError(warmupRes)) {
+          return { success: false, error: `Template ${i + 1}: ${warmupRes.error}` }
+        }
+
+        if (!Array.isArray(t.stations) || t.stations.length === 0) {
+          return { success: false, error: `Template ${i + 1}: Missing or empty "stations" array` }
+        }
+
+        const stations: NonNullable<Template['stations']> = []
+        for (let j = 0; j < t.stations.length; j++) {
+          const st = t.stations[j]
+          if (!st || typeof st !== 'object') {
+            return { success: false, error: `Template ${i + 1}, Station ${j + 1}: must be an object` }
+          }
+          if (typeof st.order !== 'number' || st.order < 1) {
+            return { success: false, error: `Template ${i + 1}, Station ${j + 1}: "order" must be a number >= 1` }
+          }
+          if (!isNonEmptyString(st.label)) {
+            return { success: false, error: `Template ${i + 1}, Station ${j + 1}: Missing or invalid "label"` }
+          }
+          if (!isNonEmptyString(st.target)) {
+            return { success: false, error: `Template ${i + 1}, Station ${j + 1}: Missing or invalid "target"` }
+          }
+          stations.push({ order: st.order, label: st.label, target: st.target })
+        }
+
+        adaptedTemplates.push({
+          id,
+          name: t.name,
+          type: 'circuit',
+          rounds: t.rounds,
+          restBetweenRoundsSeconds: t.restBetweenRoundsSeconds,
+          // Keep exercises field present for compatibility with existing strength code paths
+          exercises: [],
+          warmup: warmupRes.value || undefined,
+          stations
+        })
+      }
     }
     
     return { success: true, templates: adaptedTemplates }

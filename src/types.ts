@@ -18,13 +18,30 @@ export type Workout = {
   exercises: ExerciseEntry[]
 }
 
+export type WorkoutType = 'strength' | 'emom' | 'circuit'
+
 export type Template = {
   id: string
   name: string
-  exercises: { 
-    name: string; 
-    sets: number; 
-    reps: number; 
-    weight?: number;
+  type?: WorkoutType // Optional, defaults to 'strength'
+
+  // Strength workouts (existing)
+  exercises: {
+    name: string
+    sets: number
+    reps: number
+    weight?: number
   }[]
+
+  // EMOM-specific fields (only when type === 'emom')
+  durationMinutes?: number
+  warmup?: Array<{ label: string; target: string }>
+  minuteA?: Array<{ label: string; target: string }>
+  minuteB?: Array<{ label: string; target: string }>
+  extras?: Array<{ label: string; target: string }>
+
+  // Circuit-specific fields (only when type === 'circuit')
+  rounds?: number
+  restBetweenRoundsSeconds?: number
+  stations?: Array<{ order: number; label: string; target: string }>
 }

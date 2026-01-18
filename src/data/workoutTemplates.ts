@@ -37,6 +37,39 @@ export const workoutTemplates: Template[] = [
       { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 60 },
       { name: 'Leg Extensions', sets: 3, reps: 15, weight: 45 }
     ]
+  },
+
+  // Temporary fixtures for testing EMOM + Circuit support
+  {
+    id: "test-emom-1",
+    name: "Test EMOM 16min",
+    type: "emom",
+    exercises: [],
+    durationMinutes: 16,
+    warmup: [
+      { label: "Easy cardio", target: "2 min" }
+    ],
+    minuteA: [
+      { label: "Exercise A", target: "40 seconds" }
+    ],
+    minuteB: [
+      { label: "Exercise B", target: "12 reps" }
+    ]
+  },
+  {
+    id: "test-circuit-1",
+    name: "Test Circuit 3 Rounds",
+    type: "circuit",
+    exercises: [],
+    rounds: 3,
+    restBetweenRoundsSeconds: 90,
+    warmup: [
+      { label: "Easy cardio", target: "2 min" }
+    ],
+    stations: [
+      { order: 1, label: "Station 1", target: "30 seconds" },
+      { order: 2, label: "Station 2", target: "12 reps" }
+    ]
   }
 ]
 

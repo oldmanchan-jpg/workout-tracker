@@ -1,25 +1,40 @@
 # 📅 Today's Session Plan
 
-**Date:** January 16, 2026  
+**Date:** January 18, 2026  
 **Session Start:** TBD  
 **Session End:** TBD  
 **Duration:** TBD
 
-**Note:** Handover documentation created - see `HANDOVER_2026-01-16.md` for current project status and next steps.  
+**Note:** Latest handover: `HANDOVER_2026-01-16.md` (see top “Update — 2026-01-18” section below for what shipped today).  
 
 ---
 
-## 🎯 Session Goals
-- [x] Implement compact list view for workout logging
-- [x] Add RPE (Rate of Perceived Exertion) input
-- [x] Add manual rest timer with controls
-- [x] Implement auto-complete from last set
-- [x] Update documentation (README + project MD files)
-- [x] Commit and push changes to Git
+## Update — 2026-01-18
+
+## ✅ Completed Today
+- EMOM + Circuit workout support added (type-based templates + `ActiveWorkout` branching).
+- Excel Day 2 (EMOM) + Day 4 (Circuit) now converted via `convert_workout_excel_to_json.py`.
+- Supabase schema created: `templates` + `template_assignments` with RLS policies (coach/admin elevated; clients see assigned only).
+- Admin import now writes templates to Supabase.
+- `ActiveWorkout` loads templates from Supabase (RLS-filtered) with loading/empty states.
+
+## 🚧 Current Caveats / UX Debt (P1)
+- Conditioning UX is functional but not “usable polish” yet:
+  - EMOM needs clearer visual separation for Minute A vs Minute B.
+  - Circuit needs station-level flow (next station), station timer, and structured rest (between stations + between rounds).
+  - Current “single pause” / “clamped layout” makes circuits harder to follow.
+
+## 🔜 Next Priority Options
+- **P0**: Verify assignment flow end-to-end with 2 clients and empty state for unassigned.
+- **P1**: Conditioning runner UX overhaul (station/interval model + UI separation).
+- **P1**: Decide final source of truth (localStorage fallback rules for coach).
+- **P2**: Add small “debug panel” in Admin showing template counts in Supabase vs local.
 
 ---
 
-## ✅ Completed Tasks
+## Archive — 2026-01-16 session log
+
+## ✅ Completed Tasks (2026-01-16)
 
 ### Part 1: Initial Implementation (12:10 PM - 12:42 PM)
 

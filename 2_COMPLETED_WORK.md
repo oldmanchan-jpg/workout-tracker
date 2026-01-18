@@ -1,6 +1,6 @@
 # ✅ Completed Work Log
 
-**Last Updated:** January 16, 2026
+**Last Updated:** January 18, 2026
 
 **Note:** See `HANDOVER_2026-01-16.md` for latest project status and handover information.
 
@@ -10,6 +10,29 @@
 
 **Phase:** Professional UI Polish Complete
 **Current Focus:** Testing and next feature iteration
+
+---
+
+## 📅 Session: January 18, 2026 — Conditioning + Supabase Templates
+
+### Shipped ✅
+- EMOM + Circuit workout support added (type-based templates + `ActiveWorkout` branching).
+- Excel Day 2 (EMOM) + Day 4 (Circuit) now converted via `convert_workout_excel_to_json.py`.
+- Supabase schema created: `templates` + `template_assignments` with RLS policies (coach/admin elevated; clients see assigned only).
+- Admin import now writes templates to Supabase.
+- `ActiveWorkout` loads templates from Supabase (RLS-filtered) with loading/empty states.
+
+### Caveats / UX Debt (P1)
+- Conditioning UX is functional but not “usable polish” yet:
+  - EMOM needs clearer visual separation for Minute A vs Minute B.
+  - Circuit needs station-level flow (next station), station timer, and structured rest (between stations + between rounds).
+  - Current “single pause” / “clamped layout” makes circuits harder to follow.
+
+### Next options
+- **P0**: Verify assignment flow end-to-end with 2 clients + empty state for unassigned.
+- **P1**: Conditioning runner UX overhaul (station/interval model + UI separation).
+- **P1**: Decide final source of truth (localStorage fallback rules for coach).
+- **P2**: Add small “debug panel” in Admin showing template counts in Supabase vs local.
 
 ---
 

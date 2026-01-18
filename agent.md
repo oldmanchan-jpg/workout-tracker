@@ -14,12 +14,16 @@ This file is the *single source of truth* for what’s done, what’s next, and 
 ### ✅ Working Features (latest confirmed)
 - Bottom navigation + PWA mode
 - Vercel routing (no 404 on refresh)
-- Admin template import (JSON upload/paste)
-- Template selection on Workout page
+- Admin template import (JSON upload/paste) → **writes to Supabase**
+- Template selection on Workout page (loaded from **Supabase**, RLS-filtered)
 - Start Workout flow (no crash)
 - Set completion + RPE tracking (strength workouts)
 - Rest timers
 - Template auto-update across Admin → Workout dropdown
+- **Conditioning workouts supported** (EMOM + Circuit) via `type`-based templates + `ActiveWorkout` branching
+- Excel **Day 2 (EMOM)** + **Day 4 (Circuit)** conversion supported via `convert_workout_excel_to_json.py`
+- Supabase schema: `templates` + `template_assignments` with RLS (coach/admin elevated; clients see assigned only)
+- `ActiveWorkout` has loading + empty states for Supabase template fetch
 
 ### ⚠️ Known Minor Issue
 - PWA bottom safe-area gap (iOS / safe-area-inset-bottom handling) — optional polish, not blocking
@@ -36,6 +40,10 @@ This file is the *single source of truth* for what’s done, what’s next, and 
 - Fixed **template auto-update** — importing templates in Admin instantly makes them available in Workout template selection.
 - Preserved workout flow — logging, RPE, timers unchanged.
 - Resolved prior deployment confusion — worktrees removed and `main` deployment restored.
+- Added EMOM + Circuit workout support (type-based templates + `ActiveWorkout` branching).
+- Converted Excel Day 2 (EMOM) + Day 4 (Circuit) via `convert_workout_excel_to_json.py`.
+- Created Supabase schema for templates + assignments with RLS policies.
+- Admin import now writes templates to Supabase; clients load assigned templates via RLS.
 
 ---
 
@@ -81,6 +89,24 @@ By end of day, the app must support:
 4) ✅ **Client-scoped templates (privacy + assignment)**
    - Coach can assign templates to a specific client.
    - Client sees **only templates assigned to them** (no other clients’ templates).
+
+---
+
+## 3.1) Current Caveats / UX Debt (P1)
+
+- Conditioning UX is functional but not “usable polish” yet:
+  - EMOM needs clearer visual separation for Minute A vs Minute B.
+  - Circuit needs station-level flow (next station), station timer, and structured rest (between stations + between rounds).
+  - Current “single pause” / “clamped layout” makes circuits harder to follow.
+
+---
+
+## 3.2) Next Priority Options
+
+- **P0**: Verify assignment flow end-to-end with 2 clients + empty state for unassigned.
+- **P1**: Conditioning runner UX overhaul (station/interval model + UI separation).
+- **P1**: Decide final source of truth (localStorage fallback rules for coach).
+- **P2**: Add small “debug panel” in Admin showing template counts in Supabase vs local.
 
 ---
 

@@ -27,6 +27,29 @@ By end of day, we must have:
 - ✅ Template auto-update fixed — Admin import instantly shows in Workout dropdown
 - ✅ Workout flow preserved — set logging, RPE, timers unchanged
 - ✅ Deployment workflow fixed — removed Cursor worktrees locking `main`
+- ✅ Added **EMOM + Circuit** workout support (type-based templates + `ActiveWorkout` branching)
+- ✅ Excel **Day 2 (EMOM)** + **Day 4 (Circuit)** now converts via `convert_workout_excel_to_json.py`
+- ✅ Supabase schema created: `templates` + `template_assignments` with RLS (coach/admin elevated; clients see assigned only)
+- ✅ Admin import now writes templates to Supabase
+- ✅ `ActiveWorkout` now loads templates from Supabase (RLS-filtered) with loading + empty states
+
+---
+
+## Current Caveats / UX Debt (P1)
+
+- Conditioning UX is functional but not “usable polish” yet:
+  - EMOM needs clearer visual separation for Minute A vs Minute B
+  - Circuit needs station-level flow (next station), station timer, and structured rest (between stations + between rounds)
+  - Current “single pause” / “clamped layout” makes circuits harder to follow
+
+---
+
+## Next Priority Options
+
+- **P0**: Verify assignment flow end-to-end with 2 clients + empty state for unassigned
+- **P1**: Conditioning runner UX overhaul (station/interval model + UI separation)
+- **P1**: Decide final source of truth (localStorage fallback rules for coach)
+- **P2**: Add small “debug panel” in Admin showing template counts in Supabase vs local
 
 ---
 
@@ -46,33 +69,33 @@ By end of day, we must have:
 
 ### P0 — Step 1: Add Conditioning Support (EMOM + Circuit)
 **Goal:** Day 2 + Day 4 are runnable in-app.
-- [ ] Identify current template type shape + importer expectations
-- [ ] Extend template schema with `type: 'strength' | 'emom' | 'circuit'` (default strength)
-- [ ] Implement EMOM UI (duration + minute A/B display + timer + complete)
-- [ ] Implement Circuit UI (rounds + rest-between-rounds + station list + timers + complete)
-- [ ] Keep strength workout flow unchanged
+- [x] Identify current template type shape + importer expectations
+- [x] Extend template schema with `type: 'strength' | 'emom' | 'circuit'` (default strength)
+- [x] Implement EMOM UI (duration + minute A/B display + timer + complete)
+- [x] Implement Circuit UI (rounds + rest-between-rounds + station list + timers + complete)
+- [x] Keep strength workout flow unchanged
 
 **Acceptance:**
-- [ ] Can start an EMOM template and see timer + A/B indicator
-- [ ] Can start a Circuit template and see rounds + rest timer
-- [ ] Can mark either completed without crashing
+- [x] Can start an EMOM template and see timer + A/B indicator
+- [x] Can start a Circuit template and see rounds + rest timer
+- [x] Can mark either completed without crashing
 
 ### P0 — Step 2: Convert Excel Day 2/Day 4 → JSON + Import
-- [ ] Update `convert_workout_excel_to_json.py` to emit EMOM/Circuit templates using the new schema
-- [ ] Generate a **single JSON** containing **all 16 workouts** (4 weeks × 4 days)
-- [ ] Import into Admin
-- [ ] Verify Day 2 and Day 4 workouts are usable
+- [x] Update `convert_workout_excel_to_json.py` to emit EMOM/Circuit templates using the new schema
+- [x] Generate a **single JSON** containing **all 16 workouts** (4 weeks × 4 days)
+- [x] Import into Admin (writes templates to Supabase)
+- [x] Verify Day 2 and Day 4 workouts are usable
 
 **Acceptance:**
-- [ ] Workout list includes Strength + EMOM + Circuit workouts for the block
-- [ ] EMOM and Circuit templates run end-to-end
+- [x] Workout list includes Strength + EMOM + Circuit workouts for the block
+- [x] EMOM and Circuit templates run end-to-end
 
 ### P0 — Step 3: Client-Scoped Assignment + Visibility
-- [ ] Confirm whether templates currently live in localStorage or Supabase
-- [ ] Implement minimal per-client assignment (prefer Supabase/RLS if templates are shared)
-- [ ] Admin: assign templates to a client
-- [ ] Client: Workout list shows only assigned templates
-- [ ] Empty state when none assigned
+- [x] Confirm whether templates currently live in localStorage or Supabase (now: Supabase)
+- [x] Implement minimal per-client assignment (Supabase + RLS)
+- [ ] Verify Admin: assign templates to a client (end-to-end)
+- [ ] Verify Client: Workout list shows only assigned templates (2 clients)
+- [ ] Verify empty state when none assigned
 
 **Acceptance:**
 - [ ] Client A sees only Client A templates

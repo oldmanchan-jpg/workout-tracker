@@ -63,6 +63,8 @@ export function EMOMRun({ section, onComplete }: Props) {
         duration={60}
         variant="work"
         autoStart={false}
+        allowAdjust={true}
+        presetSeconds={[10, 30, 45, 60, 90]}
         onComplete={handleMinuteComplete}
       />
 

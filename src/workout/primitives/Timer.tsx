@@ -5,9 +5,11 @@ interface Props {
   onComplete?: () => void;
   variant?: 'work' | 'rest';
   autoStart?: boolean;
+  allowAdjust?: boolean;
+  presetSeconds?: number[]; // Preset values in seconds
 }
 
-export function Timer({ duration, onComplete, variant = 'work', autoStart = false }: Props) {
+export function Timer({ duration, onComplete, variant = 'work', autoStart = false, allowAdjust = false, presetSeconds = [] }: Props) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(autoStart);
   const intervalRef = useRef<number | null>(null);
@@ -73,6 +75,30 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
     return 'Paused';
   };
 
+  const adjustTime = (deltaSeconds: number) => {
+    if (isRunning) return; // Only allow adjustment when paused
+    
+    const newTimeLeft = Math.max(0, timeLeft + deltaSeconds);
+    setTimeLeft(newTimeLeft);
+    timeLeftRef.current = newTimeLeft;
+    
+    if (newTimeLeft > 0) {
+      hasCompletedRef.current = false;
+    }
+  };
+
+  const setPresetTime = (presetSeconds: number) => {
+    if (isRunning) return; // Only allow adjustment when paused
+    
+    const newTimeLeft = Math.max(0, presetSeconds);
+    setTimeLeft(newTimeLeft);
+    timeLeftRef.current = newTimeLeft;
+    
+    if (newTimeLeft > 0) {
+      hasCompletedRef.current = false;
+    }
+  };
+
   return (
     <div
       className={`rounded-xl p-6 text-center ${
@@ -112,6 +138,49 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
           Reset
         </button>
       </div>
+      {allowAdjust && !isRunning && (
+        <div className="mt-3 space-y-2">
+          {presetSeconds.length > 0 && (
+            <div className="flex gap-2 justify-center flex-wrap">
+              {presetSeconds.map((preset) => (
+                <button
+                  key={preset}
+                  onClick={() => setPresetTime(preset)}
+                  className="min-h-[44px] px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+                >
+                  {preset}s
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => adjustTime(-10)}
+              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+            >
+              -10s
+            </button>
+            <button
+              onClick={() => adjustTime(10)}
+              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+            >
+              +10s
+            </button>
+            <button
+              onClick={() => adjustTime(-60)}
+              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+            >
+              -1m
+            </button>
+            <button
+              onClick={() => adjustTime(60)}
+              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+            >
+              +1m
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,27 +11,52 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(autoStart);
   const intervalRef = useRef<number | null>(null);
+  const timeLeftRef = useRef(timeLeft);
+  const onCompleteRef = useRef(onComplete);
+  const hasCompletedRef = useRef(false);
+
+  // Sync refs with latest values
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   useEffect(() => {
-    if (isRunning && timeLeft > 0) {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  // Handle duration changes when not running
+  useEffect(() => {
+    if (!isRunning) {
+      setTimeLeft(duration);
+      hasCompletedRef.current = false;
+    }
+  }, [duration, isRunning]);
+
+  // Single interval controlled by isRunning
+  useEffect(() => {
+    if (isRunning && timeLeftRef.current > 0) {
       intervalRef.current = window.setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            onComplete?.();
-            return 0;
-          }
-          return prev - 1;
-        });
+        const current = timeLeftRef.current;
+        const next = Math.max(current - 1, 0);
+        
+        setTimeLeft(next);
+        timeLeftRef.current = next;
+        
+        if (next === 0 && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          setIsRunning(false);
+          onCompleteRef.current?.();
+        }
       }, 1000);
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isRunning, timeLeft, onComplete]);
+  }, [isRunning]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -78,7 +103,9 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
         <button
           onClick={() => {
             setTimeLeft(duration);
+            timeLeftRef.current = duration;
             setIsRunning(false);
+            hasCompletedRef.current = false;
           }}
           className="px-6 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors"
         >

@@ -28,7 +28,7 @@ export function RunView({ sections, onWorkoutComplete }: Props) {
           return (
             <div
               key={section.id}
-              className="rounded-xl bg-[#29e33c]/10 border border-[#29e33c] p-4"
+              className="rounded-xl bg-[#29e33c]/10 border border-[#29e33c] p-3"
             >
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#29e33c]" fill="currentColor" viewBox="0 0 20 20">
@@ -38,6 +38,7 @@ export function RunView({ sections, onWorkoutComplete }: Props) {
                     clipRule="evenodd"
                   />
                 </svg>
+                <span className="text-[#29e33c] text-sm font-medium">Completed</span>
                 <h3 className="text-white font-semibold">{section.name}</h3>
               </div>
             </div>

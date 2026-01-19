@@ -9,12 +9,17 @@ export function CompletionGate({ onComplete }: Props) {
 
   return (
     <>
-      <button
-        className="w-full rounded-xl bg-[#29e33c] px-4 py-4 text-base font-semibold text-black hover:bg-[#29e33c]/90 transition-colors"
-        onClick={() => setShowConfirm(true)}
+      <div 
+        className="sticky bottom-0 pt-4 bg-gradient-to-t from-[#15181d] via-[#15181d]/95 to-transparent -mx-4 px-4 -mb-6 mt-6"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
       >
-        Complete Workout
-      </button>
+        <button
+          className="w-full rounded-xl bg-[#29e33c] px-4 py-4 text-base font-semibold text-black hover:bg-[#29e33c]/90 transition-colors"
+          onClick={() => setShowConfirm(true)}
+        >
+          Complete Workout
+        </button>
+      </div>
 
       {showConfirm && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">

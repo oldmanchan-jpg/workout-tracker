@@ -42,6 +42,12 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const isWarning = timeLeft <= 10 && timeLeft > 0;
   const isComplete = timeLeft === 0;
 
+  const getStateLabel = () => {
+    if (timeLeft === 0) return 'Complete';
+    if (isRunning) return 'Running';
+    return 'Paused';
+  };
+
   return (
     <div
       className={`rounded-xl p-6 text-center ${
@@ -54,6 +60,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
               : 'bg-white/5 border border-white/10'
       }`}
     >
+      <div className="text-sm font-medium text-white/60 mb-2">{getStateLabel()}</div>
       <div
         className={`text-4xl font-bold mb-4 ${
           isComplete ? 'text-[#29e33c]' : isWarning ? 'text-red-500' : 'text-white'

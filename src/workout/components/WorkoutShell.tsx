@@ -16,6 +16,7 @@ export function WorkoutShell({ template }: Props) {
   const [viewMode, setViewMode] = useState<'plan' | 'run'>('plan');
   const [workout, setWorkout] = useState<CanonicalWorkout | null>(null);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [hasNotes, setHasNotes] = useState(false);
 
   useEffect(() => {
     try {
@@ -43,10 +44,6 @@ export function WorkoutShell({ template }: Props) {
     };
   }, [viewMode, workout, template]);
 
-  if (!workout) {
-    return <div className="text-white">Loading workout...</div>;
-  }
-
   // Get notes key for indicator (matches NotesModal logic)
   const getNotesKey = (): string => {
     const today = new Date().toISOString().split('T')[0];
@@ -54,15 +51,19 @@ export function WorkoutShell({ template }: Props) {
     return `workout_notes::${today}::${workoutId}::run`;
   };
 
-  const [hasNotes, setHasNotes] = useState(false);
-
   useEffect(() => {
-    if (viewMode === 'run') {
+    if (viewMode === 'run' && workout) {
       const key = getNotesKey();
       const saved = localStorage.getItem(key);
       setHasNotes(!!saved && saved.trim().length > 0);
+    } else {
+      setHasNotes(false);
     }
   }, [viewMode, workout, isNotesModalOpen]);
+
+  if (!workout) {
+    return <div className="text-white">Loading workout...</div>;
+  }
 
   return (
     <div className="max-w-[420px] mx-auto px-4 pb-28 pt-4">

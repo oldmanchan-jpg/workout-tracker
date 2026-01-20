@@ -174,12 +174,15 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
       </div>
       {showPicker &&
         createPortal(
-          <div
-            className="fixed inset-0 z-[9999] flex items-end bg-black/60 backdrop-blur-sm"
-            onClick={closePicker}
-          >
+          <>
+            {/* Backdrop layer */}
             <div
-              className="w-full bg-gray-900/95 backdrop-blur-xl rounded-t-2xl p-6 border-t border-white/10"
+              className="fixed inset-0 z-[9999] bg-black/70"
+              onClick={closePicker}
+            />
+            {/* Sheet layer */}
+            <div
+              className="fixed left-0 right-0 bottom-0 z-[10000] bg-[#0b0d10] rounded-t-2xl p-6 border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.6)] overflow-hidden"
               style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -192,7 +195,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                   Done
                 </button>
               </div>
-              <div className="flex gap-4 justify-center items-start">
+              <div className="flex gap-4 justify-center items-start overflow-hidden">
                 <WheelPicker
                   values={Array.from({ length: 11 }, (_, i) => i)}
                   value={selectedMinutes}
@@ -208,7 +211,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                 />
               </div>
             </div>
-          </div>,
+          </>,
           document.body
         )}
     </div>

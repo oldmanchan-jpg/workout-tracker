@@ -5,16 +5,28 @@ import { useProfile } from '../hooks/useProfile'
 import NotesModal from './NotesModal'
 
 /**
+ * Check if currently in Run mode
+ */
+function isRunMode(): boolean {
+  return document.body.getAttribute('data-workout-mode') === 'run'
+}
+
+/**
  * Get localStorage key for notes
- * Format: workout_notes::<date>::<workoutId>
- * Falls back to route + date if workoutId not available
+ * Format: workout_notes::<date>::<workoutId>::run
+ * Prefers workout ID from data attribute, falls back to route + date
  */
 function getNotesKey(): string {
   const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+  // Prefer workout ID from body data attribute (set by WorkoutShell)
+  const workoutIdFromBody = document.body.getAttribute('data-workout-id')
+  if (workoutIdFromBody) {
+    return `workout_notes::${today}::${workoutIdFromBody}::run`
+  }
+  // Fallback to route
   const location = window.location.pathname
-  // Use route as workoutId fallback (e.g., '/workout' or '/dashboard')
   const workoutId = location === '/workout' ? 'workout' : location.replace('/', '') || 'general'
-  return `workout_notes::${today}::${workoutId}`
+  return `workout_notes::${today}::${workoutId}::run`
 }
 
 export default function BottomNav() {
@@ -22,6 +34,7 @@ export default function BottomNav() {
   const location = useLocation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [hasNotes, setHasNotes] = useState(false)
+  const [isRunModeActive, setIsRunModeActive] = useState(false)
 
   const tabs = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
@@ -31,12 +44,27 @@ export default function BottomNav() {
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ]
 
+  // Check Run mode status
+  useEffect(() => {
+    const checkRunMode = () => {
+      setIsRunModeActive(isRunMode())
+    }
+    checkRunMode()
+    // Check periodically since WorkoutShell sets the attribute
+    const interval = setInterval(checkRunMode, 100)
+    return () => clearInterval(interval)
+  }, [location.pathname])
+
   // Check if notes exist for current route/date
   useEffect(() => {
+    if (!isRunModeActive) {
+      setHasNotes(false)
+      return
+    }
     const key = getNotesKey()
     const saved = localStorage.getItem(key)
     setHasNotes(!!saved && saved.trim().length > 0)
-  }, [location.pathname, isModalOpen])
+  }, [location.pathname, isModalOpen, isRunModeActive])
 
   const isDashboardAlias = (tabPath: string) =>
     tabPath === '/dashboard' && location.pathname === '/'
@@ -107,14 +135,19 @@ export default function BottomNav() {
             )
           })}
 
-          {/* Centered "+" button */}
+          {/* Centered "+" button - only enabled in Run mode */}
           <div className="flex items-center justify-center">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#29e33c] text-[#0b0d10] hover:bg-[#22c55e] transition-all shadow-[0_4px_12px_rgba(41,227,60,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/50 focus-visible:ring-offset-2"
+              disabled={!isRunModeActive}
+              className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/50 focus-visible:ring-offset-2 ${
+                isRunModeActive
+                  ? 'bg-[#29e33c] text-[#0b0d10] hover:bg-[#22c55e] shadow-[0_4px_12px_rgba(41,227,60,0.4)]'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+              }`}
               aria-label="Add workout notes"
             >
-              {hasNotes && (
+              {hasNotes && isRunModeActive && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#f87171] border-2 border-[#0b0d10]" />
               )}
               <Plus size={24} strokeWidth={2.5} />

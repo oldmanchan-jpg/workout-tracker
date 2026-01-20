@@ -9,22 +9,42 @@ interface NotesModalProps {
 }
 
 /**
+ * Check if currently in Run mode
+ */
+function isRunMode(): boolean {
+  return document.body.getAttribute('data-workout-mode') === 'run'
+}
+
+/**
  * Get localStorage key for notes
- * Format: workout_notes::<date>::<workoutId>
- * Falls back to route + date if workoutId not available
+ * Format: workout_notes::<date>::<workoutId>::run
+ * Prefers workout ID from data attribute, falls back to route + date
  */
 function getNotesKey(): string {
   const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+  // Prefer workout ID from body data attribute (set by WorkoutShell)
+  const workoutIdFromBody = document.body.getAttribute('data-workout-id')
+  if (workoutIdFromBody) {
+    return `workout_notes::${today}::${workoutIdFromBody}::run`
+  }
+  // Fallback to route
   const location = window.location.pathname
-  // Use route as workoutId fallback (e.g., '/workout' or '/dashboard')
   const workoutId = location === '/workout' ? 'workout' : location.replace('/', '') || 'general'
-  return `workout_notes::${today}::${workoutId}`
+  return `workout_notes::${today}::${workoutId}::run`
 }
 
 export default function NotesModal({ isOpen, onClose }: NotesModalProps) {
   const [notes, setNotes] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isRunModeActive, setIsRunModeActive] = useState(false)
   const location = useLocation()
+
+  // Check Run mode status
+  useEffect(() => {
+    if (isOpen) {
+      setIsRunModeActive(isRunMode())
+    }
+  }, [isOpen])
 
   // Load notes from localStorage when modal opens
   useEffect(() => {
@@ -93,13 +113,20 @@ export default function NotesModal({ isOpen, onClose }: NotesModalProps) {
                 </button>
               </div>
 
+              {/* Run mode message */}
+              {!isRunModeActive && (
+                <div className="mb-4 px-4 py-3 rounded-[16px] bg-white/5 border border-white/[0.08] text-white/60 text-sm">
+                  Notes are available during Run mode.
+                </div>
+              )}
+
               {/* Textarea */}
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add your workout notes here..."
-                disabled={isLoading}
-                className="w-full min-h-[200px] max-h-[400px] px-4 py-3 rounded-[16px] bg-white/5 border border-white/[0.08] text-hp-primary placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:border-[#29e33c]/30 resize-y transition-all"
+                disabled={isLoading || !isRunModeActive}
+                className="w-full min-h-[200px] max-h-[400px] px-4 py-3 rounded-[16px] bg-white/5 border border-white/[0.08] text-hp-primary placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#29e33c]/50 focus:border-[#29e33c]/30 resize-y transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   fontFamily: 'inherit',
                   fontSize: '14px',
@@ -117,8 +144,8 @@ export default function NotesModal({ isOpen, onClose }: NotesModalProps) {
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={isLoading}
-                  className="flex-1 h-11 px-4 rounded-full bg-[#29e33c] text-[#0b0d10] hover:bg-[#22c55e] transition-colors font-semibold text-sm shadow-[0_4px_12px_rgba(41,227,60,0.3)]"
+                  disabled={isLoading || !isRunModeActive}
+                  className="flex-1 h-11 px-4 rounded-full bg-[#29e33c] text-[#0b0d10] hover:bg-[#22c55e] transition-colors font-semibold text-sm shadow-[0_4px_12px_rgba(41,227,60,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Save
                 </button>

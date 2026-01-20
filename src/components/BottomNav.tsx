@@ -44,15 +44,43 @@ export default function BottomNav() {
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ]
 
-  // Check Run mode status
+  // Check Run mode status using MutationObserver
   useEffect(() => {
+    // Guard for SSR safety
+    if (typeof document === 'undefined') {
+      return
+    }
+
     const checkRunMode = () => {
       setIsRunModeActive(isRunMode())
     }
+
+    // Set initial state
     checkRunMode()
-    // Check periodically since WorkoutShell sets the attribute
-    const interval = setInterval(checkRunMode, 100)
-    return () => clearInterval(interval)
+
+    // Create MutationObserver to watch for attribute changes on document.body
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'data-workout-mode' || mutation.attributeName === 'data-workout-id')
+        ) {
+          checkRunMode()
+          break
+        }
+      }
+    })
+
+    // Observe document.body for attribute changes
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-workout-mode', 'data-workout-id'],
+    })
+
+    // Cleanup: disconnect observer on unmount or route change
+    return () => {
+      observer.disconnect()
+    }
   }, [location.pathname])
 
   // Check if notes exist for current route/date

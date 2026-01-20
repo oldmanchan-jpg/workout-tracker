@@ -6,12 +6,12 @@ interface Props {
   variant?: 'work' | 'rest';
   autoStart?: boolean;
   allowAdjust?: boolean;
-  presetSeconds?: number[]; // Preset values in seconds
 }
 
-export function Timer({ duration, onComplete, variant = 'work', autoStart = false, allowAdjust = false, presetSeconds = [] }: Props) {
+export function Timer({ duration, onComplete, variant = 'work', autoStart = false, allowAdjust = false }: Props) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(autoStart);
+  const [showPicker, setShowPicker] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const timeLeftRef = useRef(timeLeft);
   const onCompleteRef = useRef(onComplete);
@@ -75,28 +75,24 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
     return 'Paused';
   };
 
-  const adjustTime = (deltaSeconds: number) => {
-    if (isRunning) return; // Only allow adjustment when paused
+  const handleTimeTap = () => {
+    if (allowAdjust && !isRunning) {
+      setShowPicker(true);
+    }
+  };
+
+  const handlePickerChange = (minutes: number, seconds: number) => {
+    const totalSeconds = minutes * 60 + seconds;
+    setTimeLeft(totalSeconds);
+    timeLeftRef.current = totalSeconds;
     
-    const newTimeLeft = Math.max(0, timeLeft + deltaSeconds);
-    setTimeLeft(newTimeLeft);
-    timeLeftRef.current = newTimeLeft;
-    
-    if (newTimeLeft > 0) {
+    if (totalSeconds > 0) {
       hasCompletedRef.current = false;
     }
   };
 
-  const setPresetTime = (presetSeconds: number) => {
-    if (isRunning) return; // Only allow adjustment when paused
-    
-    const newTimeLeft = Math.max(0, presetSeconds);
-    setTimeLeft(newTimeLeft);
-    timeLeftRef.current = newTimeLeft;
-    
-    if (newTimeLeft > 0) {
-      hasCompletedRef.current = false;
-    }
+  const closePicker = () => {
+    setShowPicker(false);
   };
 
   return (
@@ -113,12 +109,18 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
     >
       <div className="text-sm font-medium text-white/60 mb-2">{getStateLabel()}</div>
       <div
-        className={`text-4xl font-bold mb-4 ${
+        onClick={handleTimeTap}
+        className={`text-4xl font-bold mb-2 ${
           isComplete ? 'text-[#29e33c]' : isWarning ? 'text-red-500' : 'text-white'
+        } ${
+          allowAdjust && !isRunning ? 'cursor-pointer active:opacity-70 transition-opacity' : ''
         }`}
       >
         {formatTime(timeLeft)}
       </div>
+      {allowAdjust && !isRunning && (
+        <div className="text-xs text-white/40 mb-4">Tap time to adjust</div>
+      )}
       <div className="flex gap-2 justify-center">
         <button
           onClick={() => setIsRunning(!isRunning)}
@@ -138,46 +140,69 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
           Reset
         </button>
       </div>
-      {allowAdjust && !isRunning && (
-        <div className="mt-3 space-y-2">
-          {presetSeconds.length > 0 && (
-            <div className="flex gap-2 justify-center flex-wrap">
-              {presetSeconds.map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => setPresetTime(preset)}
-                  className="min-h-[44px] px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
-                >
-                  {preset}s
-                </button>
-              ))}
+      {showPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end bg-black/50"
+          onClick={closePicker}
+        >
+          <div
+            className="w-full bg-gray-900 rounded-t-2xl p-6 pb-safe"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <div className="text-lg font-semibold text-white">Adjust Timer</div>
+              <button
+                onClick={closePicker}
+                className="text-white/60 hover:text-white text-sm font-medium"
+              >
+                Done
+              </button>
             </div>
-          )}
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => adjustTime(-10)}
-              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
-            >
-              -10s
-            </button>
-            <button
-              onClick={() => adjustTime(10)}
-              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
-            >
-              +10s
-            </button>
-            <button
-              onClick={() => adjustTime(-60)}
-              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
-            >
-              -1m
-            </button>
-            <button
-              onClick={() => adjustTime(60)}
-              className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
-            >
-              +1m
-            </button>
+            <div className="flex gap-8 justify-center items-center">
+              <div className="flex-1">
+                <label className="block text-sm text-white/60 mb-2 text-center">Minutes</label>
+                <select
+                  value={Math.floor(timeLeft / 60)}
+                  onChange={(e) => {
+                    const minutes = parseInt(e.target.value, 10);
+                    const currentSeconds = timeLeft % 60;
+                    const roundedSeconds = Math.round(currentSeconds / 5) * 5;
+                    handlePickerChange(minutes, roundedSeconds);
+                  }}
+                  className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center appearance-none"
+                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+                >
+                  {Array.from({ length: 11 }, (_, i) => (
+                    <option key={i} value={i} className="bg-gray-900 text-white">
+                      {i}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-2xl font-bold text-white/60">:</div>
+              <div className="flex-1">
+                <label className="block text-sm text-white/60 mb-2 text-center">Seconds</label>
+                <select
+                  value={Math.min(55, Math.round((timeLeft % 60) / 5) * 5)}
+                  onChange={(e) => {
+                    const seconds = parseInt(e.target.value, 10);
+                    const minutes = Math.floor(timeLeft / 60);
+                    handlePickerChange(minutes, seconds);
+                  }}
+                  className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center appearance-none"
+                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const value = i * 5;
+                    return (
+                      <option key={value} value={value} className="bg-gray-900 text-white">
+                        {value.toString().padStart(2, '0')}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       )}

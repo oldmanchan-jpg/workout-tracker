@@ -19,6 +19,8 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const timeLeftRef = useRef(timeLeft);
   const onCompleteRef = useRef(onComplete);
   const hasCompletedRef = useRef(false);
+  const minutesSelectRef = useRef<HTMLSelectElement>(null);
+  const secondsSelectRef = useRef<HTMLSelectElement>(null);
 
   // Sync refs with latest values
   useEffect(() => {
@@ -81,13 +83,26 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const handleTimeTap = () => {
     if (allowAdjust && !isRunning) {
       // Initialize picker values from current timeLeft
+      // Round seconds to nearest 5, clamp 0..55
       const mins = Math.floor(timeLeft / 60);
-      const secs = Math.min(55, Math.round((timeLeft % 60) / 5) * 5);
+      const secs = Math.min(55, Math.max(0, Math.round((timeLeft % 60) / 5) * 5));
       setSelectedMinutes(mins);
       setSelectedSeconds(secs);
       setShowPicker(true);
     }
   };
+
+  // Auto-focus/click Minutes select when picker opens (attempt native iOS picker)
+  useEffect(() => {
+    if (showPicker) {
+      // Wait for sheet to render, then attempt to open native picker
+      requestAnimationFrame(() => {
+        minutesSelectRef.current?.focus();
+        // Attempt programmatic click (may be blocked by iOS, but focus helps)
+        minutesSelectRef.current?.click?.();
+      });
+    }
+  }, [showPicker]);
 
   const handlePickerChange = (minutes: number, seconds: number) => {
     const totalSeconds = minutes * 60 + seconds;
@@ -182,6 +197,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                 <div className="flex-1">
                   <label className="block text-sm text-white/60 mb-2 text-center">Minutes</label>
                   <select
+                    ref={minutesSelectRef}
                     value={selectedMinutes}
                     onChange={(e) => {
                       const minutes = parseInt(e.target.value, 10);
@@ -201,6 +217,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                 <div className="flex-1">
                   <label className="block text-sm text-white/60 mb-2 text-center">Seconds</label>
                   <select
+                    ref={secondsSelectRef}
                     value={selectedSeconds}
                     onChange={(e) => {
                       const seconds = parseInt(e.target.value, 10);
@@ -220,6 +237,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                   </select>
                 </div>
               </div>
+              <div className="text-xs text-white/40 text-center mt-4">Tap Minutes/Seconds to adjust</div>
             </div>
           </div>,
           document.body

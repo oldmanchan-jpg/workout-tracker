@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { Home, TrendingUp, Dumbbell, Settings, ShieldCheck, Plus } from 'lucide-react'
 import { useProfile } from '../hooks/useProfile'
 import NotesModal from './NotesModal'
+import { AppIcon } from './ui/AppIcon'
 
 /**
  * Check if currently in Run mode
@@ -143,13 +144,12 @@ export default function BottomNav() {
                   const active = isActive || isDashboardAlias(tab.path)
                   return (
                     <>
-                      <div className="relative flex items-center justify-center">
+                      <div className="relative flex items-center justify-center min-w-[40px] min-h-[40px]">
                         {active && (
                           <div className="absolute inset-0 w-10 h-10 -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#29e33c]/15 blur-sm" />
                         )}
-                        <Icon
-                          size={24}
-                          strokeWidth={active ? 2 : 1.5}
+                        <AppIcon
+                          icon={Icon}
                           className={active ? 'text-[#29e33c] drop-shadow-[0_0_8px_rgba(41,227,60,0.5)]' : 'text-gray-500'}
                         />
                       </div>
@@ -168,7 +168,7 @@ export default function BottomNav() {
             <button
               onClick={() => setIsModalOpen(true)}
               disabled={!isRunModeActive}
-              className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/50 focus-visible:ring-offset-2 ${
+              className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#29e33c]/50 focus-visible:ring-offset-2 min-w-[40px] min-h-[40px] ${
                 isRunModeActive
                   ? 'bg-[#29e33c] text-[#0b0d10] hover:bg-[#22c55e] shadow-[0_4px_12px_rgba(41,227,60,0.4)]'
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
@@ -178,7 +178,7 @@ export default function BottomNav() {
               {hasNotes && isRunModeActive && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#f87171] border-2 border-[#0b0d10]" />
               )}
-              <Plus size={24} strokeWidth={2.5} />
+              <AppIcon icon={Plus} />
             </button>
           </div>
 
@@ -209,13 +209,12 @@ export default function BottomNav() {
                   const active = isActive || isDashboardAlias(tab.path)
                   return (
                     <>
-                      <div className="relative flex items-center justify-center">
+                      <div className="relative flex items-center justify-center min-w-[40px] min-h-[40px]">
                         {active && (
                           <div className="absolute inset-0 w-10 h-10 -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#29e33c]/15 blur-sm" />
                         )}
-                        <Icon
-                          size={24}
-                          strokeWidth={active ? 2 : 1.5}
+                        <AppIcon
+                          icon={Icon}
                           className={active ? 'text-[#29e33c] drop-shadow-[0_0_8px_rgba(41,227,60,0.5)]' : 'text-gray-500'}
                         />
                       </div>

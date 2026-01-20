@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Dumbbell, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import { AppIcon } from './ui/AppIcon'
 
 export default function TopBar() {
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export default function TopBar() {
           <div
             className="w-9 h-9 rounded-full bg-[#29e33c]/20 flex items-center justify-center hp-glow-soft"
           >
-            <Dumbbell className="w-5 h-5 text-hp-accent" />
+            <AppIcon icon={Dumbbell} className="text-hp-accent" />
           </div>
           <div>
             <p className="text-hp-primary font-semibold leading-tight">Workout Tracker</p>
@@ -41,9 +42,9 @@ export default function TopBar() {
           whileTap={{ scale: 0.97 }}
           onClick={onSignOut}
           disabled={signingOut}
-          className="h-9 px-3 rounded-full bg-white/5 border border-white/6 text-hp-muted hover:text-hp-primary transition-colors flex items-center gap-2 disabled:opacity-60"
+          className="h-9 px-3 rounded-full bg-white/5 border border-white/6 text-hp-muted hover:text-hp-primary transition-colors flex items-center gap-2 disabled:opacity-60 min-w-[40px]"
         >
-          <LogOut className="w-4 h-4" />
+          <AppIcon icon={LogOut} />
           <span className="text-xs font-medium">Logout</span>
         </motion.button>
       </div>

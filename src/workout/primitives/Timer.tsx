@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { WheelPicker } from './WheelPicker';
 
 interface Props {
   duration: number; // seconds
@@ -19,8 +20,6 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const timeLeftRef = useRef(timeLeft);
   const onCompleteRef = useRef(onComplete);
   const hasCompletedRef = useRef(false);
-  const minutesSelectRef = useRef<HTMLSelectElement>(null);
-  const secondsSelectRef = useRef<HTMLSelectElement>(null);
 
   // Sync refs with latest values
   useEffect(() => {
@@ -84,7 +83,7 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
     if (allowAdjust && !isRunning) {
       // Initialize picker values from current timeLeft
       // Round seconds to nearest 5, clamp 0..55
-      const mins = Math.floor(timeLeft / 60);
+      const mins = Math.min(10, Math.max(0, Math.floor(timeLeft / 60)));
       const secs = Math.min(55, Math.max(0, Math.round((timeLeft % 60) / 5) * 5));
       setSelectedMinutes(mins);
       setSelectedSeconds(secs);
@@ -92,20 +91,20 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
     }
   };
 
-  // Auto-focus/click Minutes select when picker opens (attempt native iOS picker)
-  useEffect(() => {
-    if (showPicker) {
-      // Wait for sheet to render, then attempt to open native picker
-      requestAnimationFrame(() => {
-        minutesSelectRef.current?.focus();
-        // Attempt programmatic click (may be blocked by iOS, but focus helps)
-        minutesSelectRef.current?.click?.();
-      });
+  const handleMinutesChange = (minutes: number) => {
+    setSelectedMinutes(minutes);
+    const totalSeconds = minutes * 60 + selectedSeconds;
+    setTimeLeft(totalSeconds);
+    timeLeftRef.current = totalSeconds;
+    
+    if (totalSeconds > 0) {
+      hasCompletedRef.current = false;
     }
-  }, [showPicker]);
+  };
 
-  const handlePickerChange = (minutes: number, seconds: number) => {
-    const totalSeconds = minutes * 60 + seconds;
+  const handleSecondsChange = (seconds: number) => {
+    setSelectedSeconds(seconds);
+    const totalSeconds = selectedMinutes * 60 + seconds;
     setTimeLeft(totalSeconds);
     timeLeftRef.current = totalSeconds;
     
@@ -193,51 +192,21 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
                   Done
                 </button>
               </div>
-              <div className="flex gap-8 justify-center items-center">
-                <div className="flex-1">
-                  <label className="block text-sm text-white/60 mb-2 text-center">Minutes</label>
-                  <select
-                    ref={minutesSelectRef}
-                    value={selectedMinutes}
-                    onChange={(e) => {
-                      const minutes = parseInt(e.target.value, 10);
-                      setSelectedMinutes(minutes);
-                      handlePickerChange(minutes, selectedSeconds);
-                    }}
-                    className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center"
-                  >
-                    {Array.from({ length: 21 }, (_, i) => (
-                      <option key={i} value={i} className="bg-gray-900 text-white">
-                        {i}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="text-2xl font-bold text-white/60">:</div>
-                <div className="flex-1">
-                  <label className="block text-sm text-white/60 mb-2 text-center">Seconds</label>
-                  <select
-                    ref={secondsSelectRef}
-                    value={selectedSeconds}
-                    onChange={(e) => {
-                      const seconds = parseInt(e.target.value, 10);
-                      setSelectedSeconds(seconds);
-                      handlePickerChange(selectedMinutes, seconds);
-                    }}
-                    className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const value = i * 5;
-                      return (
-                        <option key={value} value={value} className="bg-gray-900 text-white">
-                          {value.toString().padStart(2, '0')}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+              <div className="flex gap-4 justify-center items-start">
+                <WheelPicker
+                  values={Array.from({ length: 11 }, (_, i) => i)}
+                  value={selectedMinutes}
+                  onChange={handleMinutesChange}
+                  label="Minutes"
+                />
+                <div className="text-2xl font-bold text-white/60 pt-12">:</div>
+                <WheelPicker
+                  values={Array.from({ length: 12 }, (_, i) => i * 5)}
+                  value={selectedSeconds}
+                  onChange={handleSecondsChange}
+                  label="Seconds"
+                />
               </div>
-              <div className="text-xs text-white/40 text-center mt-4">Tap Minutes/Seconds to adjust</div>
             </div>
           </div>,
           document.body

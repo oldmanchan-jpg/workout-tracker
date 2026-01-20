@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   duration: number; // seconds
@@ -12,6 +13,8 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(autoStart);
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedMinutes, setSelectedMinutes] = useState(0);
+  const [selectedSeconds, setSelectedSeconds] = useState(0);
   const intervalRef = useRef<number | null>(null);
   const timeLeftRef = useRef(timeLeft);
   const onCompleteRef = useRef(onComplete);
@@ -77,6 +80,11 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
 
   const handleTimeTap = () => {
     if (allowAdjust && !isRunning) {
+      // Initialize picker values from current timeLeft
+      const mins = Math.floor(timeLeft / 60);
+      const secs = Math.min(55, Math.round((timeLeft % 60) / 5) * 5);
+      setSelectedMinutes(mins);
+      setSelectedSeconds(secs);
       setShowPicker(true);
     }
   };
@@ -94,6 +102,16 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
   const closePicker = () => {
     setShowPicker(false);
   };
+
+  // Lock background scroll when picker is open
+  useEffect(() => {
+    if (showPicker) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showPicker]);
 
   return (
     <div
@@ -140,72 +158,72 @@ export function Timer({ duration, onComplete, variant = 'work', autoStart = fals
           Reset
         </button>
       </div>
-      {showPicker && (
-        <div
-          className="fixed inset-0 z-50 flex items-end bg-black/50"
-          onClick={closePicker}
-        >
+      {showPicker &&
+        createPortal(
           <div
-            className="w-full bg-gray-900 rounded-t-2xl p-6 pb-safe"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-end bg-black/60 backdrop-blur-sm"
+            onClick={closePicker}
           >
-            <div className="flex justify-between items-center mb-6">
-              <div className="text-lg font-semibold text-white">Adjust Timer</div>
-              <button
-                onClick={closePicker}
-                className="text-white/60 hover:text-white text-sm font-medium"
-              >
-                Done
-              </button>
-            </div>
-            <div className="flex gap-8 justify-center items-center">
-              <div className="flex-1">
-                <label className="block text-sm text-white/60 mb-2 text-center">Minutes</label>
-                <select
-                  value={Math.floor(timeLeft / 60)}
-                  onChange={(e) => {
-                    const minutes = parseInt(e.target.value, 10);
-                    const currentSeconds = timeLeft % 60;
-                    const roundedSeconds = Math.round(currentSeconds / 5) * 5;
-                    handlePickerChange(minutes, roundedSeconds);
-                  }}
-                  className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center appearance-none"
-                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+            <div
+              className="w-full bg-gray-900/95 backdrop-blur-xl rounded-t-2xl p-6 border-t border-white/10"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="text-lg font-semibold text-white">Adjust Timer</div>
+                <button
+                  onClick={closePicker}
+                  className="px-4 py-2 rounded-lg bg-[#29e33c]/20 hover:bg-[#29e33c]/30 text-[#29e33c] text-sm font-medium transition-colors"
                 >
-                  {Array.from({ length: 11 }, (_, i) => (
-                    <option key={i} value={i} className="bg-gray-900 text-white">
-                      {i}
-                    </option>
-                  ))}
-                </select>
+                  Done
+                </button>
               </div>
-              <div className="text-2xl font-bold text-white/60">:</div>
-              <div className="flex-1">
-                <label className="block text-sm text-white/60 mb-2 text-center">Seconds</label>
-                <select
-                  value={Math.min(55, Math.round((timeLeft % 60) / 5) * 5)}
-                  onChange={(e) => {
-                    const seconds = parseInt(e.target.value, 10);
-                    const minutes = Math.floor(timeLeft / 60);
-                    handlePickerChange(minutes, seconds);
-                  }}
-                  className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center appearance-none"
-                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
-                >
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const value = i * 5;
-                    return (
-                      <option key={value} value={value} className="bg-gray-900 text-white">
-                        {value.toString().padStart(2, '0')}
+              <div className="flex gap-8 justify-center items-center">
+                <div className="flex-1">
+                  <label className="block text-sm text-white/60 mb-2 text-center">Minutes</label>
+                  <select
+                    value={selectedMinutes}
+                    onChange={(e) => {
+                      const minutes = parseInt(e.target.value, 10);
+                      setSelectedMinutes(minutes);
+                      handlePickerChange(minutes, selectedSeconds);
+                    }}
+                    className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center"
+                  >
+                    {Array.from({ length: 21 }, (_, i) => (
+                      <option key={i} value={i} className="bg-gray-900 text-white">
+                        {i}
                       </option>
-                    );
-                  })}
-                </select>
+                    ))}
+                  </select>
+                </div>
+                <div className="text-2xl font-bold text-white/60">:</div>
+                <div className="flex-1">
+                  <label className="block text-sm text-white/60 mb-2 text-center">Seconds</label>
+                  <select
+                    value={selectedSeconds}
+                    onChange={(e) => {
+                      const seconds = parseInt(e.target.value, 10);
+                      setSelectedSeconds(seconds);
+                      handlePickerChange(selectedMinutes, seconds);
+                    }}
+                    className="w-full text-2xl font-bold text-white bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-center"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const value = i * 5;
+                      return (
+                        <option key={value} value={value} className="bg-gray-900 text-white">
+                          {value.toString().padStart(2, '0')}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

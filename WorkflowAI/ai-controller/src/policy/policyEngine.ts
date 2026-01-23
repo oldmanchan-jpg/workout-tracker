@@ -10,17 +10,6 @@ export type PolicyDecision = {
 };
 
 /**
- * Default allowlist patterns for controller run outputs.
- * These patterns are always included in addition to any provided allowlist.
- */
-const DEFAULT_FILE_ALLOWLIST_PATTERNS = [
-  'logs/runs/**/task_spec.yaml',
-  'logs/runs/**/transcript.log',
-  'logs/runs/**/events.jsonl',
-  'logs/runs/**/summary.md',
-];
-
-/**
  * Checks if a file path is allowed based on allowlist and denylist patterns.
  * Uses minimatch for glob pattern matching.
  *
@@ -42,9 +31,6 @@ export function isFileAllowed(
   // Normalize path separators to forward slashes for consistent matching
   const normalizedPath = filePath.split(path.sep).join('/');
 
-  // Merge default allowlist patterns with provided allowlist
-  const combinedAllowlist = [...DEFAULT_FILE_ALLOWLIST_PATTERNS, ...allow];
-
   // Check denylist first (denylist always wins)
   for (const denyPattern of deny) {
     if (minimatch(normalizedPath, denyPattern)) {
@@ -56,7 +42,7 @@ export function isFileAllowed(
   }
 
   // Check allowlist
-  for (const allowPattern of combinedAllowlist) {
+  for (const allowPattern of allow) {
     if (minimatch(normalizedPath, allowPattern)) {
       return {
         allowed: true,

@@ -1,0 +1,45 @@
+spec_version: "1.0"
+
+id: "2026-01-22-001"
+title: "Phase 3: finalize task spec format + validation rules"
+intent: "Lock the Task Spec contract (v1.0) and validation rules; no controller code yet."
+mode: "plan"
+
+repo_root: "/mnt/c/Users/ABY/Documents/APP test/workout-tracker"
+workdir: "/home/dharma/sandboxes/claude"
+agent_preference: ["claude", "opencode", "codex"]
+
+budget:
+  max_minutes: 20
+  max_tool_cost_usd: 2.00
+  codex_break_glass: false
+
+scope:
+  files_allowlist:
+    - "docs/**"
+    - "ai-controller/**"
+  files_denylist:
+    - ".env*"
+    - "**/*secret*"
+    - "**/*key*"
+    - "**/node_modules/**"
+  commands_allowlist:
+    - "git status --short"
+    - "git diff"
+  commands_denylist:
+    - "rm -rf"
+    - "git reset --hard"
+    - "curl "
+    - "wget "
+
+acceptance_checks:
+  - "Task Spec v1.0 is deny-by-default and mode rules are explicit."
+  - "Validation rules are deterministic and reject unsafe/ambiguous specs."
+  - "Artifacts required per run are explicitly listed."
+
+output_requirements:
+  - "write logs/runs/<run_id>/task_spec.yaml"
+  - "write logs/runs/<run_id>/transcript.log"
+  - "write logs/runs/<run_id>/events.jsonl"
+  - "write logs/runs/<run_id>/summary.md"
+  - "no commits"

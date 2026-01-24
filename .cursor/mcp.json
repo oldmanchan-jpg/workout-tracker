@@ -41,10 +41,10 @@
       "args": [
         "-d",
         "Ubuntu",
-        "-e",
-        "/bin/bash",
+        "--",
+        "bash",
         "-lc",
-        "node \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/runner_ro_server.mjs\" \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+        "node \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/runner_ro_server.mjs\""
       ],
       "env": {}
     },
@@ -53,7 +53,7 @@
       "args": [
         "-d",
         "Ubuntu",
-        "-e",
+        "--",
         "/bin/bash",
         "-lc",
         "\"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/run_ui_eyes_playwright_mcp.sh\" \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""

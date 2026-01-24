@@ -1,13 +1,42 @@
 {
   "mcpServers": {
-    "claude-code": {
-      "type": "stdio",
-      "command": "claude",
-      "args": ["mcp", "serve"],
+    "filesystem": {
+      "command": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "--",
+        "bash",
+        "-lc",
+        "npx -y @modelcontextprotocol/server-filesystem \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+      ],
       "env": {}
     },
-    "filesystem": {
-      "type": "stdio",
+    "git_ro": {
+      "command": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "--",
+        "bash",
+        "-lc",
+        "node \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/git_ro_server.mjs\" \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+      ],
+      "env": {}
+    },
+    "fetch_ro": {
+      "command": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "--",
+        "bash",
+        "-lc",
+        "MCP_FETCH_ALLOWLIST=\"developer.mozilla.org,docs.github.com,modelcontextprotocol.io\" node \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/fetch_ro_server.mjs\""
+      ],
+      "env": {}
+    },
+    "runner_ro": {
       "command": "wsl.exe",
       "args": [
         "-d",
@@ -15,7 +44,19 @@
         "-e",
         "/bin/bash",
         "-lc",
-        "npx -y @modelcontextprotocol/server-filesystem \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+        "node \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/runner_ro_server.mjs\" \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+      ],
+      "env": {}
+    },
+    "ui_eyes_playwright": {
+      "command": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "-e",
+        "/bin/bash",
+        "-lc",
+        "\"/mnt/c/Users/ABY/Documents/APP test/workout-tracker/scripts/mcp/run_ui_eyes_playwright_mcp.sh\" \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
       ],
       "env": {}
     }

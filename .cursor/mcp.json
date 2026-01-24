@@ -5,6 +5,19 @@
       "command": "claude",
       "args": ["mcp", "serve"],
       "env": {}
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "-e",
+        "/bin/bash",
+        "-lc",
+        "npx -y @modelcontextprotocol/server-filesystem \"/mnt/c/Users/ABY/Documents/APP test/workout-tracker\""
+      ],
+      "env": {}
     }
   }
 }
